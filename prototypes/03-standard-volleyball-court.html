@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Standard volleyball court (FIVB scale)</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1117; font-family: system-ui, sans-serif; }
+    #hud {
+      position: fixed; left: 12px; top: 12px; z-index: 1;
+      color: #e8f4ff; font-size: 12px; line-height: 1.45; max-width: 360px;
+      text-shadow: 0 0 12px rgba(0, 245, 212, 0.35), 0 1px 3px #000;
+    }
+    #hud strong { font-size: 13px; color: #7cf0ff; }
+    #hud ul { margin: 6px 0 0 1rem; padding: 0; }
+    #hud code {
+      background: #12141c; color: #ff4dce; padding: 0 4px; border-radius: 4px; font-size: 11px;
+      border: 1px solid rgba(255, 77, 206, 0.35);
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong>Standard court · neon night (1 unit = 1 m)</strong>
+    <ul>
+      <li>Playing area <strong>18 × 9 m</strong></li>
+      <li>Lines <strong>5 cm</strong> wide</li>
+      <li>Attack line <strong>3 m</strong> from center (net)</li>
+      <li>Net <strong>9.5 m</strong> long (FIVB min.; 9.5–10 m), mesh <strong>1 m</strong> tall; top <strong>2.43 m</strong> (men’s) at court center → bottom ~<strong>1.43 m</strong></li>
+      <li>Net plane on <strong>center line</strong> (<code>z = 0</code>); posts <strong>2.55 m</strong>, <strong>0.5 m</strong> outside sidelines</li>
+      <li>Free zone pad <strong>3 m</strong> around court (visual only)</li>
+    </ul>
+    Drag orbit · scroll zoom<br />
+    <code>prototypes/standard-volleyball-court.html</code>
+  </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // --- FIVB-style dimensions (meters) ---
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2; // 9
+    const HALF_W = COURT_W / 2; // 4.5
+    const LINE = 0.05; // 5 cm line width
+    const ATTACK_DIST = 3; // attack line 3 m from axis of net (center)
+    const FREE = 3; // free zone extension for visualization
+    // FIVB: net 9.50–10 m long, 1 m vertical (mesh); height measured at court centre (men 2.43 m = top of net)
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43; // men’s — playing surface to top of net at centre
+    const NET_BOTTOM_M = NET_TOP_M - NET_MESH_HEIGHT_M;
+    const NET_CENTER_Y = (NET_TOP_M + NET_BOTTOM_M) / 2;
+    const POLE_OUTSIDE_M = 0.5; // posts 0.5–1 m outside sidelines (FIVB)
+    const POLE_HEIGHT_M = 2.55;
+    const POLE_X = HALF_W + POLE_OUTSIDE_M;
+    const ANTENNA_ABOVE_NET_M = 0.8; // FIVB: 80 cm above net top
+    const LINE_Y = 0.018; // lift slightly above floor to reduce z-fighting
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x050508, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x08060f, 0.012);
+
+    const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 150);
+    camera.position.set(14, 11, 16);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1.2, 0);
+    controls.maxPolarAngle = Math.PI * 0.49;
+    controls.minDistance = 6;
+    controls.maxDistance = 55;
+    controls.update();
+
+    const hemi = new THREE.HemisphereLight(0x6688aa, 0x080810, 0.35);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xaaccff, 0.55);
+    sun.position.set(-14, 26, 10);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 70;
+    const ext = HALF_L + FREE + 5;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    scene.add(sun);
+
+    const fillCyan = new THREE.PointLight(0x00fff0, 0.45, 45);
+    fillCyan.position.set(-10, 8, 8);
+    scene.add(fillCyan);
+    const fillMagenta = new THREE.PointLight(0xff2ec4, 0.32, 42);
+    fillMagenta.position.set(10, 6, -8);
+    scene.add(fillMagenta);
+
+    // Neon palette — MeshBasicMaterial so lines stay vivid on black
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    const lineBoundaryMat = new THREE.MeshBasicMaterial({ color: neonCyan });
+    const lineCenterMat = new THREE.MeshBasicMaterial({ color: neonMagenta });
+    const lineAttackMat = new THREE.MeshBasicMaterial({ color: neonLime });
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.4,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.25,
+    });
+
+    // Free zone (outer pad)
+    const outerL = COURT_L + FREE * 2;
+    const outerW = COURT_W + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+
+    // Playing surface (slightly inset under lines)
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    /**
+     * Line parallel to X axis (runs along width), centered at origin in X, at z = z0.
+     * Total length along X = widthSpan (full court width 9 m for internal lines).
+     */
+    function lineAlongX(z0, widthSpan, mat) {
+      const g = new THREE.BoxGeometry(widthSpan, LINE_Y * 2, LINE);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(0, LINE_Y, z0);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+
+    /**
+     * Line parallel to Z axis (runs along length), at x = x0, full court length 18 m.
+     */
+    function lineAlongZ(x0, mat) {
+      const g = new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(x0, LINE_Y, 0);
+      m.castShadow = true;
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+
+    // Sidelines (long boundaries) — cyan
+    lineAlongZ(-HALF_W, lineBoundaryMat);
+    lineAlongZ(HALF_W, lineBoundaryMat);
+
+    // End lines — violet accent
+    const lineEndMat = new THREE.MeshBasicMaterial({ color: neonViolet });
+    lineAlongX(HALF_L, COURT_W, lineEndMat);
+    lineAlongX(-HALF_L, COURT_W, lineEndMat);
+
+    // Center line (axis of net on the floor) — magenta
+    lineAlongX(0, COURT_W, lineCenterMat);
+
+    // Attack lines — chartreuse
+    lineAlongX(ATTACK_DIST, COURT_W, lineAttackMat);
+    lineAlongX(-ATTACK_DIST, COURT_W, lineAttackMat);
+
+    // --- Net (vertical plane on center, spans X) ---
+    const netTex = makeNetTexture();
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3); // ~10 cm cells visually over 9.5 m × 1 m mesh
+    const netMat = new THREE.MeshStandardMaterial({
+      map: netTex,
+      color: 0x7cf0ff,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide,
+      roughness: 0.35,
+      metalness: 0.15,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.35,
+      emissiveMap: netTex,
+    });
+    // Vertical plane on centre line (z = 0), spans court width direction (X), mesh height along Y
+    const net = new THREE.Mesh(new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M), netMat);
+    net.position.set(0, NET_CENTER_Y, 0);
+    net.castShadow = true;
+    net.receiveShadow = true;
+    scene.add(net);
+
+    const poleR = 0.1;
+    const poleGeo = new THREE.CylinderGeometry(poleR, poleR * 1.08, POLE_HEIGHT_M, 24);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xe2edf5,
+      roughness: 0.28,
+      metalness: 0.82,
+      emissive: new THREE.Color(0x40fff8),
+      emissiveIntensity: 0.45,
+    });
+    const baseGeo = new THREE.CylinderGeometry(0.22, 0.26, 0.07, 24);
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x1a2330,
+      roughness: 0.75,
+      metalness: 0.35,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.22,
+    });
+    const capGeo = new THREE.SphereGeometry(0.09, 16, 12);
+    const capMat = new THREE.MeshStandardMaterial({
+      color: 0xfff6ff,
+      roughness: 0.35,
+      metalness: 0.5,
+      emissive: new THREE.Color(0xff6ec7),
+      emissiveIntensity: 0.55,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(x, POLE_HEIGHT_M / 2, 0);
+      pole.castShadow = true;
+      scene.add(pole);
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.set(x, 0.035, 0);
+      base.receiveShadow = true;
+      base.castShadow = true;
+      scene.add(base);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.set(x, POLE_HEIGHT_M - 0.06, 0);
+      cap.castShadow = true;
+      scene.add(cap);
+    });
+
+    // Antennas: on net above sidelines, 80 cm above net top (FIVB)
+    const antMat = new THREE.MeshStandardMaterial({
+      color: 0xff4d00,
+      roughness: 0.35,
+      metalness: 0.2,
+      emissive: new THREE.Color(0xff6600),
+      emissiveIntensity: 0.8,
+    });
+    const antGeo = new THREE.CylinderGeometry(0.025, 0.025, ANTENNA_ABOVE_NET_M, 8);
+    [-HALF_W, HALF_W].forEach((x) => {
+      const a = new THREE.Mesh(antGeo, antMat);
+      a.position.set(x, NET_TOP_M + ANTENNA_ABOVE_NET_M / 2, 0);
+      a.castShadow = true;
+      scene.add(a);
+    });
+
+    // Reference ball (FIVB ~65–67 cm circumference → r ≈ 0.105 m)
+    const ballR = 0.105;
+    const ball = new THREE.Mesh(
+      new THREE.SphereGeometry(ballR, 32, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0xf5f0ff,
+        roughness: 0.32,
+        metalness: 0.12,
+        emissive: new THREE.Color(0xff00aa),
+        emissiveIntensity: 0.12,
+      }),
+    );
+    ball.position.set(-1.8, ballR + 0.02, 5);
+    ball.castShadow = true;
+    scene.add(ball);
+
+    function makeNetTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0a0e18';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = 'rgba(0, 255, 234, 0.65)';
+      ctx.lineWidth = 2;
+      const step = 14;
+      for (let x = 0; x <= 256; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 256);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 256; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(256, y);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function tick() {
+      requestAnimationFrame(tick);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>
