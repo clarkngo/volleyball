@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prototype 02 — Ball arc</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1117; font-family: system-ui, sans-serif; }
+    #hud {
+      position: fixed; left: 12px; top: 12px; z-index: 1;
+      color: #dff8ff; font-size: 13px; line-height: 1.5; max-width: 340px;
+      text-shadow: 0 0 10px rgba(0, 245, 212, 0.3), 0 1px 2px #000;
+    }
+    #hud strong { color: #7cf0ff; }
+    #hud button {
+      margin-top: 8px; padding: 6px 12px; border-radius: 6px;
+      border: 1px solid rgba(0, 245, 212, 0.45);
+      background: #0f1218; color: #00f5d4; cursor: pointer; font-size: 13px;
+      box-shadow: 0 0 12px rgba(0, 245, 212, 0.15);
+    }
+    #hud button:hover { background: #1a2230; color: #7cf0ff; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong>02 — Serve arc (neon night)</strong><br />
+    Parametric arc · ghost path · loop<br />
+    <button type="button" id="replay">Replay arc</button><br />
+    <code>prototypes/02-ball-arc.html</code>
+  </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x08060f, 0.018);
+
+    const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(6, 4.2, 11);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1.5, -1);
+    controls.update();
+
+    scene.add(new THREE.HemisphereLight(0x6688aa, 0x080810, 0.4));
+    const dir = new THREE.DirectionalLight(0xaaccff, 0.5);
+    dir.position.set(-5, 12, 8);
+    dir.castShadow = true;
+    dir.shadow.mapSize.set(1024, 1024);
+    scene.add(dir);
+    const pc = new THREE.PointLight(0x00fff0, 0.38, 32);
+    pc.position.set(-4, 6, 4);
+    scene.add(pc);
+    const pm = new THREE.PointLight(0xff2ec4, 0.26, 30);
+    pm.position.set(5, 4, -3);
+    scene.add(pm);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(24, 24),
+      new THREE.MeshStandardMaterial({
+        color: 0x12151c,
+        roughness: 0.92,
+        metalness: 0.1,
+        emissive: new THREE.Color(0x050810),
+        emissiveIntensity: 0.3,
+      }),
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const netLen = 9.5;
+    const netMeshH = 1.0;
+    const netTop = 2.43;
+    const netCenterY = netTop - netMeshH / 2;
+    const net = new THREE.Mesh(
+      new THREE.PlaneGeometry(netLen, netMeshH),
+      new THREE.MeshStandardMaterial({
+        color: 0x5cefff,
+        transparent: true,
+        opacity: 0.45,
+        side: THREE.DoubleSide,
+        emissive: new THREE.Color(0x00fff0),
+        emissiveIntensity: 0.25,
+      }),
+    );
+    net.position.set(0, netCenterY, 0);
+    scene.add(net);
+
+    const halfCourtW = 4.5;
+    const poleOutsideM = 0.5;
+    const poleXM = halfCourtW + poleOutsideM;
+    const poleHeightM = 2.55;
+    const poleR = 0.1;
+    const poleGeo = new THREE.CylinderGeometry(poleR, poleR * 1.08, poleHeightM, 24);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xe2edf5,
+      roughness: 0.28,
+      metalness: 0.82,
+      emissive: new THREE.Color(0x40fff8),
+      emissiveIntensity: 0.45,
+    });
+    const baseGeo = new THREE.CylinderGeometry(0.22, 0.26, 0.07, 24);
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x1a2330,
+      roughness: 0.75,
+      metalness: 0.35,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.22,
+    });
+    const capGeo = new THREE.SphereGeometry(0.09, 16, 12);
+    const capMat = new THREE.MeshStandardMaterial({
+      color: 0xfff6ff,
+      roughness: 0.35,
+      metalness: 0.5,
+      emissive: new THREE.Color(0xff6ec7),
+      emissiveIntensity: 0.55,
+    });
+    [-poleXM, poleXM].forEach((x) => {
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(x, poleHeightM / 2, 0);
+      pole.castShadow = true;
+      scene.add(pole);
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.set(x, 0.035, 0);
+      base.receiveShadow = true;
+      base.castShadow = true;
+      scene.add(base);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.set(x, poleHeightM - 0.06, 0);
+      cap.castShadow = true;
+      scene.add(cap);
+    });
+
+    const ball = new THREE.Mesh(
+      new THREE.SphereGeometry(0.21, 28, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf5f8ff,
+        roughness: 0.32,
+        metalness: 0.12,
+        emissive: new THREE.Color(0xff2ec4),
+        emissiveIntensity: 0.15,
+      }),
+    );
+    ball.castShadow = true;
+    scene.add(ball);
+
+    // Arc: start behind baseline, peak above net, land in opposite court
+    const p0 = new THREE.Vector3(-3, 0.35, 6);
+    const p1 = new THREE.Vector3(0.5, 3.8, 0.5);
+    const p2 = new THREE.Vector3(2.2, 0.35, -5);
+    const curve = new THREE.QuadraticBezierCurve3(p0, p1, p2);
+
+    const pathPoints = curve.getPoints(80);
+    const pathGeo = new THREE.BufferGeometry().setFromPoints(pathPoints);
+    const pathLine = new THREE.Line(
+      pathGeo,
+      new THREE.LineBasicMaterial({ color: 0xc8ff00, transparent: true, opacity: 0.75 }),
+    );
+    scene.add(pathLine);
+
+    let t = 0;
+    const speed = 0.22;
+
+    document.getElementById('replay').addEventListener('click', () => {
+      t = 0;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function tick() {
+      requestAnimationFrame(tick);
+      t += 0.016 * speed;
+      if (t > 1) t -= 1;
+      const pos = curve.getPoint(t);
+      ball.position.copy(pos);
+      const next = curve.getPoint(Math.min(t + 0.02, 1));
+      ball.lookAt(next);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>

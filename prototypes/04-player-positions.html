@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prototype 04 — Player positions</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #050508; font-family: system-ui, sans-serif; }
+    #hud {
+      position: fixed; left: 12px; top: 12px; z-index: 2;
+      color: #e8f4ff; font-size: 12px; line-height: 1.45; max-width: 400px;
+      text-shadow: 0 0 10px rgba(0, 245, 212, 0.25), 0 1px 2px #000;
+    }
+    #hud strong { color: #7cf0ff; font-size: 13px; }
+    #hud select {
+      margin-top: 8px; padding: 6px 10px; border-radius: 6px;
+      background: #12141c; color: #00f5d4; border: 1px solid rgba(0, 245, 212, 0.4);
+      font-size: 12px; cursor: pointer; max-width: 100%;
+    }
+    #hud ul { margin: 6px 0 0 1rem; padding: 0; }
+    #hud code { background: #12141c; color: #ff6ec7; padding: 0 4px; border-radius: 4px; font-size: 11px; }
+    canvas { display: block; }
+    .player-label {
+      font-weight: 800;
+      font-size: 11px;
+      line-height: 1.25;
+      max-width: 12em;
+      text-align: center;
+      font-family: ui-monospace, monospace;
+      pointer-events: none;
+      user-select: none;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(5, 5, 10, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .player-label.team-a { color: #00fff0; text-shadow: 0 0 10px rgba(0, 255, 240, 0.9); }
+    .player-label.team-b { color: #ff6ec7; text-shadow: 0 0 10px rgba(255, 110, 199, 0.9); }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong>04 — Players · USAV court zones</strong><br />
+    <label for="formation">Formation</label><br />
+    <select id="formation">
+      <option value="zones">Symmetric zone spots (both teams)</option>
+      <option value="serveReceive">Serve-receive (Team A shifts)</option>
+      <option value="attackTransition">Front-row attack ready (both)</option>
+    </select>
+    <ul>
+      <li><span class="player-label team-a" style="display:inline">A</span> Team A: <strong>z &gt; 0</strong> · <span class="player-label team-b" style="display:inline">B</span> Team B: <strong>z &lt; 0</strong></li>
+      <li><strong>USAV zones</strong> (facing the net from your bench): <strong>Z1</strong> right back · <strong>Z2</strong> right front · <strong>Z3</strong> middle front · <strong>Z4</strong> left front · <strong>Z5</strong> left back · <strong>Z6</strong> middle back</li>
+      <li>Abbrev: RB · RF · MF · LF · LB · MB — here <strong>MB</strong> = middle <em>back</em> (zone), not middle blocker (role).</li>
+      <li>Front row Z2–Z4 between net and attack line (<strong>3 m</strong>); back row Z1, Z6, Z5 behind it.</li>
+    </ul>
+    Drag orbit · scroll zoom<br />
+    <code>prototypes/04-player-positions.html</code>
+  </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2;
+    const HALF_W = COURT_W / 2;
+    const LINE = 0.05;
+    const ATTACK_DIST = 3;
+    const FREE = 3;
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43;
+    const NET_CENTER_Y = NET_TOP_M - NET_MESH_HEIGHT_M / 2;
+    const POLE_OUTSIDE_M = 0.5;
+    const POLE_HEIGHT_M = 2.55;
+    const POLE_X = HALF_W + POLE_OUTSIDE_M;
+    const ANTENNA_ABOVE_NET_M = 0.8;
+    const LINE_Y = 0.018;
+
+    /**
+     * USA Volleyball (USAV) indoor court zones — location names (not player roles).
+     * Facing the net: Z1 right back, Z2 right front, Z3 middle front, Z4 left front, Z5 left back, Z6 middle back.
+     */
+    const USAV_ZONE = {
+      1: { abbr: 'RB', name: 'Right back' },
+      2: { abbr: 'RF', name: 'Right front' },
+      3: { abbr: 'MF', name: 'Middle front' },
+      4: { abbr: 'LF', name: 'Left front' },
+      5: { abbr: 'LB', name: 'Left back' },
+      6: { abbr: 'MB', name: 'Middle back' }, // zone label MB = middle back, not “middle blocker” role
+    };
+
+    /** zone: 1–6 (USAV); x,z in metres */
+    const FORMATIONS = {
+      zones: {
+        teamA: [
+          { zone: 4, x: -2.15, z: 1.85 },
+          { zone: 3, x: 0, z: 1.45 },
+          { zone: 2, x: 2.15, z: 1.85 },
+          { zone: 5, x: -2.45, z: 5.9 },
+          { zone: 6, x: 0, z: 6.35 },
+          { zone: 1, x: 2.45, z: 5.9 },
+        ],
+        teamB: [
+          { zone: 4, x: -2.15, z: -1.85 },
+          { zone: 3, x: 0, z: -1.45 },
+          { zone: 2, x: 2.15, z: -1.85 },
+          { zone: 5, x: -2.45, z: -5.9 },
+          { zone: 6, x: 0, z: -6.35 },
+          { zone: 1, x: 2.45, z: -5.9 },
+        ],
+      },
+      serveReceive: {
+        teamA: [
+          { zone: 4, x: -3.0, z: 1.1 },
+          { zone: 3, x: -1.0, z: 2.6 },
+          { zone: 2, x: 2.4, z: 1.2 },
+          { zone: 5, x: -3.2, z: 6.2 },
+          { zone: 6, x: 0.2, z: 6.8 },
+          { zone: 1, x: 3.0, z: 5.4 },
+        ],
+        teamB: [
+          { zone: 4, x: -2.15, z: -1.85 },
+          { zone: 3, x: 0, z: -1.45 },
+          { zone: 2, x: 2.15, z: -1.85 },
+          { zone: 5, x: -2.45, z: -5.9 },
+          { zone: 6, x: 0, z: -6.35 },
+          { zone: 1, x: 2.45, z: -5.9 },
+        ],
+      },
+      attackTransition: {
+        teamA: [
+          { zone: 4, x: -2.6, z: 0.95 },
+          { zone: 3, x: 0, z: 0.75 },
+          { zone: 2, x: 2.6, z: 0.95 },
+          { zone: 5, x: -1.8, z: 4.2 },
+          { zone: 6, x: 1.8, z: 4.2 },
+          { zone: 1, x: 0, z: 5.2 },
+        ],
+        teamB: [
+          { zone: 4, x: -2.6, z: -0.95 },
+          { zone: 3, x: 0, z: -0.75 },
+          { zone: 2, x: 2.6, z: -0.95 },
+          { zone: 5, x: -1.8, z: -4.2 },
+          { zone: 6, x: 1.8, z: -4.2 },
+          { zone: 1, x: 0, z: -5.2 },
+        ],
+      },
+    };
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.left = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x08060f, 0.011);
+
+    const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 150);
+    camera.position.set(12, 14, 18);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1.2, 0);
+    controls.maxPolarAngle = Math.PI * 0.49;
+    controls.minDistance = 8;
+    controls.maxDistance = 58;
+    controls.update();
+
+    scene.add(new THREE.HemisphereLight(0x6688aa, 0x080810, 0.38));
+    const sun = new THREE.DirectionalLight(0xaaccff, 0.52);
+    sun.position.set(-12, 28, 14);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    const ext = HALF_L + FREE + 5;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 75;
+    scene.add(sun);
+    scene.add(new THREE.PointLight(0x00fff0, 0.42, 48).translateOnAxis(new THREE.Vector3(-1, 0.5, 1).normalize(), 12));
+    scene.add(new THREE.PointLight(0xff2ec4, 0.3, 44).translateOnAxis(new THREE.Vector3(1, 0.4, -1).normalize(), 12));
+
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.4,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.22,
+    });
+
+    const outerL = COURT_L + FREE * 2;
+    const outerW = COURT_W + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    function lineAlongX(z0, widthSpan, mat) {
+      const g = new THREE.BoxGeometry(widthSpan, LINE_Y * 2, LINE);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(0, LINE_Y, z0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    function lineAlongZ(x0, mat) {
+      const g = new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(x0, LINE_Y, 0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+
+    const lineBoundaryMat = new THREE.MeshBasicMaterial({ color: neonCyan });
+    const lineCenterMat = new THREE.MeshBasicMaterial({ color: neonMagenta });
+    const lineAttackMat = new THREE.MeshBasicMaterial({ color: neonLime });
+    const lineEndMat = new THREE.MeshBasicMaterial({ color: neonViolet });
+
+    lineAlongZ(-HALF_W, lineBoundaryMat);
+    lineAlongZ(HALF_W, lineBoundaryMat);
+    lineAlongX(HALF_L, COURT_W, lineEndMat);
+    lineAlongX(-HALF_L, COURT_W, lineEndMat);
+    lineAlongX(0, COURT_W, lineCenterMat);
+    lineAlongX(ATTACK_DIST, COURT_W, lineAttackMat);
+    lineAlongX(-ATTACK_DIST, COURT_W, lineAttackMat);
+
+    function makeNetTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0a0e18';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = 'rgba(0, 255, 234, 0.55)';
+      ctx.lineWidth = 2;
+      const step = 14;
+      for (let x = 0; x <= 256; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 256);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 256; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(256, y);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const netTex = makeNetTexture();
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3);
+    const netMat = new THREE.MeshStandardMaterial({
+      map: netTex,
+      color: 0x7cf0ff,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide,
+      roughness: 0.35,
+      metalness: 0.15,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.32,
+      emissiveMap: netTex,
+    });
+    const net = new THREE.Mesh(new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M), netMat);
+    net.position.set(0, NET_CENTER_Y, 0);
+    net.castShadow = true;
+    scene.add(net);
+
+    const poleR = 0.1;
+    const poleGeo = new THREE.CylinderGeometry(poleR, poleR * 1.08, POLE_HEIGHT_M, 24);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xe2edf5,
+      roughness: 0.28,
+      metalness: 0.82,
+      emissive: new THREE.Color(0x40fff8),
+      emissiveIntensity: 0.45,
+    });
+    const baseGeo = new THREE.CylinderGeometry(0.22, 0.26, 0.07, 24);
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x1a2330,
+      roughness: 0.75,
+      metalness: 0.35,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.2,
+    });
+    const capGeo = new THREE.SphereGeometry(0.09, 16, 12);
+    const capMat = new THREE.MeshStandardMaterial({
+      color: 0xfff6ff,
+      roughness: 0.35,
+      metalness: 0.5,
+      emissive: new THREE.Color(0xff6ec7),
+      emissiveIntensity: 0.5,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(x, POLE_HEIGHT_M / 2, 0);
+      pole.castShadow = true;
+      scene.add(pole);
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.set(x, 0.035, 0);
+      base.receiveShadow = true;
+      scene.add(base);
+      const cap = new THREE.Mesh(capGeo, capMat);
+      cap.position.set(x, POLE_HEIGHT_M - 0.06, 0);
+      scene.add(cap);
+    });
+
+    const antMat = new THREE.MeshStandardMaterial({
+      color: 0xff4d00,
+      emissive: new THREE.Color(0xff6600),
+      emissiveIntensity: 0.75,
+    });
+    const antGeo = new THREE.CylinderGeometry(0.025, 0.025, ANTENNA_ABOVE_NET_M, 8);
+    [-HALF_W, HALF_W].forEach((x) => {
+      const a = new THREE.Mesh(antGeo, antMat);
+      a.position.set(x, NET_TOP_M + ANTENNA_ABOVE_NET_M / 2, 0);
+      scene.add(a);
+    });
+
+    const playersRoot = new THREE.Group();
+    scene.add(playersRoot);
+
+    function usavLabelText(zone) {
+      const u = USAV_ZONE[zone];
+      return u ? `Z${zone} · ${u.name} (${u.abbr})` : `Z${zone}`;
+    }
+
+    function createPlayer(spec, teamClass) {
+      const group = new THREE.Group();
+      group.position.set(spec.x, 0, spec.z);
+
+      const bodyColor = teamClass === 'team-a' ? 0x1a3d48 : 0x4a1a3a;
+      const accent = teamClass === 'team-a' ? 0x00fff0 : 0xff6ec7;
+
+      const capR = 0.24;
+      const capLen = 1.28;
+      const capsule = new THREE.Mesh(
+        new THREE.CapsuleGeometry(capR, capLen, 8, 16),
+        new THREE.MeshStandardMaterial({
+          color: bodyColor,
+          roughness: 0.55,
+          metalness: 0.15,
+          emissive: new THREE.Color(accent),
+          emissiveIntensity: 0.18,
+        }),
+      );
+      const cy = capR + capLen / 2;
+      capsule.position.y = cy;
+      capsule.castShadow = true;
+      group.add(capsule);
+
+      const headR = 0.17;
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(headR, 20, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0xffe8dc,
+          roughness: 0.65,
+          metalness: 0,
+          emissive: new THREE.Color(accent),
+          emissiveIntensity: 0.08,
+        }),
+      );
+      head.position.y = cy + capLen / 2 + capR + headR * 0.85;
+      head.castShadow = true;
+      group.add(head);
+
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(0.38, 0.035, 8, 28),
+        new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.85 }),
+      );
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = 0.04;
+      group.add(ring);
+
+      const div = document.createElement('div');
+      div.className = `player-label ${teamClass}`;
+      div.textContent = usavLabelText(spec.zone);
+      div.title = `USA Volleyball court zone ${spec.zone}`;
+      const lbl = new CSS2DObject(div);
+      lbl.position.set(0, head.position.y + headR + 0.35, 0);
+      group.add(lbl);
+
+      return group;
+    }
+
+    function clearPlayers() {
+      while (playersRoot.children.length) {
+        const ch = playersRoot.children[0];
+        // CSS2DRenderer leaves label nodes in its DOM unless we remove them explicitly
+        ch.traverse((o) => {
+          const el = o.element;
+          if (el instanceof HTMLElement && el.parentNode) {
+            el.remove();
+          }
+        });
+        playersRoot.remove(ch);
+        ch.traverse((o) => {
+          if (o.material) {
+            const mats = Array.isArray(o.material) ? o.material : [o.material];
+            mats.forEach((m) => m.dispose?.());
+          }
+          if (o.geometry) o.geometry.dispose?.();
+        });
+      }
+    }
+
+    function loadFormation(key) {
+      clearPlayers();
+      const f = FORMATIONS[key];
+      if (!f) return;
+      f.teamA.forEach((s) => playersRoot.add(createPlayer(s, 'team-a')));
+      f.teamB.forEach((s) => playersRoot.add(createPlayer(s, 'team-b')));
+    }
+
+    loadFormation('zones');
+
+    document.getElementById('formation').addEventListener('change', (e) => {
+      loadFormation(e.target.value);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function tick() {
+      requestAnimationFrame(tick);
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>

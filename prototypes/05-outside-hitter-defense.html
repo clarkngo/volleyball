@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prototype 05 — Perimeter vs rotational D (outside hitter)</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #050508; font-family: system-ui, sans-serif; }
+    #hud {
+      position: fixed; left: 12px; top: 12px; z-index: 10;
+      color: #e8f4ff; font-size: 12px; line-height: 1.45; max-width: 420px;
+      text-shadow: 0 0 8px rgba(0, 245, 212, 0.2), 0 1px 2px #000;
+    }
+    #hud strong { color: #7cf0ff; font-size: 13px; }
+    #hud select, #hud button {
+      margin: 6px 8px 0 0; padding: 6px 10px; border-radius: 6px;
+      background: #12141c; color: #00f5d4; border: 1px solid rgba(0, 245, 212, 0.4);
+      font-size: 12px; cursor: pointer;
+    }
+    #hud button:hover { background: #1a2230; }
+    #hud label { display: inline-flex; align-items: center; gap: 6px; margin: 6px 12px 0 0; cursor: pointer; }
+    #hud code { background: #12141c; color: #ff6ec7; padding: 0 4px; border-radius: 4px; font-size: 11px; }
+    canvas { display: block; }
+    .lbl {
+      font-size: 10px; font-weight: 700; font-family: ui-monospace, monospace;
+      padding: 2px 5px; border-radius: 4px; background: rgba(5,5,12,0.85);
+      border: 1px solid rgba(255,255,255,0.12); pointer-events: none; user-select: none;
+    }
+    .lbl.def { color: #66eeff; text-shadow: 0 0 8px rgba(0,255,255,0.5); }
+    .lbl.oh { color: #ff8866; text-shadow: 0 0 8px rgba(255,100,80,0.6); }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong>05 — Outside hitter · perimeter vs rotational D</strong><br />
+    <label>Defense set <select id="defenseMode">
+      <option value="base">Base (pre-read)</option>
+      <option value="perimeter">Perimeter D (deep back row)</option>
+      <option value="rotational">Rotational D (slide / line help)</option>
+    </select></label><br />
+    <button type="button" id="runAnim">Animate to selection</button>
+    <button type="button" id="snap">Snap (no animation)</button><br />
+    <label><input type="checkbox" id="showRings" checked /> Responsibility circles</label>
+    <label><input type="checkbox" id="showCone" checked /> Attack cone + trajectory</label>
+    <ul style="margin:8px 0 0 1rem;padding:0;font-size:11px;opacity:0.92">
+      <li><strong>Red team</strong> OH attacks from zone 4 (left front, their side).</li>
+      <li><strong>Cyan squad</strong> defends (your half). Compare how backs spread vs rotate.</li>
+      <li>Cone = illustrative attack window (not ball physics).</li>
+    </ul>
+    <code>prototypes/05-outside-hitter-defense.html</code> · If the page stays black, open DevTools (Console) — use <code>npx serve .</code> and visit <code>/prototypes/05-outside-hitter-defense.html</code> if <code>file://</code> blocks ES modules.
+    <p id="load-error" style="display:none;margin-top:10px;padding:8px;background:#3a1010;border:1px solid #ff6666;color:#ffb0b0;font-size:11px;border-radius:6px;max-width:380px"></p>
+  </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    window.addEventListener('error', (ev) => {
+      const el = document.getElementById('load-error');
+      if (el) {
+        el.style.display = 'block';
+        el.textContent =
+          (ev.message || ev.error?.message || 'Script error') +
+          ' — try opening via a local server (e.g. npx serve) if modules fail from file://';
+      }
+    });
+
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2;
+    const HALF_W = COURT_W / 2;
+    const LINE = 0.05;
+    const ATTACK_DIST = 3;
+    const FREE = 3;
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43;
+    const NET_CENTER_Y = NET_TOP_M - NET_MESH_HEIGHT_M / 2;
+    const POLE_OUTSIDE_M = 0.5;
+    const POLE_HEIGHT_M = 2.55;
+    const POLE_X = HALF_W + POLE_OUTSIDE_M;
+    const ANTENNA_ABOVE_NET_M = 0.8;
+    const LINE_Y = 0.018;
+
+    const ANIM_SEC = 2.2;
+
+    /** Defender roles — distinct look (color, scale, head, shoulder pads) */
+    const ROLE_STYLE = {
+      libero: { color: 0xff9800, head: 0xffcc80, scale: 0.86, shoulder: false, tag: 'L' },
+      setter: { color: 0x4488ff, head: 0xccd9ff, scale: 0.94, shoulder: false, tag: 'S' },
+      mb: { color: 0xaa66dd, head: 0xe0c8ff, scale: 1.08, shoulder: true, tag: 'MB' },
+      oh: { color: 0x33dd99, head: 0xc8ffe8, scale: 1.02, shoulder: true, tag: 'OH' },
+      opp: { color: 0xee66aa, head: 0xffddee, scale: 1.0, shoulder: true, tag: 'OPP' },
+      ds: { color: 0x88aaaa, head: 0xddffff, scale: 0.92, shoulder: false, tag: 'DS' },
+    };
+
+    /**
+     * Defending team z < 0. Positions (x, z) metres on floor.
+     * Perimeter: backs hug deep corners / mid-back.
+     * Rotational: MBk rotates toward line; left back cheats up; right back holds deep cross.
+     */
+    const DEFENSE = {
+      base: {
+        4: { x: -2.15, z: -1.75 },
+        3: { x: 0, z: -1.55 },
+        2: { x: 2.15, z: -1.75 },
+        5: { x: -2.55, z: -5.6 },
+        6: { x: 0, z: -6.15 },
+        1: { x: 2.55, z: -5.6 },
+      },
+      perimeter: {
+        4: { x: -2.35, z: -1.35 },
+        3: { x: 0, z: -1.2 },
+        2: { x: 2.35, z: -1.35 },
+        5: { x: -4.0, z: -8.35 },
+        6: { x: 0, z: -8.65 },
+        1: { x: 4.0, z: -8.35 },
+      },
+      rotational: {
+        4: { x: -2.65, z: -1.45 },
+        3: { x: 0.55, z: -1.05 },
+        2: { x: 2.45, z: -1.35 },
+        5: { x: -3.1, z: -4.65 },
+        6: { x: 1.95, z: -4.85 },
+        1: { x: 2.35, z: -7.15 },
+      },
+    };
+
+    const DEF_ROLES = { 4: 'oh', 3: 'mb', 2: 'opp', 5: 'libero', 6: 'ds', 1: 'setter' };
+    const RING_RADIUS = { front: 1.05, back: 1.55 };
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x0a0c12, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.position = 'fixed';
+    renderer.domElement.style.inset = '0';
+    renderer.domElement.style.zIndex = '0';
+    document.body.appendChild(renderer.domElement);
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'fixed';
+    labelRenderer.domElement.style.inset = '0';
+    labelRenderer.domElement.style.zIndex = '1';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    labelRenderer.domElement.style.background = 'transparent';
+    document.body.appendChild(labelRenderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x0a0c14, 0.006);
+
+    const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 160);
+    camera.position.set(-2, 16, 11);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 0.5, -2);
+    controls.maxPolarAngle = Math.PI * 0.49;
+    controls.minDistance = 10;
+    controls.maxDistance = 62;
+    controls.update();
+
+    scene.add(new THREE.HemisphereLight(0x8899bb, 0x151820, 0.72));
+    const sun = new THREE.DirectionalLight(0xd8e8ff, 0.85);
+    sun.position.set(8, 28, 12);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    const ext = HALF_L + FREE + 5;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 85;
+    scene.add(sun);
+    const plAtk = new THREE.PointLight(0xff8866, 0.85, 55);
+    plAtk.position.set(2, 11, 4);
+    scene.add(plAtk);
+    const plDef = new THREE.PointLight(0x88eeff, 0.75, 60);
+    plDef.position.set(-4, 9, -8);
+    scene.add(plDef);
+    scene.add(new THREE.AmbientLight(0x405060, 0.35));
+
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.35,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.2,
+    });
+
+    const outerL = COURT_L + FREE * 2;
+    const outerW = COURT_W + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    function lineAlongX(z0, widthSpan, mat) {
+      const g = new THREE.BoxGeometry(widthSpan, LINE_Y * 2, LINE);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(0, LINE_Y, z0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    function lineAlongZ(x0, mat) {
+      const g = new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(x0, LINE_Y, 0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+
+    const lineBoundaryMat = new THREE.MeshBasicMaterial({ color: neonCyan });
+    const lineCenterMat = new THREE.MeshBasicMaterial({ color: neonMagenta });
+    const lineAttackMat = new THREE.MeshBasicMaterial({ color: neonLime });
+    const lineEndMat = new THREE.MeshBasicMaterial({ color: neonViolet });
+    lineAlongZ(-HALF_W, lineBoundaryMat);
+    lineAlongZ(HALF_W, lineBoundaryMat);
+    lineAlongX(HALF_L, COURT_W, lineEndMat);
+    lineAlongX(-HALF_L, COURT_W, lineEndMat);
+    lineAlongX(0, COURT_W, lineCenterMat);
+    lineAlongX(ATTACK_DIST, COURT_W, lineAttackMat);
+    lineAlongX(-ATTACK_DIST, COURT_W, lineAttackMat);
+
+    function makeNetTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0a0e18';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = 'rgba(0, 255, 234, 0.5)';
+      ctx.lineWidth = 2;
+      const step = 14;
+      for (let x = 0; x <= 256; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 256);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 256; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(256, y);
+        ctx.stroke();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+    const netTex = makeNetTexture();
+    netTex.colorSpace = THREE.SRGBColorSpace;
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3);
+    const net = new THREE.Mesh(
+      new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M),
+      new THREE.MeshStandardMaterial({
+        map: netTex,
+        color: 0x7cf0ff,
+        transparent: true,
+        opacity: 0.78,
+        side: THREE.DoubleSide,
+        roughness: 0.35,
+        metalness: 0.12,
+        emissive: new THREE.Color(0x00fff0),
+        emissiveIntensity: 0.28,
+        emissiveMap: netTex,
+      }),
+    );
+    net.position.set(0, NET_CENTER_Y, 0);
+    scene.add(net);
+
+    const poleR = 0.1;
+    const poleGeo = new THREE.CylinderGeometry(poleR, poleR * 1.08, POLE_HEIGHT_M, 20);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xd0dce8,
+      roughness: 0.3,
+      metalness: 0.75,
+      emissive: new THREE.Color(0x40fff8),
+      emissiveIntensity: 0.35,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const p = new THREE.Mesh(poleGeo, poleMat);
+      p.position.set(x, POLE_HEIGHT_M / 2, 0);
+      p.castShadow = true;
+      scene.add(p);
+    });
+
+    const attackGroup = new THREE.Group();
+    scene.add(attackGroup);
+
+    /** OH in Z4 (left front, attack team) → contact over net on −x; cross lands defender +x / deep */
+    const CONTACT = new THREE.Vector3(-1.85, 2.9, 0.75);
+    const LANDING = new THREE.Vector3(2.35, 0.04, -5.35);
+    /** Cone local +Y is apex; align +Y with ball flight (landing → contact). */
+    const flightUp = new THREE.Vector3().subVectors(CONTACT, LANDING);
+    const coneLen = flightUp.length();
+    const coneMid = new THREE.Vector3().addVectors(CONTACT, LANDING).multiplyScalar(0.5);
+    const flightDir = flightUp.clone().normalize();
+
+    const coneMat = new THREE.MeshStandardMaterial({
+      color: 0xff5533,
+      transparent: true,
+      opacity: 0.14,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      emissive: new THREE.Color(0xff2200),
+      emissiveIntensity: 0.25,
+    });
+    const attackCone = new THREE.Mesh(new THREE.ConeGeometry(2.8, coneLen, 48, 1, false), coneMat);
+    attackCone.position.copy(coneMid);
+    attackCone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), flightDir);
+    attackGroup.add(attackCone);
+
+    /** Triangular cross-section cone = “wedge” in the attack window */
+    const wedgeMat = new THREE.MeshBasicMaterial({
+      color: 0xffaa44,
+      transparent: true,
+      opacity: 0.22,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const wedge = new THREE.Mesh(new THREE.ConeGeometry(1.9, coneLen * 0.92, 3, 1, false), wedgeMat);
+    wedge.position.copy(coneMid);
+    wedge.quaternion.copy(attackCone.quaternion);
+    wedge.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.35);
+    attackGroup.add(wedge);
+
+    const curve = new THREE.QuadraticBezierCurve3(
+      CONTACT.clone(),
+      new THREE.Vector3(0.4, 3.75, -2.4),
+      LANDING.clone(),
+    );
+    const arcPts = curve.getPoints(48);
+    const arcGeo = new THREE.BufferGeometry().setFromPoints(arcPts);
+    const arcLine = new THREE.Line(
+      arcGeo,
+      new THREE.LineBasicMaterial({ color: 0xffaa66, transparent: true, opacity: 0.9 }),
+    );
+    attackGroup.add(arcLine);
+
+    function createDefender(zone, roleKey) {
+      const st = ROLE_STYLE[roleKey];
+      const g = new THREE.Group();
+      const s = st.scale;
+      const capR = 0.22 * s;
+      const capLen = 1.15 * s;
+      const torsoH = capLen + 2 * capR * 0.95;
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(capR * 0.94, capR * 1.05, torsoH, 18, 1, false),
+        new THREE.MeshStandardMaterial({
+          color: st.color,
+          roughness: 0.5,
+          metalness: 0.2,
+          emissive: new THREE.Color(st.color),
+          emissiveIntensity: 0.12,
+        }),
+      );
+      body.position.y = torsoH / 2;
+      body.castShadow = true;
+      g.add(body);
+
+      if (st.shoulder) {
+        const pad = new THREE.Mesh(
+          new THREE.BoxGeometry(capR * 2.8, capR * 0.45, capR * 0.9),
+          new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.45, metalness: 0.15 }),
+        );
+        pad.position.y = torsoH * 0.58;
+        pad.castShadow = true;
+        g.add(pad);
+      }
+
+      const headR = 0.16 * s;
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(headR, 16, 12),
+        new THREE.MeshStandardMaterial({ color: st.head, roughness: 0.6 }),
+      );
+      head.position.y = torsoH + headR * 0.92;
+      head.castShadow = true;
+      g.add(head);
+
+      if (roleKey === 'libero') {
+        const band = new THREE.Mesh(
+          new THREE.TorusGeometry(capR * 1.1, 0.04, 6, 16),
+          new THREE.MeshBasicMaterial({ color: 0xffffff }),
+        );
+        band.rotation.x = Math.PI / 2;
+        band.position.y = torsoH * 0.42;
+        g.add(band);
+      }
+
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(0.15, 0.32, 24),
+        new THREE.MeshBasicMaterial({
+          color: st.color,
+          transparent: true,
+          opacity: 0.5,
+          side: THREE.DoubleSide,
+        }),
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.03;
+      g.add(ring);
+
+      const div = document.createElement('div');
+      div.className = 'lbl def';
+      div.textContent = `Z${zone} ${st.tag}`;
+      const lbl = new CSS2DObject(div);
+      lbl.position.set(0, head.position.y + headR + 0.35, 0);
+      g.add(lbl);
+
+      const rr = zone >= 2 && zone <= 4 ? RING_RADIUS.front : RING_RADIUS.back;
+      const disc = new THREE.Mesh(
+        new THREE.RingGeometry(rr - 0.06, rr, 48),
+        new THREE.MeshBasicMaterial({
+          color: st.color,
+          transparent: true,
+          opacity: 0.28,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      );
+      disc.rotation.x = -Math.PI / 2;
+      disc.position.y = 0.025;
+      disc.visible = true;
+      g.add(disc);
+      g.userData.disc = disc;
+      g.userData.zone = zone;
+
+      return g;
+    }
+
+    function createOutsideHitter() {
+      const g = new THREE.Group();
+      g.position.set(-2.25, 0, 1.85);
+      const s = 1.05;
+      const capR = 0.24 * s;
+      const capLen = 1.22 * s;
+      const torsoH = capLen + 2 * capR * 0.95;
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(capR * 0.94, capR * 1.05, torsoH, 18, 1, false),
+        new THREE.MeshStandardMaterial({
+          color: 0xcc3322,
+          roughness: 0.45,
+          metalness: 0.15,
+          emissive: new THREE.Color(0xff2200),
+          emissiveIntensity: 0.2,
+        }),
+      );
+      body.position.y = torsoH / 2;
+      body.castShadow = true;
+      g.add(body);
+      const headR = 0.17 * s;
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(headR, 16, 12),
+        new THREE.MeshStandardMaterial({ color: 0xffcbb0, roughness: 0.55 }),
+      );
+      head.position.y = torsoH + headR * 0.92;
+      g.add(head);
+      const arm = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.07, 0.06, 0.55, 8),
+        new THREE.MeshStandardMaterial({
+          color: 0xcc3322,
+          emissive: new THREE.Color(0xff4400),
+          emissiveIntensity: 0.15,
+        }),
+      );
+      arm.position.set(0.35, torsoH * 0.62, 0.1);
+      arm.rotation.z = -0.6;
+      arm.rotation.x = 0.4;
+      g.add(arm);
+
+      const div = document.createElement('div');
+      div.className = 'lbl oh';
+      div.textContent = 'OH · Z4 (attack)';
+      const lbl = new CSS2DObject(div);
+      lbl.position.set(0, head.position.y + headR + 0.4, 0);
+      g.add(lbl);
+
+      g.rotation.y = 0.45;
+      return g;
+    }
+
+    const ohGroup = createOutsideHitter();
+    scene.add(ohGroup);
+
+    const defendersRoot = new THREE.Group();
+    scene.add(defendersRoot);
+
+    const defenderGroups = [];
+    for (const z of [4, 3, 2, 5, 6, 1]) {
+      const dg = createDefender(z, DEF_ROLES[z]);
+      defenderGroups.push(dg);
+      defendersRoot.add(dg);
+    }
+
+    function posForMode(mode) {
+      const p = DEFENSE[mode];
+      return defenderGroups.map((g) => {
+        const u = p[g.userData.zone];
+        return { x: u.x, z: u.z };
+      });
+    }
+
+    let currentXZ = posForMode('base');
+    defenderGroups.forEach((g, i) => {
+      g.position.x = currentXZ[i].x;
+      g.position.z = currentXZ[i].z;
+    });
+
+    let animT = 0;
+    let animFrom = null;
+    let animTo = null;
+    let animating = false;
+
+    function easeOutCubic(t) {
+      return 1 - (1 - t) ** 3;
+    }
+
+    function startAnim(toMode) {
+      animFrom = defenderGroups.map((g) => ({ x: g.position.x, z: g.position.z }));
+      animTo = posForMode(toMode);
+      animT = 0;
+      animating = true;
+    }
+
+    function snapToMode(mode) {
+      const p = posForMode(mode);
+      defenderGroups.forEach((g, i) => {
+        g.position.x = p[i].x;
+        g.position.z = p[i].z;
+      });
+      animating = false;
+    }
+
+    document.getElementById('runAnim').addEventListener('click', () => {
+      startAnim(document.getElementById('defenseMode').value);
+    });
+    document.getElementById('snap').addEventListener('click', () => {
+      snapToMode(document.getElementById('defenseMode').value);
+    });
+
+    const showRingsEl = document.getElementById('showRings');
+    const showConeEl = document.getElementById('showCone');
+    showRingsEl.addEventListener('change', () => {
+      defenderGroups.forEach((g) => {
+        if (g.userData.disc) g.userData.disc.visible = showRingsEl.checked;
+      });
+    });
+    showConeEl.addEventListener('change', () => {
+      attackGroup.visible = showConeEl.checked;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const clock = new THREE.Clock();
+
+    function tick() {
+      requestAnimationFrame(tick);
+      const dt = clock.getDelta();
+
+      if (animating) {
+        animT += dt / ANIM_SEC;
+        const k = easeOutCubic(Math.min(1, animT));
+        defenderGroups.forEach((g, i) => {
+          g.position.x = THREE.MathUtils.lerp(animFrom[i].x, animTo[i].x, k);
+          g.position.z = THREE.MathUtils.lerp(animFrom[i].z, animTo[i].z, k);
+        });
+        if (animT >= 1) animating = false;
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>
