@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ideas backlog · Volleyball prototypes</title>
+  <style>
+    :root {
+      --bg: #050508;
+      --panel: #0f1218;
+      --text: #e8f4ff;
+      --muted: #8a9cb0;
+      --cyan: #00f5d4;
+      --pink: #ff6ec7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wrap {
+      max-width: 46rem;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: #7cf0ff;
+    }
+    .lede {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin: 0 0 1.5rem;
+    }
+    .lede a { color: var(--cyan); }
+    #content {
+      padding: 1.25rem 1.35rem;
+      border-radius: 10px;
+      background: var(--panel);
+      border: 1px solid rgba(0, 245, 212, 0.18);
+      font-size: 0.95rem;
+    }
+    #content h1 { font-size: 1.35rem; margin-top: 0; }
+    #content h2 {
+      font-size: 1.05rem;
+      margin: 1.75rem 0 0.65rem;
+      color: var(--cyan);
+      font-weight: 650;
+    }
+    #content h2:first-of-type { margin-top: 0.5rem; }
+    #content h3 {
+      font-size: 0.98rem;
+      margin: 1.25rem 0 0.5rem;
+      color: #ffcc66;
+    }
+    #content p { margin: 0.65rem 0; }
+    #content ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+    #content li { margin: 0.35rem 0; }
+    #content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 1rem 0;
+    }
+    #content th, #content td {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.45rem 0.55rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    #content th { background: rgba(0, 245, 212, 0.08); color: #7cf0ff; }
+    #content code {
+      background: #12141c;
+      color: var(--pink);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.86em;
+    }
+    #content a { color: var(--cyan); }
+    #content hr {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 1.5rem 0;
+    }
+    #content strong { color: #e8f4ff; }
+    .err {
+      color: #ff9999;
+      padding: 1rem;
+      border-radius: 8px;
+      background: #2a1010;
+      border: 1px solid #663333;
+    }
+    .meta {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .meta a { color: var(--pink); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Ideas backlog</h1>
+    <p class="lede">
+      Rendered from <a href="./IDEAS.md"><code>IDEAS.md</code></a> for
+      <a href="https://pages.github.com/">GitHub Pages</a>. If this box stays empty, open the markdown on GitHub or run from a local server.
+    </p>
+    <p class="err" id="fallback" style="display:none" role="alert"></p>
+    <div id="content"></div>
+    <div class="meta">
+      <a href="../index.html">← Prototype index</a>
+      · <a href="../README.md">README.md</a>
+    </div>
+  </div>
+  <script type="module">
+    const el = document.getElementById('content');
+    const fb = document.getElementById('fallback');
+    try {
+      const res = await fetch(new URL('./IDEAS.md', import.meta.url));
+      if (!res.ok) throw new Error('Could not load IDEAS.md (' + res.status + ')');
+      const md = await res.text();
+      const { marked } = await import('https://cdn.jsdelivr.net/npm/marked@14.1.0/+esm');
+      el.innerHTML = marked.parse(md);
+    } catch (e) {
+      fb.style.display = 'block';
+      fb.textContent = String(e.message || e);
+    }
+  </script>
+</body>
+</html>

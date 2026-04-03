@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prototype 06 — Offensive sets (attack options)</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #050508; font-family: system-ui, sans-serif; }
+    #hud {
+      position: fixed; left: 12px; top: 12px; z-index: 10;
+      color: #e8f4ff; font-size: 12px; line-height: 1.45; max-width: 468px;
+      text-shadow: 0 0 8px rgba(0, 245, 212, 0.2), 0 1px 2px #000;
+    }
+    #hud strong { color: #7cf0ff; font-size: 13px; }
+    #hud select, #hud button {
+      margin: 6px 8px 0 0; padding: 6px 10px; border-radius: 6px;
+      background: #12141c; color: #00f5d4; border: 1px solid rgba(0, 245, 212, 0.4);
+      font-size: 12px; cursor: pointer;
+    }
+    #hud label { display: inline-flex; align-items: center; gap: 6px; margin: 6px 12px 0 0; cursor: pointer; }
+    #hud code { background: #12141c; color: #ff6ec7; padding: 0 4px; border-radius: 4px; font-size: 11px; }
+    #set-detail {
+      margin-top: 10px; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid rgba(0, 245, 212, 0.22); background: rgba(8, 10, 18, 0.94);
+      max-width: 456px;
+    }
+    #set-detail-title { font-weight: 700; color: #7cf0ff; margin-bottom: 6px; font-size: 12px; }
+    #set-detail-desc { font-size: 11px; color: #d0dce8; line-height: 1.45; margin-bottom: 8px; }
+    #set-detail-when { font-size: 11px; color: #b8c8d8; line-height: 1.45; margin-bottom: 6px; }
+    #set-detail-when strong { color: #8a9cb0; font-weight: 600; }
+    #set-detail-level {
+      font-size: 10px; color: #c4a8e0; line-height: 1.4;
+      border-top: 1px solid rgba(255, 255, 255, 0.07); padding-top: 8px; margin-top: 2px;
+    }
+    canvas { display: block; }
+    .tag {
+      font-size: 10px; font-weight: 700; font-family: ui-monospace, monospace;
+      padding: 2px 5px; border-radius: 4px; background: rgba(5,5,12,0.88);
+      border: 1px solid rgba(255,255,255,0.12); pointer-events: none; user-select: none;
+      color: #ffdd88;
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong>06 — Offensive sets (attack shapes)</strong><br />
+    <label>Team level <select id="skillLevel" title="Adjusts arc height and back-row penetration">
+      <option value="youth">Youth / club</option>
+      <option value="hs">High school</option>
+      <option value="college" selected>Collegiate</option>
+      <option value="elite">Elite / pro</option>
+    </select></label><br />
+    <label>Highlight <select id="highlight">
+      <option value="all">All sets (dim)</option>
+      <option value="one">1 — front quick (MB)</option>
+      <option value="thirty_one">31 — quick (zone 4)</option>
+      <option value="two">2 — zone 5 (medium)</option>
+      <option value="three">3 — zone 3 / gap area</option>
+      <option value="rip">Rip — off gap shoulder</option>
+      <option value="shoot">Shoot / Go — left pin, fast</option>
+      <option value="hut">4 / Hut — OoS, higher</option>
+      <option value="five">5 — moon left pin</option>
+      <option value="nine">9 / Red — right pin</option>
+      <option value="back_a">A — quick behind setter</option>
+      <option value="slide">Slide — MB, 2nd-step</option>
+      <option value="pipe">Pipe — center back row</option>
+      <option value="bic">Bic — back row (2nd-step)</option>
+      <option value="back_thirty">30 / Pink — back left-mid</option>
+      <option value="back_ten">10 — back left sideline</option>
+      <option value="back_d">D — back right sideline</option>
+      <option value="dump">Setter dump</option>
+    </select></label><br />
+    <label><input type="checkbox" id="animateBall" checked /> Animate ball on highlighted set</label>
+    <label><input type="checkbox" id="showHitters" checked /> Hitter markers</label>
+    <div id="set-detail">
+      <div id="set-detail-title"></div>
+      <div id="set-detail-desc"></div>
+      <div id="set-detail-when"></div>
+      <div id="set-detail-level"></div>
+    </div>
+    <p style="margin:8px 0 0;font-size:11px;opacity:0.9;max-width:440px">
+      <strong>Team level</strong> reshapes every arc (especially back-row penetration vs rainbow). <strong>Highlight</strong> fills the panel with what the set is and when to use it. Setter at <strong>Z2–Z3</strong>; floor ticks = net zones <strong>1–9</strong>. Teaching shapes, not physics. <strong>Fixed</strong> lanes vs <strong>floating</strong> (1, A). Back-row: Pipe, Bic, 30, 10, D.
+    </p>
+    <code>prototypes/06-attack-sets.html</code>
+    <p id="load-error" style="display:none;margin-top:10px;padding:8px;background:#3a1010;border:1px solid #ff6666;color:#ffb0b0;font-size:11px;border-radius:6px;max-width:380px"></p>
+  </div>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    window.addEventListener('error', (ev) => {
+      const el = document.getElementById('load-error');
+      if (el) {
+        el.style.display = 'block';
+        el.textContent = ev.message || ev.error?.message || 'Script error';
+      }
+    });
+
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2;
+    const HALF_W = COURT_W / 2;
+    const LINE = 0.05;
+    const ATTACK_DIST = 3;
+    const FREE = 3;
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43;
+    const NET_CENTER_Y = NET_TOP_M - NET_MESH_HEIGHT_M / 2;
+    const POLE_X = HALF_W + 0.5;
+    const LINE_Y = 0.018;
+    const POLE_HEIGHT_M = 2.55;
+
+    /** Setter release point (hands), ~front row right. Net z=0; attack line z=+ATTACK_DIST on this half. */
+    const SETTER_HANDS = new THREE.Vector3(1.75, 2.45, 1.15);
+
+    /** Net-zone centers along X (zones 1 = left pin … 9 = right pin), full 9 m width */
+    function zoneX(n) {
+      return -HALF_W + (COURT_W * (n - 0.5)) / 9;
+    }
+
+    /**
+     * Quadratic: p0=setter, p1=apex, p2=contact. Cubic (slide): cp1, cp2, p2.
+     * Base = collegiate; skill level warps height and back-row penetration.
+     */
+    const LEVEL = {
+      youth: {
+        label: 'Youth / club',
+        blurb:
+          'Paths stay on your side longer (higher +z), with the attack end of the arc up near the 3 m line—not tight to the net. Taller arcs and little back-row “bite.”',
+        /** Positive = shift whole path toward +z (setter side), away from the net at z=0 */
+        retreatZ: 0.44,
+        /** Extra +z on path end only: contact window sits nearer the 3 m / attack line than the net */
+        endNearAttackLineZ: 0.52,
+        frontApex: 0.48,
+        backApex: 0.64,
+        backP2y: 0.14,
+        backPenZ: 0.22,
+        backHitterZ: 0.4,
+        quickExtra: 0.15,
+      },
+      hs: {
+        label: 'High school',
+        blurb:
+          'Trajectories retreat from the net vs college; the ball finishes its arc closer to the attack line than college. Back-row stays rainbowy; front tempos floatier.',
+        retreatZ: 0.24,
+        endNearAttackLineZ: 0.28,
+        frontApex: 0.24,
+        backApex: 0.36,
+        backP2y: 0.07,
+        backPenZ: 0.12,
+        backHitterZ: 0.2,
+        quickExtra: 0.08,
+      },
+      college: {
+        label: 'Collegiate',
+        blurb: 'Benchmark for this demo: strong HS club / college training groups.',
+        retreatZ: 0,
+        endNearAttackLineZ: 0,
+        frontApex: 0,
+        backApex: 0,
+        backP2y: 0,
+        backPenZ: 0,
+        backHitterZ: 0,
+        quickExtra: 0,
+      },
+      elite: {
+        label: 'Elite / pro',
+        blurb:
+          'Lower quick peaks, flatter shoots, and back-row swings that can still compress toward the net from behind the 3 m line.',
+        retreatZ: -0.07,
+        endNearAttackLineZ: -0.05,
+        frontApex: -0.08,
+        backApex: -0.15,
+        backP2y: -0.05,
+        backPenZ: -0.09,
+        backHitterZ: -0.11,
+        quickExtra: -0.08,
+      },
+    };
+
+    function getSkillLevel() {
+      const el = document.getElementById('skillLevel');
+      return el && el.value ? el.value : 'college';
+    }
+
+    function arcStyleMult(d) {
+      if (d.arcStyle === 'flat') return 0.4;
+      if (d.arcStyle === 'high') return 1.1;
+      return 1;
+    }
+
+    function buildAdjustedVectors(d) {
+      const L = LEVEL[getSkillLevel()];
+      const p1 = d.p1.clone();
+      const p2 = d.p2.clone();
+      let cp1;
+      let cp2;
+      if (d.cubic) {
+        cp1 = d.cp1.clone();
+        cp2 = d.cp2.clone();
+      }
+      if (d.category === 'back') {
+        p1.y += L.backApex;
+        p2.y += L.backP2y;
+      } else if (d.category === 'dump') {
+        const a = L.frontApex * 0.52;
+        p1.y += a;
+        p2.y += a * 0.38;
+      } else {
+        const m = arcStyleMult(d);
+        const fa = L.frontApex * m;
+        p1.y += fa;
+        p2.y += fa * 0.4;
+        if (d.quick) p1.y += L.quickExtra;
+      }
+      if (d.cubic) {
+        const m = arcStyleMult(d);
+        const fa = L.frontApex * m * 0.72;
+        cp1.y += fa;
+        cp2.y += fa;
+        p2.y += L.frontApex * m * 0.24;
+      }
+
+      const rz = L.retreatZ;
+      p1.z += rz * 0.72;
+      p2.z += rz;
+      if (d.cubic && cp1 && cp2) {
+        cp1.z += rz * 0.55;
+        cp2.z += rz * 0.82;
+      }
+      if (d.category === 'back') {
+        p2.z += L.backPenZ;
+      }
+
+      const eal = L.endNearAttackLineZ;
+      if (eal !== 0) {
+        const endBoost = d.category === 'back' ? eal * 0.5 : eal;
+        p2.z += endBoost;
+        if (d.cubic && cp2) {
+          cp2.z += endBoost * 0.62;
+        }
+      }
+      return { p1, p2, cp1, cp2 };
+    }
+
+    const SET_DATA = {
+      one: {
+        label: '1',
+        category: 'front',
+        quick: true,
+        color: 0x8899aa,
+        p2: new THREE.Vector3(0.38, 2.98, -0.06),
+        p1: new THREE.Vector3(1.12, 2.68, 0.48),
+        hitter: new THREE.Vector3(0.3, 0, 0.42),
+        hitterTag: 'Z3 quick · float',
+        description:
+          'Front “1” (quick): almost straight-up tempo in front of the setter for the middle. The ball travels a very short distance with minimal arc.',
+        whenToUse:
+          'Ideal pass on the net, middle loaded early, and you want to stress the blocker before pins commit. Floating relative to setter position.',
+      },
+      thirty_one: {
+        label: '31',
+        category: 'front',
+        quick: true,
+        color: 0x00ffcc,
+        p2: new THREE.Vector3(zoneX(4), 2.94, -0.1),
+        p1: new THREE.Vector3(0.4, 2.74, 0.52),
+        hitter: new THREE.Vector3(zoneX(4) + 0.12, 0, 0.4),
+        hitterTag: 'Quick z4',
+        description:
+          'Zone-4 quick: same low tempo idea as a 1, but to the left-middle window so the MB or quick OH can attack.',
+        whenToUse:
+          'Good pass, committed middle or quick pin, and you want speed over the net instead of a high set.',
+      },
+      two: {
+        label: '2',
+        category: 'front',
+        color: 0xff4488,
+        p2: new THREE.Vector3(zoneX(5), 3.42, -0.18),
+        p1: new THREE.Vector3(0.75, 3.28, 0.55),
+        hitter: new THREE.Vector3(zoneX(5) + 0.1, 0, 0.48),
+        hitterTag: 'Zone 5 (B)',
+        description:
+          'Medium-height “2” to the left-center net zone—between a quick and a high outside.',
+        whenToUse:
+          'Standard offense: pass is solid but not perfect; OH or RS can approach with a normal 3- or 4-step rhythm.',
+      },
+      three: {
+        label: '3',
+        category: 'front',
+        color: 0xd946ef,
+        p2: new THREE.Vector3(zoneX(3), 3.38, -0.2),
+        p1: new THREE.Vector3(-0.35, 3.22, 0.58),
+        hitter: new THREE.Vector3(zoneX(3) + 0.08, 0, 0.52),
+        hitterTag: '32 / RS area',
+        description:
+          'Set toward the gap / left-middle antenna area—often a 32-style window for OH or front slide.',
+        whenToUse:
+          'Spread or hybrid look: pin occupied or you want the RS / combo hitter inside the block shadow.',
+      },
+      rip: {
+        label: 'Rip',
+        category: 'front',
+        quick: true,
+        color: 0x5c9ead,
+        p2: new THREE.Vector3(zoneX(3) + 0.35, 2.9, -0.04),
+        p1: new THREE.Vector3(0.25, 2.78, 0.45),
+        hitter: new THREE.Vector3(zoneX(3) + 0.5, 0, 0.4),
+        hitterTag: 'Off gap L',
+        description:
+          'Short, fast set just off the left shoulder of the gap—lower and tighter than a full 3.',
+        whenToUse:
+          'Surprise tempo after showing gap/middle, or the block is leaning and you need a quick window.',
+      },
+      shoot: {
+        label: 'Shoot',
+        category: 'front',
+        arcStyle: 'flat',
+        color: 0xffaa00,
+        p2: new THREE.Vector3(zoneX(1) + 0.15, 2.72, 0.02),
+        p1: new THREE.Vector3(0.55, 2.88, 0.62),
+        hitter: new THREE.Vector3(zoneX(1) + 0.2, 0, 0.65),
+        hitterTag: 'Go · left pin',
+        description:
+          'Low, fast “shoot” or “go” to the left pin—minimal air time; hitter is on the ball early (often 2nd-step tempo).',
+        whenToUse:
+          'Tight pass, early outside commit, or beat the block’s outside hand before it squares.',
+      },
+      hut: {
+        label: '4 / Hut',
+        category: 'front',
+        arcStyle: 'high',
+        color: 0x60a5fa,
+        p2: new THREE.Vector3(zoneX(1) + 0.12, 3.52, -0.22),
+        p1: new THREE.Vector3(-1.05, 3.72, 0.78),
+        hitter: new THREE.Vector3(zoneX(1) + 0.18, 0, 0.58),
+        hitterTag: 'OoS hut',
+        description:
+          'Out-of-system hut: higher and further off the net than a shoot, still to the left pin for an OH swing.',
+        whenToUse:
+          'Broken pass or tight platform—you still want a real swing from the pin instead of a free ball.',
+      },
+      five: {
+        label: '5',
+        category: 'front',
+        arcStyle: 'high',
+        color: 0x4ade80,
+        p2: new THREE.Vector3(zoneX(1) + 0.1, 3.78, -0.32),
+        p1: new THREE.Vector3(-1.35, 4.95, 0.95),
+        hitter: new THREE.Vector3(zoneX(1) + 0.15, 0, 0.55),
+        hitterTag: 'Moon · left pin',
+        description:
+          'Very high “5” or moonball to the left antenna—maximum time for the hitter to adjust.',
+        whenToUse:
+          'Bail-out pass, isolation for a pin, or height to clear a big block and reset the rally.',
+      },
+      nine: {
+        label: '9',
+        category: 'front',
+        arcStyle: 'high',
+        color: 0xaa88ff,
+        p2: new THREE.Vector3(zoneX(9) - 0.1, 3.72, -0.28),
+        p1: new THREE.Vector3(2.9, 4.45, 0.52),
+        hitter: new THREE.Vector3(zoneX(9) - 0.15, 0, 0.5),
+        hitterTag: 'Red · right pin',
+        description:
+          'High back set to the right pin for the opposite / RS—mirror of a 5 on the weak side.',
+        whenToUse:
+          'Stacked left or pipe look; opposite is hot or you want to pull blockers.',
+      },
+      back_a: {
+        label: 'A',
+        category: 'front',
+        quick: true,
+        color: 0x94a3b8,
+        p2: new THREE.Vector3(2.12, 2.9, -0.04),
+        p1: new THREE.Vector3(1.92, 2.72, 0.4),
+        hitter: new THREE.Vector3(2.05, 0, 0.36),
+        hitterTag: 'Behind S · float',
+        description:
+          'Quick set behind the setter’s head—floating with the back of the S, often a deceptive tempo.',
+        whenToUse:
+          'Slide / pipe fakes, or when the MB stays home and you need a fast window behind the setter.',
+      },
+      slide: {
+        label: 'Slide',
+        category: 'front',
+        cubic: true,
+        color: 0x66ff66,
+        cp1: new THREE.Vector3(2.25, 2.98, 0.52),
+        cp2: new THREE.Vector3(2.95, 3.08, 0.12),
+        p2: new THREE.Vector3(zoneX(8), 2.96, -0.14),
+        p1: new THREE.Vector3(2.25, 2.98, 0.52),
+        hitter: new THREE.Vector3(zoneX(8) - 0.05, 0, 0.44),
+        hitterTag: 'MB → z8–9',
+        description:
+          'Traveling path for the middle on the slide behind the setter toward the right pin—2nd-step tempo.',
+        whenToUse:
+          'Committed slide approach; pin draws the block; MB attacks from zone 8–9 space.',
+      },
+      pipe: {
+        label: 'Pipe',
+        category: 'back',
+        color: 0x66ccff,
+        p2: new THREE.Vector3(0.05, 3.48, -0.08),
+        p1: new THREE.Vector3(0.45, 3.88, 2.05),
+        hitter: new THREE.Vector3(0, 0, 3.65),
+        hitterTag: 'Back row center',
+        description:
+          'Back-row attack from center back—a higher ball so the hitter can jump from behind the attack line.',
+        whenToUse:
+          'Stacked front row, FCC, or a credible threat without using a front-row pin.',
+      },
+      bic: {
+        label: 'Bic',
+        category: 'back',
+        color: 0xc084fc,
+        p2: new THREE.Vector3(0.95, 3.38, -0.06),
+        p1: new THREE.Vector3(1.35, 3.65, 1.88),
+        hitter: new THREE.Vector3(1.05, 0, 3.62),
+        hitterTag: 'Back · mid-R (Bic)',
+        description:
+          'Quick-tempo back-row set (often mid-right)—faster than a classic pipe, still legal from behind the line.',
+        whenToUse:
+          'Combination with front-row clears; surprise when the block expects only a high pipe.',
+      },
+      back_thirty: {
+        label: '30',
+        category: 'back',
+        color: 0xf472b6,
+        p2: new THREE.Vector3(-1.35, 3.44, -0.1),
+        p1: new THREE.Vector3(0.15, 3.78, 1.92),
+        hitter: new THREE.Vector3(-1.85, 0, 3.66),
+        hitterTag: 'Pink · back L-mid',
+        description:
+          '“30” / Pink: back-row set to left-center—between the left line and the pipe lane.',
+        whenToUse:
+          'Left-back attacker or pull blockers from the left pin without a front-row swing.',
+      },
+      back_ten: {
+        label: '10',
+        category: 'back',
+        color: 0x2dd4bf,
+        p2: new THREE.Vector3(-2.85, 3.4, -0.05),
+        p1: new THREE.Vector3(-0.65, 3.62, 1.98),
+        hitter: new THREE.Vector3(-3.38, 0, 3.6),
+        hitterTag: 'Back left pin',
+        description:
+          'Back-row set tight along the left sideline—long push for the setter.',
+        whenToUse:
+          'Left-back specialist or overload the right-side block so the left defender is isolated.',
+      },
+      back_d: {
+        label: 'D',
+        category: 'back',
+        color: 0xfb923c,
+        p2: new THREE.Vector3(2.72, 3.42, -0.1),
+        p1: new THREE.Vector3(2.15, 3.68, 1.85),
+        hitter: new THREE.Vector3(3.38, 0, 3.6),
+        hitterTag: 'Back right pin',
+        description:
+          'Back-row set to the right sideline—“D” lane for the right-back attacker.',
+        whenToUse:
+          'Symmetry to 10 on the right when the line opens behind a drawn block.',
+      },
+      dump: {
+        label: 'Dump',
+        category: 'dump',
+        color: 0xffffff,
+        p2: new THREE.Vector3(0.35, 2.18, -0.48),
+        p1: new THREE.Vector3(1.05, 2.55, 0.32),
+        hitter: new THREE.Vector3(0.45, 0, -1.05),
+        hitterTag: 'S dump',
+        description:
+          'Setter attacks on two (tip, roll, joust)—low trajectory into open seams.',
+        whenToUse:
+          'Blockers freeze on pins, overpass, or the ball is tight to the net with hands free.',
+      },
+    };
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x0a0c12, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const glCanvas = renderer.domElement;
+    glCanvas.style.display = 'block';
+    glCanvas.style.position = 'fixed';
+    glCanvas.style.left = '0';
+    glCanvas.style.top = '0';
+    glCanvas.style.zIndex = '0';
+    document.body.appendChild(glCanvas);
+
+    const labelRenderer = new CSS2DRenderer();
+    const labelLayer = labelRenderer.domElement;
+    labelLayer.style.position = 'fixed';
+    labelLayer.style.left = '0';
+    labelLayer.style.top = '0';
+    labelLayer.style.zIndex = '1';
+    labelLayer.style.pointerEvents = 'none';
+    labelLayer.style.background = 'transparent';
+    document.body.appendChild(labelLayer);
+
+    function syncRenderSize() {
+      const w = Math.max(1, window.innerWidth);
+      const h = Math.max(1, window.innerHeight);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      labelRenderer.setSize(w, h);
+      controls.update();
+    }
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x0a0c14, 0.006);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 160);
+    camera.position.set(-4, 12, 14);
+
+    const controls = new OrbitControls(camera, glCanvas);
+    controls.target.set(0, 1.5, 0);
+    controls.maxPolarAngle = Math.PI * 0.49;
+    controls.minDistance = 8;
+    controls.maxDistance = 55;
+
+    syncRenderSize();
+
+    scene.add(new THREE.HemisphereLight(0x8899bb, 0x151820, 0.75));
+    const sun = new THREE.DirectionalLight(0xe8f0ff, 0.9);
+    sun.position.set(-6, 24, 10);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    const ext = HALF_L + FREE + 4;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 80;
+    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0x506070, 0.4));
+    const pl = new THREE.PointLight(0xffcc88, 0.6, 50);
+    pl.position.set(0, 10, 6);
+    scene.add(pl);
+
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.35,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.2,
+    });
+
+    const outerL = COURT_L + FREE * 2;
+    const outerW = COURT_W + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    function lineAlongX(z0, w, mat) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, LINE_Y * 2, LINE), mat);
+      m.position.set(0, LINE_Y, z0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    function lineAlongZ(x0, mat) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L), mat);
+      m.position.set(x0, LINE_Y, 0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    const mBasic = (c) => new THREE.MeshBasicMaterial({ color: c });
+    lineAlongZ(-HALF_W, mBasic(neonCyan));
+    lineAlongZ(HALF_W, mBasic(neonCyan));
+    lineAlongX(HALF_L, COURT_W, mBasic(neonViolet));
+    lineAlongX(-HALF_L, COURT_W, mBasic(neonViolet));
+    lineAlongX(0, COURT_W, mBasic(neonMagenta));
+    lineAlongX(ATTACK_DIST, COURT_W, mBasic(neonLime));
+    lineAlongX(-ATTACK_DIST, COURT_W, mBasic(neonLime));
+
+    const netTexCanvas = document.createElement('canvas');
+    netTexCanvas.width = 256;
+    netTexCanvas.height = 256;
+    const nctx = netTexCanvas.getContext('2d');
+    nctx.fillStyle = '#0a0e18';
+    nctx.fillRect(0, 0, 256, 256);
+    nctx.strokeStyle = 'rgba(0,255,234,0.5)';
+    nctx.lineWidth = 2;
+    for (let i = 0; i <= 256; i += 14) {
+      nctx.beginPath();
+      nctx.moveTo(i, 0);
+      nctx.lineTo(i, 256);
+      nctx.stroke();
+      nctx.beginPath();
+      nctx.moveTo(0, i);
+      nctx.lineTo(256, i);
+      nctx.stroke();
+    }
+    const netTex = new THREE.CanvasTexture(netTexCanvas);
+    netTex.colorSpace = THREE.SRGBColorSpace;
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3);
+    const net = new THREE.Mesh(
+      new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M),
+      new THREE.MeshStandardMaterial({
+        map: netTex,
+        color: 0x7cf0ff,
+        transparent: true,
+        opacity: 0.75,
+        side: THREE.DoubleSide,
+        emissive: new THREE.Color(0x00fff0),
+        emissiveIntensity: 0.25,
+        emissiveMap: netTex,
+      }),
+    );
+    net.position.set(0, NET_CENTER_Y, 0);
+    scene.add(net);
+
+    const poleGeo = new THREE.CylinderGeometry(0.1, 0.108, POLE_HEIGHT_M, 16);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xd8e4f0,
+      metalness: 0.7,
+      roughness: 0.3,
+      emissive: new THREE.Color(0x4488aa),
+      emissiveIntensity: 0.2,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const p = new THREE.Mesh(poleGeo, poleMat);
+      p.position.set(x, POLE_HEIGHT_M / 2, 0);
+      p.castShadow = true;
+      scene.add(p);
+    });
+
+    const zoneTickMat = new THREE.MeshBasicMaterial({
+      color: neonCyan,
+      transparent: true,
+      opacity: 0.12,
+    });
+    for (let b = 1; b <= 8; b++) {
+      const x = -HALF_W + b;
+      const tick = new THREE.Mesh(new THREE.BoxGeometry(0.04, LINE_Y * 2, 0.55), zoneTickMat);
+      tick.position.set(x, LINE_Y, 0.72);
+      scene.add(tick);
+    }
+
+    function addSimplePlayer(x, z, color, tagText) {
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+      const r = 0.22;
+      const h = 1.2;
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(r * 0.94, r * 1.04, h, 14, 1, false),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.15 }),
+      );
+      body.position.y = h / 2;
+      body.castShadow = true;
+      g.add(body);
+      const hr = 0.15;
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(hr, 12, 10),
+        new THREE.MeshStandardMaterial({ color: 0xffe0d0, roughness: 0.55 }),
+      );
+      head.position.y = h + hr * 0.9;
+      g.add(head);
+      const div = document.createElement('div');
+      div.className = 'tag';
+      div.textContent = tagText;
+      const lbl = new CSS2DObject(div);
+      lbl.position.set(0, h + hr + 0.4, 0);
+      g.add(lbl);
+      scene.add(g);
+      return g;
+    }
+
+    addSimplePlayer(1.65, 1.05, 0x4488ff, 'Setter');
+
+    const setsGroup = new THREE.Group();
+    scene.add(setsGroup);
+    const hitterGroup = new THREE.Group();
+    scene.add(hitterGroup);
+
+    const setCurves = {};
+    const setLines = {};
+    const ballMeshes = {};
+    const hitterEls = {};
+
+    function rebuildCurvesAndHitters() {
+      Object.keys(SET_DATA).forEach((key) => {
+        const d = SET_DATA[key];
+        const { p1, p2, cp1, cp2 } = buildAdjustedVectors(d);
+        let curve;
+        if (d.cubic && cp1 && cp2) {
+          curve = new THREE.CubicBezierCurve3(SETTER_HANDS.clone(), cp1, cp2, p2);
+        } else {
+          curve = new THREE.QuadraticBezierCurve3(SETTER_HANDS.clone(), p1, p2);
+        }
+        setCurves[key] = curve;
+        const pts = curve.getPoints(64);
+        setLines[key].geometry.dispose();
+        setLines[key].geometry = new THREE.BufferGeometry().setFromPoints(pts);
+        const hz = d.category === 'back' ? d.hitter.z + LEVEL[getSkillLevel()].backHitterZ : d.hitter.z;
+        const el = hitterEls[key];
+        el.ring.position.set(d.hitter.x, 0.04, hz);
+        el.lbl.position.set(d.hitter.x, 0.85, hz);
+      });
+    }
+
+    Object.entries(SET_DATA).forEach(([key, d]) => {
+      const geo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0.01, 0),
+      ]);
+      const line = new THREE.Line(
+        geo,
+        new THREE.LineBasicMaterial({
+          color: d.color,
+          transparent: true,
+          opacity: 0.35,
+          linewidth: 1,
+        }),
+      );
+      line.userData.key = key;
+      setsGroup.add(line);
+      setLines[key] = line;
+
+      const hm = new THREE.Mesh(
+        new THREE.SphereGeometry(0.11, 16, 12),
+        new THREE.MeshStandardMaterial({
+          color: d.color,
+          emissive: new THREE.Color(d.color),
+          emissiveIntensity: 0.35,
+        }),
+      );
+      hm.visible = false;
+      setsGroup.add(hm);
+      ballMeshes[key] = hm;
+    });
+
+    Object.entries(SET_DATA).forEach(([key, d]) => {
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(0.25, 0.42, 24),
+        new THREE.MeshBasicMaterial({
+          color: d.color,
+          transparent: true,
+          opacity: 0.45,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(d.hitter.x, 0.04, d.hitter.z);
+      ring.userData.setKey = key;
+      hitterGroup.add(ring);
+      const div = document.createElement('div');
+      div.className = 'tag';
+      div.textContent = d.hitterTag;
+      div.style.color = '#' + new THREE.Color(d.color).getHexString();
+      const lbl = new CSS2DObject(div);
+      lbl.position.set(d.hitter.x, 0.85, d.hitter.z);
+      lbl.userData.setKey = key;
+      hitterGroup.add(lbl);
+      hitterEls[key] = { ring, lbl };
+    });
+
+    rebuildCurvesAndHitters();
+
+    const ballDot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.13, 20, 16),
+      new THREE.MeshStandardMaterial({
+        color: 0xfff8e8,
+        emissive: new THREE.Color(0xffaa66),
+        emissiveIntensity: 0.4,
+      }),
+    );
+    ballDot.visible = false;
+    scene.add(ballDot);
+
+    let highlight = 'all';
+    let animT = 0;
+    const clock = new THREE.Clock();
+
+    function updateSetDetailPanel() {
+      const hl = document.getElementById('highlight').value;
+      const titleEl = document.getElementById('set-detail-title');
+      const descEl = document.getElementById('set-detail-desc');
+      const whenEl = document.getElementById('set-detail-when');
+      const levEl = document.getElementById('set-detail-level');
+      const L = LEVEL[getSkillLevel()];
+      if (hl === 'all') {
+        titleEl.textContent = 'Overview';
+        descEl.textContent =
+          'Pick a set below for a short definition and when coaches call it. Team level raises arcs, shifts paths toward your side (+z), and moves the attack end of the curve nearer the 3 m / attack line than the net for youth/HS. Elite tightens back toward the net plane.';
+        whenEl.innerHTML = '';
+        levEl.textContent = L.blurb;
+      } else {
+        const d = SET_DATA[hl];
+        titleEl.textContent = `${d.label} — ${d.hitterTag}`;
+        descEl.textContent = d.description;
+        whenEl.innerHTML = '<strong>When to use:</strong> ' + d.whenToUse;
+        const extra =
+          d.category === 'back'
+            ? ' Back-row: lower levels use a higher rainbow and a takeoff marker farther from the net.'
+            : d.category === 'dump'
+              ? ' Dump: minor height shift by level only.'
+              : ' Front-row: lower levels add float on quicks and outsides; elite flattens.';
+        levEl.textContent = `${L.label}: ${L.blurb}${extra}`;
+      }
+    }
+
+    function applyHighlight() {
+      highlight = document.getElementById('highlight').value;
+      Object.keys(setLines).forEach((k) => {
+        const line = setLines[k];
+        const mat = line.material;
+        const d = SET_DATA[k];
+        if (highlight === 'all') {
+          mat.opacity = 0.16;
+          mat.color.setHex(d.color);
+          ballMeshes[k].visible = false;
+        } else if (highlight === k) {
+          mat.opacity = 1;
+          mat.color.setHex(d.color);
+        } else {
+          mat.opacity = 0.08;
+          mat.color.setHex(d.color);
+          ballMeshes[k].visible = false;
+        }
+      });
+      const showH = document.getElementById('showHitters').checked;
+      hitterGroup.children.forEach((ch) => {
+        const k = ch.userData.setKey;
+        if (k == null) return;
+        ch.visible = showH && (highlight === 'all' || k === highlight);
+      });
+      if (highlight !== 'all') {
+        ballDot.visible = document.getElementById('animateBall').checked;
+      } else {
+        ballDot.visible = false;
+        animT = 0;
+      }
+      updateSetDetailPanel();
+    }
+
+    document.getElementById('highlight').addEventListener('change', applyHighlight);
+    document.getElementById('skillLevel').addEventListener('change', () => {
+      animT = 0;
+      rebuildCurvesAndHitters();
+      applyHighlight();
+    });
+    document.getElementById('animateBall').addEventListener('change', applyHighlight);
+    document.getElementById('showHitters').addEventListener('change', applyHighlight);
+
+    applyHighlight();
+
+    window.addEventListener('resize', syncRenderSize);
+    window.addEventListener('load', syncRenderSize);
+    requestAnimationFrame(() => {
+      syncRenderSize();
+    });
+
+    function tick() {
+      requestAnimationFrame(tick);
+      const dt = clock.getDelta();
+
+      if (highlight !== 'all' && ballDot.visible) {
+        animT += dt * 0.35;
+        if (animT > 1) animT -= 1;
+        const curve = setCurves[highlight];
+        if (curve) {
+          const p = curve.getPoint(animT);
+          ballDot.position.copy(p);
+        }
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>
