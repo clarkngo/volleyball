@@ -52,13 +52,13 @@ Each item below is intended to ship as its **own** interactive prototype later (
 
 ---
 
-## 5. Setter footwork: out-of-system serve receive & first ball
+## ~~5. Setter footwork: out-of-system serve receive & first ball~~ → shipped
 
 **Concept:** **Footwork and step count** the setter needs for many **out-of-system** serve-receive and **first-ball** situations (platform inside, tight, off-net, chase, etc.) — patterns, not one perfect pass.
 
-**Implemented as its own prototype?** No.
+**Implemented as its own prototype?** **Yes** — [`prototypes/09-setter-footwork.html`](../prototypes/09-setter-footwork.html) (scenarios: in-system, tight, off-net chase, inside seam, wide pin; **L/R feet** + **first-ball arc**; step summary + coaching).
 
-*Related shipped work (not a substitute):* [`prototypes/07-outside-hitter-approach.html`](../prototypes/07-outside-hitter-approach.html) — **hitter** approach vs **5 / 4 / Shoot**; **no** setter OOS footwork catalog.
+*Related (different role):* [`prototypes/07-outside-hitter-approach.html`](../prototypes/07-outside-hitter-approach.html) — OH approach vs sets.
 
 ---
 

@@ -13,6 +13,7 @@
 - **`prototypes/06-attack-sets.html`** — **net zones 1–9** reference, call-sheet sets (1, 31, 2, 3, Rip, Shoot, 4/Hut, 5, 9, A, Slide, Pipe, Bic, 30/Pink, 10, D, dump), quadratic + cubic slide, optional ball animation  
 - **`prototypes/07-outside-hitter-approach.html`** — setter **5 / 4 / Shoot** to left pin; OH starts **outside the sideline** with **both feet** (L/R) driving a stylized spike approach in sync with the ball; **slow playback**; coaching on **reads**, **footwork**, **patterns**  
 - **`prototypes/08-basic-drills.html`** — **fundamental drills** library: pepper progression, wall ball, serving targets, passing ladder, solo toss–pass–set vs wall; **checklists** + **3D targets** + optional **ball motion**  
+- **`prototypes/09-setter-footwork.html`** — **setter footwork** for serve-receive / first ball: **in-system**, **tight**, **off-net chase**, **inside seam**, **wide pin**; stylized **L/R feet**, **ball arc**, phase HUD, **~step counts**, coaching copy  
 
 Open **`index.html`** or any prototype in a browser (needs network for the Three.js CDN).
 

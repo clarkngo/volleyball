@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Prototype 09 — Setter footwork (OOS &amp; first ball)</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: #050508;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      touch-action: manipulation;
+    }
+    #hud {
+      position: fixed;
+      z-index: 20;
+      left: 12px;
+      top: 12px;
+      max-width: min(420px, calc(100vw - 24px));
+      padding: 10px 12px;
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-top: max(12px, env(safe-area-inset-top));
+      color: #e8f4ff;
+      font-size: 12px;
+      line-height: 1.45;
+      text-shadow: 0 0 8px rgba(0, 245, 212, 0.12), 0 1px 2px #000;
+      pointer-events: auto;
+    }
+    #hud strong { color: #7cf0ff; }
+    #hud .hud-title { display: block; margin-bottom: 4px; }
+    #hud select, #hud button {
+      margin: 4px 8px 4px 0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #12141c;
+      color: #00f5d4;
+      border: 1px solid rgba(0, 245, 212, 0.4);
+      font-size: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    #hud label { display: block; margin: 6px 0 0; }
+    #phase-strip {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(8, 12, 22, 0.95);
+      border: 1px solid rgba(0, 245, 212, 0.28);
+    }
+    #phase-big { font-size: 14px; font-weight: 800; color: #ffcc66; }
+    #phase-sub { font-size: 10px; color: #8a9cb0; margin-top: 4px; }
+    #step-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: #d8b4fe;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    #timeline {
+      margin-top: 8px;
+      height: 6px;
+      border-radius: 3px;
+      background: #1a2030;
+      overflow: hidden;
+    }
+    #timeline > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f5d4, #ff6ec7);
+    }
+    #info {
+      margin-top: 10px;
+      max-height: min(32vh, 280px);
+      overflow-y: auto;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 110, 199, 0.22);
+      background: rgba(10, 8, 18, 0.94);
+      font-size: 11px;
+      color: #d4dce8;
+      line-height: 1.5;
+      -webkit-overflow-scrolling: touch;
+    }
+    #info h4 { margin: 8px 0 4px; font-size: 11px; color: #7cf0ff; text-transform: uppercase; letter-spacing: 0.06em; }
+    #info h4:first-child { margin-top: 0; }
+    #info ul { margin: 4px 0 0 1.1rem; padding: 0; }
+    canvas { display: block; touch-action: none; }
+    code.path { background: #12141c; color: #ff6ec7; padding: 0 4px; border-radius: 4px; font-size: 10px; }
+    @media (max-width: 640px) {
+      #hud {
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        max-width: none;
+        max-height: min(38vh, 100dvh - 120px);
+        padding: 8px 10px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        border-radius: 12px 12px 0 0;
+        background: rgba(5, 6, 14, 0.94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+      }
+      #hud .hud-title { font-size: 11px; line-height: 1.25; }
+      #hud select, #hud button { width: 100%; margin: 6px 0 0; min-height: 40px; font-size: 16px; }
+      #phase-big { font-size: 13px; }
+      #phase-sub { font-size: 9px; }
+      #info { max-height: min(14vh, 130px); font-size: 10px; padding: 6px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong class="hud-title">09 — Setter footwork · OOS serve receive &amp; first ball</strong>
+    <label>Scenario
+      <select id="scenarioPick"></select>
+    </label>
+    <label>Speed
+      <select id="speedPick">
+        <option value="0.35">Slow</option>
+        <option value="0.6">Medium</option>
+        <option value="1" selected>Normal</option>
+      </select>
+    </label>
+    <label><input type="checkbox" id="showTrail" checked /> Ball trail</label>
+    <button type="button" id="btnRestart">Restart loop</button>
+    <div id="phase-strip">
+      <div id="phase-big">—</div>
+      <div id="phase-sub">—</div>
+      <div id="step-badge">—</div>
+      <div id="timeline"><i id="timeline-fill"></i></div>
+    </div>
+    <div id="info"></div>
+    <p style="margin:8px 0 0;font-size:10px;opacity:0.85">
+      <code class="path">prototypes/09-setter-footwork.html</code> · Stylized steps; not player-specific handedness.
+    </p>
+    <p id="load-error" style="display:none;margin-top:8px;padding:8px;background:#3a1010;border:1px solid #ff6666;color:#ffb0b0;font-size:11px;border-radius:6px"></p>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    window.addEventListener('error', (ev) => {
+      const el = document.getElementById('load-error');
+      if (el) {
+        el.style.display = 'block';
+        el.textContent = ev.message || ev.error?.message || 'Script error';
+      }
+    });
+
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2;
+    const HALF_W = COURT_W / 2;
+    const LINE = 0.05;
+    const ATTACK_DIST = 3;
+    const FREE = 3;
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43;
+    const NET_CENTER_Y = NET_TOP_M - NET_MESH_HEIGHT_M / 2;
+    const POLE_X = HALF_W + 0.5;
+    const LINE_Y = 0.018;
+    const POLE_HEIGHT_M = 2.55;
+
+    /** Keyframe: u 0..1, phase title, coaching line, left/right foot (x,z on floor). */
+    function K(u, phase, cue, lfx, lfz, rfx, rfz) {
+      return { u, phase, cue, lf: new THREE.Vector3(lfx, 0, lfz), rf: new THREE.Vector3(rfx, 0, rfz) };
+    }
+
+    const SCENARIOS = [
+      {
+        id: 'good',
+        name: 'In-system (high pass)',
+        stepLabel: '~3 steps + release',
+        cameraTarget: new THREE.Vector3(0.2, 0.6, 2.2),
+        cameraPos: new THREE.Vector3(11, 12, 14),
+        ballStart: new THREE.Vector3(-2.2, 1.05, 5.8),
+        ballPeak: new THREE.Vector3(-0.2, 3.1, 3.0),
+        ballEnd: new THREE.Vector3(0.2, 1.12, 1.55),
+        ballTravelEndU: 0.78,
+        keyframes: [
+          K(0, 'Release / read', 'Start in zone 2–3; eyes on passer + block shape.', 1.05, 3.55, 1.55, 3.48),
+          K(0.18, 'First step', 'Lead foot starts the approach; hands show early.', 0.92, 3.05, 1.48, 2.98),
+          K(0.38, 'Second step', 'Sell tempo; stay between ball and net.', 0.62, 2.45, 1.12, 2.35),
+          K(0.58, 'Third / arrive', 'Square hips to target lane; don’t drift under.', 0.38, 1.82, 0.88, 1.72),
+          K(0.78, 'Set base', 'Neutral base; weight balanced — in-system “classic” footwork.', 0.28, 1.58, 0.68, 1.48),
+          K(1, 'Hands', 'High hands; release window matches pin / MB call.', 0.26, 1.52, 0.65, 1.42),
+        ],
+        info: `
+          <h4>When to use</h4>
+          <ul>
+            <li>Pass lands inside 3–4 m with height — you have time to use a full approach.</li>
+            <li>Goal: <strong>three steps</strong> to square behind the ball, not a last-second stutter.</li>
+          </ul>
+          <h4>Cues</h4>
+          <ul>
+            <li><strong>Left–right–left</strong> or <strong>right–left–right</strong> pattern depends on which foot you release on; mirror if needed.</li>
+            <li>Finish with feet <strong>slightly open</strong> to the antenna you’re setting.</li>
+          </ul>
+        `,
+      },
+      {
+        id: 'tight',
+        name: 'Tight pass (net zone)',
+        stepLabel: '~2 steps + slide',
+        cameraTarget: new THREE.Vector3(0.5, 0.5, 1.0),
+        cameraPos: new THREE.Vector3(9, 10, 11),
+        ballStart: new THREE.Vector3(-1.5, 0.95, 4.2),
+        ballPeak: new THREE.Vector3(0.4, 2.4, 1.35),
+        ballEnd: new THREE.Vector3(0.55, 0.98, 0.92),
+        ballTravelEndU: 0.72,
+        keyframes: [
+          K(0, 'Tight read', 'Recognize low time — shrink the approach.', 1.15, 3.2, 1.52, 3.15),
+          K(0.22, 'Slide / hop', 'Short first move; stay tall; avoid lunging under.', 0.95, 2.55, 1.35, 2.48),
+          K(0.48, 'Close', 'Feet under shoulders; fight the net drift.', 0.72, 1.55, 1.05, 1.42),
+          K(0.72, 'Base', 'Minimal backpedal; hands fast to ball.', 0.58, 1.12, 0.88, 1.05),
+          K(1, 'Outlet', 'High finish; consider high OOS set or bump set.', 0.52, 1.05, 0.82, 0.98),
+        ],
+        info: `
+          <h4>When to use</h4>
+          <ul>
+            <li>Pass tracks <strong>tight to the tape</strong> or falls inside the 3 m line with low margin.</li>
+          </ul>
+          <h4>Cues</h4>
+          <ul>
+            <li>Fewer steps; more <strong>lateral slide</strong> and <strong>squat</strong> than a full approach.</li>
+            <li>Prioritize <strong>clean platform above net height</strong> over perfect foot order.</li>
+          </ul>
+        `,
+      },
+      {
+        id: 'off-net',
+        name: 'Off-net / deep chase',
+        stepLabel: '~4 steps',
+        cameraTarget: new THREE.Vector3(0.3, 0.5, 2.8),
+        cameraPos: new THREE.Vector3(10, 11, 13),
+        ballStart: new THREE.Vector3(-2.8, 1.15, 6.2),
+        ballPeak: new THREE.Vector3(0.1, 2.9, 3.8),
+        ballEnd: new THREE.Vector3(0.35, 1.2, 2.75),
+        ballTravelEndU: 0.82,
+        keyframes: [
+          K(0, 'Release', 'Deeper start — you must eat space.', 1.25, 4.05, 1.62, 4.0),
+          K(0.2, 'Open', 'First step opens toward ball; long step acceptable.', 1.05, 3.45, 1.45, 3.35),
+          K(0.42, 'Drive 2', 'Continue closing; don’t stand upright.', 0.78, 2.85, 1.15, 2.75),
+          K(0.62, 'Drive 3', 'Penultimate loads; prepare to brake.', 0.52, 2.35, 0.92, 2.25),
+          K(0.82, 'Arrive', 'Stop momentum; square late if needed.', 0.38, 2.05, 0.78, 1.95),
+          K(1, 'Base', 'Athletic base — OOS set or bump to pin.', 0.32, 1.95, 0.72, 1.88),
+        ],
+        info: `
+          <h4>When to use</h4>
+          <ul>
+            <li>Pass is <strong>inside / off the body</strong> and forces you to move <strong>forward into the court</strong>.</li>
+          </ul>
+          <h4>Cues</h4>
+          <ul>
+            <li>Expect <strong>one extra step</strong> vs in-system; brake before you crash the pass.</li>
+            <li>If you can’t square, <strong>face the target</strong> with shoulders on the release.</li>
+          </ul>
+        `,
+      },
+      {
+        id: 'inside-seam',
+        name: 'Inside seam (LF / 6 lane)',
+        stepLabel: '~3–4 lateral',
+        cameraTarget: new THREE.Vector3(-0.5, 0.6, 2.0),
+        cameraPos: new THREE.Vector3(12, 13, 11),
+        ballStart: new THREE.Vector3(-3.4, 1.0, 5.5),
+        ballPeak: new THREE.Vector3(-1.2, 2.85, 2.9),
+        ballEnd: new THREE.Vector3(-0.85, 1.08, 1.65),
+        ballTravelEndU: 0.76,
+        keyframes: [
+          K(0, 'Release', 'You’re in 2–3; ball crosses toward 5–6 lane.', 1.35, 3.4, 1.65, 3.35),
+          K(0.2, 'Diagonal 1', 'First step aims at intercept; cross body line.', 1.05, 3.0, 1.35, 2.88),
+          K(0.42, 'Diagonal 2', 'Close the seam; stay square to net as long as possible.', 0.55, 2.5, 0.95, 2.35),
+          K(0.62, 'Bracket', 'Feet bracket the ball; avoid reaching across face.', 0.15, 1.95, 0.55, 1.82),
+          K(0.76, 'Base', 'Neutral for high OOS or quick to MB if available.', -0.05, 1.72, 0.38, 1.58),
+          K(1, 'Hands up', 'Early overhead shape for tight block reads.', -0.08, 1.65, 0.35, 1.52),
+        ],
+        info: `
+          <h4>When to use</h4>
+          <ul>
+            <li>Libero / DS passes <strong>inside toward the left-front seam</strong> (your right as you face the net).</li>
+          </ul>
+          <h4>Cues</h4>
+          <ul>
+            <li><strong>Lateral series</strong> more than forward — avoid turning your back to the target early.</li>
+            <li>If you arrive late, <strong>face where you’re sending</strong> the ball, not where you ran from.</li>
+          </ul>
+        `,
+      },
+      {
+        id: 'wide-pin',
+        name: 'Wide pass (RF / pin chase)',
+        stepLabel: '~3 steps + load',
+        cameraTarget: new THREE.Vector3(1.8, 0.55, 1.6),
+        cameraPos: new THREE.Vector3(4, 11, 12),
+        ballStart: new THREE.Vector3(0.2, 1.1, 5.2),
+        ballPeak: new THREE.Vector3(2.4, 2.95, 2.6),
+        ballEnd: new THREE.Vector3(2.85, 1.1, 1.35),
+        ballTravelEndU: 0.74,
+        keyframes: [
+          K(0, 'Release', 'Ball pulled wide — load outside foot early.', 0.85, 3.35, 1.25, 3.28),
+          K(0.24, 'Load', 'Outside foot accepts weight; inside foot pushes.', 1.15, 2.85, 1.65, 2.72),
+          K(0.48, 'Close', 'Drive to contact point; stay inside the sideline plane.', 1.85, 2.25, 2.25, 2.08),
+          K(0.68, 'Arrive', 'Square to left pin / pipe read.', 2.45, 1.62, 2.75, 1.48),
+          K(0.88, 'Base', 'Wide base; strong torso to fight drift out of bounds.', 2.62, 1.42, 2.88, 1.28),
+          K(1, 'Outlet', 'High release or wipe angle depending on block.', 2.65, 1.35, 2.9, 1.22),
+        ],
+        info: `
+          <h4>When to use</h4>
+          <ul>
+            <li>Pass is <strong>pushed toward the antenna</strong> (pin chase) off serve or tight dig.</li>
+          </ul>
+          <h4>Cues</h4>
+          <ul>
+            <li><strong>Load the outside leg</strong> so you don’t fall away from court center.</li>
+            <li>Last step often <strong>smaller</strong> — control before you set.</li>
+          </ul>
+        `,
+      },
+    ];
+
+    function smoothstep(t) {
+      const x = Math.min(1, Math.max(0, t));
+      return x * x * (3 - 2 * x);
+    }
+
+    function sampleKeyframes(kfs, u) {
+      const uu = Math.min(1, Math.max(0, u));
+      if (uu <= kfs[0].u) {
+        const k = kfs[0];
+        return { phase: k.phase, cue: k.cue, lf: k.lf.clone(), rf: k.rf.clone() };
+      }
+      if (uu >= kfs[kfs.length - 1].u) {
+        const k = kfs[kfs.length - 1];
+        return { phase: k.phase, cue: k.cue, lf: k.lf.clone(), rf: k.rf.clone() };
+      }
+      let i = 0;
+      for (; i < kfs.length - 1; i++) {
+        if (uu >= kfs[i].u && uu <= kfs[i + 1].u) break;
+      }
+      const a = kfs[i];
+      const b = kfs[i + 1];
+      const t = (uu - a.u) / (b.u - a.u);
+      const s = smoothstep(t);
+      return {
+        phase: t < 0.5 ? a.phase : b.phase,
+        cue: t < 0.45 ? a.cue : t > 0.55 ? b.cue : `${a.cue} → ${b.cue}`,
+        lf: new THREE.Vector3().lerpVectors(a.lf, b.lf, s),
+        rf: new THREE.Vector3().lerpVectors(a.rf, b.rf, s),
+      };
+    }
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x0a0c14, 0.007);
+
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 150);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.maxPolarAngle = Math.PI * 0.49;
+    controls.minDistance = 6;
+    controls.maxDistance = 50;
+
+    function applyDefaultFraming(isMobileLayout) {
+      if (isMobileLayout) {
+        camera.fov = 54;
+        controls.minDistance = 9;
+        controls.maxDistance = 62;
+      } else {
+        camera.fov = 48;
+        controls.minDistance = 6;
+        controls.maxDistance = 50;
+      }
+      camera.updateProjectionMatrix();
+    }
+    let framingLayoutKey = null;
+    function mobileLayoutActive(w, h) {
+      return w <= 640 || (h > w && w <= 900);
+    }
+
+    const hemi = new THREE.HemisphereLight(0x8899bb, 0x151820, 0.72);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xe8f0ff, 0.88);
+    sun.position.set(-10, 24, 12);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 70;
+    const ext = HALF_L + FREE + 5;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0x405070, 0.22));
+
+    const fillCyan = new THREE.PointLight(0x00fff0, 0.35, 45);
+    fillCyan.position.set(-8, 8, 6);
+    scene.add(fillCyan);
+    const fillMagenta = new THREE.PointLight(0xff2ec4, 0.28, 40);
+    fillMagenta.position.set(8, 6, -6);
+    scene.add(fillMagenta);
+
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    const lineBoundaryMat = new THREE.MeshBasicMaterial({ color: neonCyan });
+    const lineCenterMat = new THREE.MeshBasicMaterial({ color: neonMagenta });
+    const lineAttackMat = new THREE.MeshBasicMaterial({ color: neonLime });
+    const lineEndMat = new THREE.MeshBasicMaterial({ color: neonViolet });
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.4,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.25,
+    });
+
+    const outerL = COURT_L + FREE * 2;
+    const outerW = COURT_W + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    function lineAlongX(z0, widthSpan, mat) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(widthSpan, LINE_Y * 2, LINE), mat);
+      m.position.set(0, LINE_Y, z0);
+      scene.add(m);
+    }
+    function lineAlongZ(x0, mat) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L), mat);
+      m.position.set(x0, LINE_Y, 0);
+      scene.add(m);
+    }
+    lineAlongZ(-HALF_W, lineBoundaryMat);
+    lineAlongZ(HALF_W, lineBoundaryMat);
+    lineAlongX(HALF_L, COURT_W, lineEndMat);
+    lineAlongX(-HALF_L, COURT_W, lineEndMat);
+    lineAlongX(0, COURT_W, lineCenterMat);
+    lineAlongX(ATTACK_DIST, COURT_W, lineAttackMat);
+    lineAlongX(-ATTACK_DIST, COURT_W, lineAttackMat);
+
+    function makeNetTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0a0e18';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = 'rgba(0, 255, 234, 0.65)';
+      ctx.lineWidth = 2;
+      const step = 14;
+      for (let x = 0; x <= 256; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 256);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 256; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(256, y);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+    const netTex = makeNetTexture();
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3);
+    const netMat = new THREE.MeshStandardMaterial({
+      map: netTex,
+      color: 0x7cf0ff,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide,
+      roughness: 0.35,
+      metalness: 0.15,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.35,
+      emissiveMap: netTex,
+    });
+    const net = new THREE.Mesh(new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M), netMat);
+    net.position.set(0, NET_CENTER_Y, 0);
+    net.castShadow = true;
+    scene.add(net);
+    const poleGeo = new THREE.CylinderGeometry(0.1, 0.108, POLE_HEIGHT_M, 24);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xe2edf5,
+      roughness: 0.28,
+      metalness: 0.82,
+      emissive: new THREE.Color(0x40fff8),
+      emissiveIntensity: 0.45,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(x, POLE_HEIGHT_M / 2, 0);
+      pole.castShadow = true;
+      scene.add(pole);
+    });
+
+    const overlay = new THREE.Group();
+    scene.add(overlay);
+
+    const footGeo = new THREE.CylinderGeometry(0.13, 0.15, 0.06, 20);
+    const lfMesh = new THREE.Mesh(
+      footGeo,
+      new THREE.MeshStandardMaterial({
+        color: 0x22d3ee,
+        roughness: 0.4,
+        metalness: 0.2,
+        emissive: new THREE.Color(0x00fff0),
+        emissiveIntensity: 0.35,
+      }),
+    );
+    lfMesh.castShadow = true;
+    const rfMesh = new THREE.Mesh(
+      footGeo.clone(),
+      new THREE.MeshStandardMaterial({
+        color: 0xf472b6,
+        roughness: 0.4,
+        metalness: 0.2,
+        emissive: new THREE.Color(0xff6ec7),
+        emissiveIntensity: 0.35,
+      }),
+    );
+    rfMesh.castShadow = true;
+    overlay.add(lfMesh, rfMesh);
+
+    const ballR = 0.105;
+    const ball = new THREE.Mesh(
+      new THREE.SphereGeometry(ballR, 28, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf5f0e8,
+        roughness: 0.35,
+        emissive: new THREE.Color(0xffaa66),
+        emissiveIntensity: 0.18,
+      }),
+    );
+    ball.castShadow = true;
+    overlay.add(ball);
+
+    const trailMaxPts = 100;
+    const trailGeo = new THREE.BufferGeometry();
+    const trailPos = new Float32Array(trailMaxPts * 3);
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+    trailGeo.setDrawRange(0, 0);
+    const trailMat = new THREE.LineBasicMaterial({
+      color: 0xffcc66,
+      transparent: true,
+      opacity: 0.55,
+    });
+    const trailLine = new THREE.Line(trailGeo, trailMat);
+    overlay.add(trailLine);
+    const trailRing = [];
+
+    const targetRing = new THREE.Mesh(
+      new THREE.RingGeometry(0.35, 0.5, 36),
+      new THREE.MeshBasicMaterial({
+        color: 0xc8ff00,
+        transparent: true,
+        opacity: 0.4,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+    );
+    targetRing.rotation.x = -Math.PI / 2;
+    overlay.add(targetRing);
+
+    let scenario = SCENARIOS[0];
+    let ballCurve = new THREE.QuadraticBezierCurve3(
+      scenario.ballStart.clone(),
+      scenario.ballPeak.clone(),
+      scenario.ballEnd.clone(),
+    );
+    let loopT = 0;
+    let speedMul = 1;
+
+    const pick = document.getElementById('scenarioPick');
+    for (const s of SCENARIOS) {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.textContent = s.name;
+      pick.appendChild(o);
+    }
+
+    function applyScenario(id) {
+      scenario = SCENARIOS.find((s) => s.id === id) || SCENARIOS[0];
+      ballCurve = new THREE.QuadraticBezierCurve3(
+        scenario.ballStart.clone(),
+        scenario.ballPeak.clone(),
+        scenario.ballEnd.clone(),
+      );
+      controls.target.copy(scenario.cameraTarget);
+      camera.position.copy(scenario.cameraPos);
+      controls.update();
+      targetRing.position.set(scenario.ballEnd.x, 0.04, scenario.ballEnd.z);
+      document.getElementById('info').innerHTML = scenario.info;
+      document.getElementById('step-badge').textContent = scenario.stepLabel;
+      loopT = 0;
+      trailRing.length = 0;
+      trailGeo.setDrawRange(0, 0);
+    }
+
+    pick.addEventListener('change', () => applyScenario(pick.value));
+    document.getElementById('speedPick').addEventListener('change', (e) => {
+      speedMul = parseFloat(e.target.value, 10) || 1;
+    });
+    document.getElementById('btnRestart').addEventListener('click', () => {
+      loopT = 0;
+      trailRing.length = 0;
+      trailGeo.setDrawRange(0, 0);
+    });
+
+    applyScenario(SCENARIOS[0].id);
+
+    function syncRenderSize() {
+      const vv = window.visualViewport;
+      const w = Math.max(1, vv?.width ?? window.innerWidth);
+      const h = Math.max(1, vv?.height ?? window.innerHeight);
+      const mobile = mobileLayoutActive(w, h);
+      if (framingLayoutKey !== mobile) {
+        framingLayoutKey = mobile;
+        applyDefaultFraming(mobile);
+      }
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      controls.update();
+    }
+    window.addEventListener('resize', syncRenderSize);
+    window.addEventListener('load', syncRenderSize);
+    requestAnimationFrame(syncRenderSize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncRenderSize);
+      window.visualViewport.addEventListener('scroll', syncRenderSize);
+    }
+
+    const tmpB = new THREE.Vector3();
+    let last = performance.now();
+    function tick(now) {
+      requestAnimationFrame(tick);
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const dur = 4.2 / speedMul;
+      loopT += dt / dur;
+      if (loopT >= 1) loopT -= 1;
+      const u = loopT;
+
+      const samp = sampleKeyframes(scenario.keyframes, u);
+      lfMesh.position.set(samp.lf.x, 0.04, samp.lf.z);
+      rfMesh.position.set(samp.rf.x, 0.04, samp.rf.z);
+
+      document.getElementById('phase-big').textContent = samp.phase;
+      document.getElementById('phase-sub').textContent = samp.cue;
+      document.getElementById('timeline-fill').style.width = `${u * 100}%`;
+
+      const bu = Math.min(1, u / scenario.ballTravelEndU);
+      ballCurve.getPoint(smoothstep(bu), tmpB);
+      ball.position.copy(tmpB);
+
+      const showTrail = document.getElementById('showTrail').checked;
+      trailLine.visible = showTrail;
+      if (u < 0.03) {
+        trailRing.length = 0;
+        trailGeo.setDrawRange(0, 0);
+      }
+      if (showTrail) {
+        trailRing.push(tmpB.x, tmpB.y, tmpB.z);
+        while (trailRing.length > trailMaxPts * 3) {
+          trailRing.splice(0, 3);
+        }
+        for (let i = 0; i < trailRing.length; i++) {
+          trailPos[i] = trailRing[i];
+        }
+        trailGeo.attributes.position.needsUpdate = true;
+        trailGeo.setDrawRange(0, trailRing.length / 3);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    tick(last);
+  </script>
+</body>
+</html>

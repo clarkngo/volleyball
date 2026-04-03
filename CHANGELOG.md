@@ -11,6 +11,7 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 ### Added
 
+- `prototypes/09-setter-footwork.html` — Setter OOS / first-ball scenarios (in-system, tight, off-net, inside seam, wide pin); L/R foot keyframes + synced ball arc; phase strip, step badge, trail toggle; mobile framing.
 - `prototypes/08-basic-drills.html` — Drill picker (pepper, wall ball, serve targets, passing ladder, solo wall); HUD checklists; floor rings / wall anchor; stylized ball loops; motion toggle; mobile-friendly HUD.
 - **`docs/ideas.html`** — Renders **`IDEAS.md`** on **GitHub Pages** via `fetch` + **marked** (same-origin).
 - **`docs/PRE_WRITE.md`** — Short pre-build checklist (IDEAS, plan, README).
@@ -19,9 +20,9 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 ### Changed
 
-- **`docs/IDEAS.md`** — Backlog item **4 (basic drills)** marked shipped with link to **`08-basic-drills.html`**.
-- **`index.html`** — Links for prototypes **06**–**08**; doc links for **IDEAS**, **PRE_WRITE**, **POST_WRITE**.
-- **`README.md`** — Prototypes **06**–**08**; backlog + **PRE_WRITE** pointer.
+- **`docs/IDEAS.md`** — Item **5 (setter footwork)** marked shipped (**09**). (Item **4** / **08** from earlier commit.)
+- **`index.html`** — Links for prototypes **06**–**09**; doc links for **IDEAS**, **PRE_WRITE**, **POST_WRITE**.
+- **`README.md`** — Prototypes **06**–**09**; backlog + **PRE_WRITE** pointer.
 - **`docs/POST_WRITE.md`** — Note to update **`IDEAS.md`** when backlog items ship.
 - **Net (FIVB):** length **9.5 m**, mesh height **1 m**, top at **2.43 m** (men) at court centre, plane on **z = 0**; posts **2.55 m** at **0.5 m** outside sidelines; antennas **0.8 m** above net top (`standard-volleyball-court`, `01`, `02`).
 - All court prototypes: **neon night** look — black background, fog, emissive net/ball, colored boundary/center/attack lines, fill lights.
