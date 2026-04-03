@@ -11,6 +11,7 @@ Use this after a meaningful change (feature, fix, doc, or prototype) so the repo
 ## 2. Align docs with reality
 
 - **README** — if paths, ports, prerequisites, or “how to run” changed, update the root README.
+- **Backlog** — if you shipped something that matched an item in **`docs/IDEAS.md`**, update or strike it there and keep **`index.html`** in sync.
 - **In-repo specs** — if `docs/THREE_JS_PLAN.md` or architecture notes are wrong, fix them in the same PR/commit as the code.
 
 ## 3. Dependencies and security

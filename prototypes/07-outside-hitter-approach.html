@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Prototype 07 — OH approach vs 5 / 4 / Shoot</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: #050508;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      touch-action: manipulation;
+    }
+    #hud {
+      position: fixed;
+      z-index: 20;
+      left: 12px;
+      top: 12px;
+      max-width: min(440px, calc(100vw - 24px));
+      padding: 10px 12px;
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-top: max(12px, env(safe-area-inset-top));
+      color: #e8f4ff;
+      font-size: 12px;
+      line-height: 1.45;
+      text-shadow: 0 0 8px rgba(0, 245, 212, 0.15), 0 1px 2px #000;
+      pointer-events: auto;
+    }
+    #hud strong { color: #7cf0ff; }
+    .hud-controls { margin-top: 2px; }
+    #hud select, #hud button {
+      margin: 4px 8px 4px 0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #12141c;
+      color: #00f5d4;
+      border: 1px solid rgba(0, 245, 212, 0.4);
+      font-size: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    #hud label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 4px 12px 4px 0;
+      cursor: pointer;
+      flex-wrap: wrap;
+    }
+    #hud label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    #phase-strip {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(8, 12, 22, 0.95);
+      border: 1px solid rgba(0, 245, 212, 0.28);
+    }
+    #phase-big { font-size: 15px; font-weight: 800; color: #ffcc66; letter-spacing: 0.02em; }
+    #phase-sub { font-size: 10px; color: #8a9cb0; margin-top: 4px; }
+    #timeline {
+      margin-top: 8px;
+      height: 6px;
+      border-radius: 3px;
+      background: #1a2030;
+      overflow: hidden;
+    }
+    #timeline > i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f5d4, #ff6ec7);
+      transition: width 0.05s linear;
+    }
+    #info {
+      margin-top: 10px;
+      max-height: min(38vh, 320px);
+      overflow-y: auto;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 110, 199, 0.22);
+      background: rgba(10, 8, 18, 0.94);
+      font-size: 11px;
+      color: #d4dce8;
+      line-height: 1.5;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    #info h4 { margin: 10px 0 4px; font-size: 11px; color: #7cf0ff; text-transform: uppercase; letter-spacing: 0.06em; }
+    #info h4:first-child { margin-top: 0; }
+    #info ul { margin: 4px 0 0 1.1rem; padding: 0; }
+    #info p { margin: 6px 0 0; }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+    code.path { background: #12141c; color: #ff6ec7; padding: 0 4px; border-radius: 4px; font-size: 10px; }
+
+    @media (max-width: 640px) {
+      #hud {
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        max-width: none;
+        width: 100%;
+        max-height: min(36vh, 100dvh - 140px);
+        padding: 8px 10px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        padding-right: max(10px, env(safe-area-inset-right));
+        border-radius: 12px 12px 0 0;
+        background: rgba(5, 6, 14, 0.94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+        font-size: 11px;
+        line-height: 1.35;
+      }
+      #hud .hud-title {
+        font-size: 11px;
+        font-weight: 700;
+        display: block;
+        margin: 0 0 6px 0;
+        padding-right: 0;
+        line-height: 1.25;
+        color: #7cf0ff;
+      }
+      #hud .hud-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 8px;
+        align-items: stretch;
+        margin-top: 0;
+      }
+      #hud .hud-field {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        margin: 0;
+        min-width: 0;
+        font-size: 10px;
+        color: #9ab0c8;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      #hud .hud-field-full {
+        grid-column: 1 / -1;
+      }
+      #hud select {
+        flex: 1;
+        min-width: 0;
+        min-height: 36px;
+        font-size: 16px;
+        padding: 5px 8px;
+        margin: 0;
+      }
+      #hud label.hud-check {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        margin: 0;
+        min-height: 36px;
+        font-size: 11px;
+        text-transform: none;
+        letter-spacing: normal;
+        color: #e8f4ff;
+      }
+      #hud label.hud-check input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
+      #hud .hud-controls > button {
+        grid-column: 1 / -1;
+        width: 100%;
+        min-height: 38px;
+        margin: 2px 0 0 0;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 6px 10px;
+      }
+      #phase-strip {
+        margin-top: 6px;
+        padding: 5px 7px;
+      }
+      #phase-big { font-size: 13px; }
+      #phase-sub {
+        font-size: 9px;
+        line-height: 1.3;
+        margin-top: 2px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      #timeline { height: 4px; margin-top: 5px; }
+      #info {
+        max-height: min(14vh, 120px);
+        font-size: 10px;
+        margin-top: 6px;
+        padding: 6px 8px;
+        line-height: 1.4;
+      }
+      #info h4 { font-size: 9px; margin: 6px 0 2px; }
+      .hud-footnote { font-size: 9px !important; margin-top: 4px !important; }
+      code.path { font-size: 9px; }
+      .hud-mobile-hint { display: inline !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong class="hud-title">07 — Outside hitter: 5 / 4 / Shoot + approach sync</strong>
+    <div class="hud-controls">
+    <label class="hud-field hud-field-full">Set <select id="setPick">
+      <option value="five">5 (high / moon)</option>
+      <option value="four">4 / Hut (OoS medium)</option>
+      <option value="shoot">Shoot (fast pin)</option>
+    </select></label>
+    <label class="hud-field">Steps <select id="stepPick">
+      <option value="4">4-step approach</option>
+      <option value="3">3-step approach</option>
+    </select></label>
+    <label class="hud-field">Speed <select id="speedPick">
+      <option value="0.2">Very slow (teaching)</option>
+      <option value="0.35">Slow</option>
+      <option value="0.55">Medium</option>
+      <option value="1" selected>Normal</option>
+    </select></label>
+    <label class="hud-check"><input type="checkbox" id="showTrail" checked /> Ball trail</label>
+    <label class="hud-check"><input type="checkbox" id="showPath" checked /> Approach</label>
+    <button type="button" id="btnRestart">Restart loop</button>
+    </div>
+    <div id="phase-strip">
+      <div id="phase-big">—</div>
+      <div id="phase-sub">Ball, hips, and both feet share one timeline (0 → contact). OH starts outside the sideline.</div>
+      <div id="timeline"><i id="timeline-fill"></i></div>
+    </div>
+    <div id="info"></div>
+    <p class="hud-footnote" style="margin:8px 0 0;font-size:10px;opacity:0.85">
+      <code class="path">prototypes/07-outside-hitter-approach.html</code> · Teaching only; tempos are stylized.
+      <span class="hud-mobile-hint" style="display:none"> · Drag one finger on court to orbit.</span>
+    </p>
+    <p id="load-error" style="display:none;margin-top:8px;padding:8px;background:#3a1010;border:1px solid #ff6666;color:#ffb0b0;font-size:11px;border-radius:6px"></p>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    window.addEventListener('error', (ev) => {
+      const el = document.getElementById('load-error');
+      if (el) {
+        el.style.display = 'block';
+        el.textContent = ev.message || ev.error?.message || 'Script error';
+      }
+    });
+
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2;
+    const HALF_W = COURT_W / 2;
+    const LINE = 0.05;
+    const ATTACK_DIST = 3;
+    const FREE = 3;
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43;
+    const NET_CENTER_Y = NET_TOP_M - NET_MESH_HEIGHT_M / 2;
+    const POLE_X = HALF_W + 0.5;
+    const LINE_Y = 0.018;
+    const POLE_HEIGHT_M = 2.55;
+
+    const SETTER_HANDS = new THREE.Vector3(1.75, 2.45, 1.15);
+
+    function zoneX(n) {
+      return -HALF_W + (COURT_W * (n - 0.5)) / 9;
+    }
+
+    const PIN_X = zoneX(1) + 0.14;
+    const PIN_Z = 0.58;
+    /** Wide outside the left sideline (free zone), like elite pin attack depth */
+    const OH_START = new THREE.Vector3(-HALF_W - 0.95, 0, 4.15);
+    const OH_CONTACT_FOOT = new THREE.Vector3(PIN_X, 0, PIN_Z);
+
+    const approachFwd = new THREE.Vector3(
+      OH_CONTACT_FOOT.x - OH_START.x,
+      0,
+      OH_CONTACT_FOOT.z - OH_START.z,
+    ).normalize();
+    const approachSide = new THREE.Vector3(-approachFwd.z, 0, approachFwd.x);
+
+    const SET_BASE = {
+      five: {
+        label: '5',
+        color: 0x4ade80,
+        p1: new THREE.Vector3(-1.35, 4.95, 0.95),
+        p2: new THREE.Vector3(zoneX(1) + 0.1, 3.78, -0.32),
+      },
+      four: {
+        label: '4 / Hut',
+        color: 0x60a5fa,
+        p1: new THREE.Vector3(-1.05, 3.72, 0.78),
+        p2: new THREE.Vector3(zoneX(1) + 0.12, 3.52, -0.22),
+      },
+      shoot: {
+        label: 'Shoot',
+        color: 0xffaa00,
+        p1: new THREE.Vector3(0.55, 2.88, 0.62),
+        p2: new THREE.Vector3(zoneX(1) + 0.15, 2.72, 0.02),
+      },
+    };
+
+    function buildBallCurve(setKey) {
+      const d = SET_BASE[setKey];
+      return new THREE.QuadraticBezierCurve3(SETTER_HANDS.clone(), d.p1.clone(), d.p2.clone());
+    }
+
+    /** Foot offsets from hip: f = along approach toward net, s = lateral (outside +). */
+    function F(lfF, lfS, rfF, rfS) {
+      return {
+        lf: { f: lfF, s: lfS },
+        rf: { f: rfF, s: rfS },
+      };
+    }
+
+    /**
+     * Shared u∈[0,1]: ball on Bézier, hips lerp start→pin, feet chase in approach frame.
+     * RH left pin: L opens, R penultimate (big), L step-close, plant, jump, contact.
+     */
+    const KEYFRAMES = {
+      five: {
+        4: [
+          { u: 0, phase: 'Outside — wide stance', y: 0, ...F(-0.06, 0.22, -0.28, -0.1) },
+          { u: 0.13, phase: '1st step — L toward net', y: 0, ...F(0.36, 0.16, -0.22, -0.09) },
+          { u: 0.28, phase: '2nd — R penultimate (arms back)', y: 0, ...F(0.06, 0.11, 0.46, -0.08) },
+          { u: 0.42, phase: '3rd — L step-close', y: 0, ...F(0.26, 0.06, 0.2, -0.05) },
+          { u: 0.5, phase: '4th — plant (narrow)', y: 0, ...F(0.12, 0.05, 0.1, -0.05) },
+          { u: 0.58, phase: 'Jump — load (feet under hips)', y: 0.14, ...F(0.06, 0.05, 0.05, -0.05) },
+          { u: 0.66, phase: 'Jump — apex', y: 0.58, ...F(0.04, 0.045, 0.035, -0.045) },
+          { u: 0.9, phase: 'Contact / swing', y: 0.62, ...F(0.03, 0.04, 0.03, -0.04) },
+          { u: 1, phase: 'Follow-through / land', y: 0.15, ...F(0.15, 0.08, 0.12, -0.07) },
+        ],
+        3: [
+          { u: 0, phase: 'Outside — commit', y: 0, ...F(-0.04, 0.2, -0.24, -0.1) },
+          { u: 0.2, phase: '1st — L directional', y: 0, ...F(0.32, 0.14, -0.18, -0.08) },
+          { u: 0.36, phase: '2nd — R big (arms back)', y: 0, ...F(0.05, 0.1, 0.42, -0.07) },
+          { u: 0.46, phase: '3rd — L plant / close', y: 0, ...F(0.22, 0.05, 0.16, -0.05) },
+          { u: 0.54, phase: 'Jump — load', y: 0.15, ...F(0.07, 0.05, 0.06, -0.05) },
+          { u: 0.64, phase: 'Apex', y: 0.58, ...F(0.04, 0.045, 0.035, -0.045) },
+          { u: 0.88, phase: 'Contact', y: 0.62, ...F(0.03, 0.04, 0.03, -0.04) },
+          { u: 1, phase: 'Land', y: 0.15, ...F(0.14, 0.08, 0.11, -0.07) },
+        ],
+      },
+      four: {
+        4: [
+          { u: 0, phase: 'Outside — 1st-step tempo', y: 0, ...F(-0.05, 0.2, -0.26, -0.1) },
+          { u: 0.18, phase: '1st — L opens', y: 0, ...F(0.34, 0.15, -0.2, -0.09) },
+          { u: 0.34, phase: '2nd — R penultimate', y: 0, ...F(0.06, 0.1, 0.43, -0.08) },
+          { u: 0.48, phase: '3rd — L close', y: 0, ...F(0.25, 0.06, 0.19, -0.05) },
+          { u: 0.56, phase: '4th — plant', y: 0, ...F(0.11, 0.05, 0.09, -0.05) },
+          { u: 0.62, phase: 'Jump — load', y: 0.15, ...F(0.06, 0.05, 0.05, -0.05) },
+          { u: 0.7, phase: 'Apex', y: 0.56, ...F(0.04, 0.045, 0.035, -0.045) },
+          { u: 0.9, phase: 'Contact', y: 0.6, ...F(0.03, 0.04, 0.03, -0.04) },
+          { u: 1, phase: 'Land', y: 0.12, ...F(0.13, 0.07, 0.11, -0.07) },
+        ],
+        3: [
+          { u: 0, phase: 'Outside', y: 0, ...F(-0.05, 0.2, -0.24, -0.1) },
+          { u: 0.22, phase: '1st — L', y: 0, ...F(0.3, 0.14, -0.16, -0.08) },
+          { u: 0.4, phase: '2nd — R big', y: 0, ...F(0.05, 0.1, 0.4, -0.07) },
+          { u: 0.5, phase: '3rd — plant', y: 0, ...F(0.2, 0.05, 0.15, -0.05) },
+          { u: 0.58, phase: 'Jump', y: 0.16, ...F(0.06, 0.05, 0.05, -0.05) },
+          { u: 0.68, phase: 'Apex', y: 0.55, ...F(0.04, 0.045, 0.035, -0.045) },
+          { u: 0.89, phase: 'Contact', y: 0.58, ...F(0.03, 0.04, 0.03, -0.04) },
+          { u: 1, phase: 'Land', y: 0.12, ...F(0.13, 0.07, 0.1, -0.07) },
+        ],
+      },
+      shoot: {
+        4: [
+          { u: 0, phase: 'Outside — late go', y: 0, ...F(-0.04, 0.18, -0.22, -0.09) },
+          { u: 0.12, phase: '1st — L quick', y: 0, ...F(0.28, 0.13, -0.14, -0.07) },
+          { u: 0.24, phase: '2nd-step tempo — R drives', y: 0, ...F(0.04, 0.09, 0.38, -0.07) },
+          { u: 0.34, phase: '3rd — L close', y: 0, ...F(0.2, 0.05, 0.17, -0.05) },
+          { u: 0.42, phase: 'Plant', y: 0, ...F(0.1, 0.05, 0.08, -0.05) },
+          { u: 0.5, phase: 'Jump', y: 0.17, ...F(0.06, 0.05, 0.05, -0.05) },
+          { u: 0.6, phase: 'Apex', y: 0.52, ...F(0.04, 0.04, 0.035, -0.04) },
+          { u: 0.82, phase: 'Contact', y: 0.55, ...F(0.03, 0.04, 0.03, -0.04) },
+          { u: 1, phase: 'Land', y: 0.1, ...F(0.12, 0.07, 0.1, -0.06) },
+        ],
+        3: [
+          { u: 0, phase: 'Outside — commit', y: 0, ...F(-0.03, 0.18, -0.2, -0.09) },
+          { u: 0.18, phase: '1st — L', y: 0, ...F(0.26, 0.12, -0.12, -0.07) },
+          { u: 0.32, phase: '2nd-step tempo — R big', y: 0, ...F(0.04, 0.09, 0.35, -0.06) },
+          { u: 0.4, phase: '3rd — plant', y: 0, ...F(0.18, 0.05, 0.14, -0.05) },
+          { u: 0.48, phase: 'Jump', y: 0.18, ...F(0.06, 0.05, 0.05, -0.05) },
+          { u: 0.58, phase: 'Apex', y: 0.5, ...F(0.04, 0.04, 0.035, -0.04) },
+          { u: 0.76, phase: 'Contact', y: 0.54, ...F(0.03, 0.04, 0.03, -0.04) },
+          { u: 1, phase: 'Land', y: 0.1, ...F(0.11, 0.07, 0.09, -0.06) },
+        ],
+      },
+    };
+
+    const COACHING = {
+      five: {
+        read:
+          'Use a 5 when the pass is poor or you need time: stacked block, oversize MB, or pin is late. Show a high hands early so the block can’t cheat pin. If the defense is perimeter and deep, a high ball buys vision to find the deep corner or wipe off hands.',
+        approach:
+          'OH starts outside the sideline in the free zone (wide). Stylized RH footwork: left opens toward the net, right takes the long penultimate step (arms swing back), left step-closes, narrow plant, then jump. Match this rhythm to how long the ball hangs.',
+        patterns:
+          'Line, sharp angle, high hands wipe, off-speed to deep 5/6, roll over block, seam if block is split late. Rarely a tip unless the block sells out line—usually you have time to go over.',
+      },
+      four: {
+        read:
+          'Hut / 4 is the “out of system but still swinging” call—tight pass, platform inside, or wind pushing the set line. Read the outside blocker: if they stay on the quick or gap, the pin can still get a full approach. If the block jumps early on the release, consider wiping or cutting angle.',
+        approach:
+          'Same outside entry; ball arrives sooner than a 5 so the foot sequence compresses on the timeline. 1st-step tempo means the release meets you earlier in the approach—feet still run L–R–L–close, just faster relative to the set.',
+        patterns:
+          'Hard angle, hard line, high-hands wipe, roll short to 1–2 m, occasional tip to deep corner if block seals angle. Less time than a 5—fewer “second bounce” shots.',
+      },
+      shoot: {
+        read:
+          'Shoot when the pass is on or slightly inside and you want to stress the outside blocker before they square—front-row commit to middle, late pin read, or free-ball pace you want to terminate. If the defense shows early line step or a small OHB, shoot beats their hand speed.',
+        approach:
+          'Still from outside, but the approach is short and aggressive: classic 3-step pairs with 2nd-step tempo—the right-foot drive and plant happen almost back-to-back with the ball. Watch when the pink “L” and orange “R” feet hit relative to the ball.',
+        patterns:
+          'Primary: hard angle, hard line. Secondary: wipe if hand is there, roll if block sells out. Tip is rare (no time). Pipe/stack situations sometimes turn shoot into a “speed out” to draw block for middle/back row.',
+      },
+    };
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function ohPoseAt(setKey, steps, uRaw) {
+      const u = Math.min(1, Math.max(0, uRaw));
+      const kf = KEYFRAMES[setKey][String(steps)];
+      const hip = new THREE.Vector3().lerpVectors(OH_START, OH_CONTACT_FOOT, u);
+      if (u <= kf[0].u) {
+        const y0 = kf[0].u > 0 ? lerp(0, kf[0].y, u / kf[0].u) : kf[0].y;
+        return { hip, yBody: y0, phase: kf[0].phase, lf: { ...kf[0].lf }, rf: { ...kf[0].rf } };
+      }
+      let a = kf[0];
+      let b = kf[kf.length - 1];
+      for (let j = 0; j < kf.length - 1; j++) {
+        if (u >= kf[j].u && u <= kf[j + 1].u) {
+          a = kf[j];
+          b = kf[j + 1];
+          break;
+        }
+        if (u > kf[j + 1].u) {
+          a = kf[j];
+          b = kf[j + 1];
+        }
+      }
+      const span = Math.max(1e-6, b.u - a.u);
+      const t = Math.min(1, Math.max(0, (u - a.u) / span));
+      const yBody = lerp(a.y, b.y, t);
+      const lf = { f: lerp(a.lf.f, b.lf.f, t), s: lerp(a.lf.s, b.lf.s, t) };
+      const rf = { f: lerp(a.rf.f, b.rf.f, t), s: lerp(a.rf.s, b.rf.s, t) };
+      const phase = t < 0.5 ? a.phase : b.phase;
+      return { hip, yBody, phase, lf, rf };
+    }
+
+    function feetWorld(hip, lf, rf) {
+      return {
+        L: new THREE.Vector3(
+          hip.x + approachFwd.x * lf.f + approachSide.x * lf.s,
+          0.038,
+          hip.z + approachFwd.z * lf.f + approachSide.z * lf.s,
+        ),
+        R: new THREE.Vector3(
+          hip.x + approachFwd.x * rf.f + approachSide.x * rf.s,
+          0.038,
+          hip.z + approachFwd.z * rf.f + approachSide.z * rf.s,
+        ),
+      };
+    }
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x0a0c12, 1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    const glCanvas = renderer.domElement;
+    glCanvas.style.display = 'block';
+    glCanvas.style.position = 'fixed';
+    glCanvas.style.left = '0';
+    glCanvas.style.top = '0';
+    glCanvas.style.zIndex = '0';
+    document.body.appendChild(glCanvas);
+
+    const labelRenderer = new CSS2DRenderer();
+    const labelLayer = labelRenderer.domElement;
+    labelLayer.style.position = 'fixed';
+    labelLayer.style.left = '0';
+    labelLayer.style.top = '0';
+    labelLayer.style.zIndex = '1';
+    labelLayer.style.pointerEvents = 'none';
+    labelLayer.style.background = 'transparent';
+    document.body.appendChild(labelLayer);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 160);
+
+    const controls = new OrbitControls(camera, glCanvas);
+    controls.maxPolarAngle = Math.PI * 0.49;
+
+    /** Wider FOV + pulled back so portrait / bottom-sheet HUD shows full court & outside approach */
+    function applyDefaultFraming(isMobileLayout) {
+      if (isMobileLayout) {
+        camera.fov = 56;
+        camera.position.set(-9.2, 17.2, 24.5);
+        controls.target.set(-1.35, 0.72, 1.95);
+        controls.minDistance = 11;
+        controls.maxDistance = 78;
+      } else {
+        camera.fov = 50;
+        camera.position.set(-5.5, 13, 15);
+        controls.target.set(-0.5, 1.2, 1.2);
+        controls.minDistance = 7;
+        controls.maxDistance = 52;
+      }
+      camera.updateProjectionMatrix();
+    }
+
+    let framingLayoutKey = null;
+    function mobileLayoutActive(w, h) {
+      return w <= 640 || (h > w && w <= 900);
+    }
+
+    function syncRenderSize() {
+      const vv = window.visualViewport;
+      const w = Math.max(1, vv?.width ?? window.innerWidth);
+      const h = Math.max(1, vv?.height ?? window.innerHeight);
+      const mobile = mobileLayoutActive(w, h);
+      if (framingLayoutKey !== mobile) {
+        framingLayoutKey = mobile;
+        applyDefaultFraming(mobile);
+      }
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      labelRenderer.setSize(w, h);
+      controls.update();
+    }
+    syncRenderSize();
+    window.addEventListener('resize', syncRenderSize);
+    window.addEventListener('load', syncRenderSize);
+    requestAnimationFrame(syncRenderSize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncRenderSize);
+      window.visualViewport.addEventListener('scroll', syncRenderSize);
+    }
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x0a0c14, 0.006);
+
+    scene.add(new THREE.HemisphereLight(0x8899bb, 0x151820, 0.75));
+    const sun = new THREE.DirectionalLight(0xe8f0ff, 0.9);
+    sun.position.set(-8, 26, 12);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    const ext = HALF_L + FREE + 4;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 85;
+    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0x506070, 0.45));
+
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.35,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.2,
+    });
+    const outerW = COURT_W + FREE * 2;
+    const outerL = COURT_L + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    const mBasic = (c) => new THREE.MeshBasicMaterial({ color: c });
+    function lineAlongX(z0, w, mat) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, LINE_Y * 2, LINE), mat);
+      m.position.set(0, LINE_Y, z0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    function lineAlongZ(x0, mat) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L), mat);
+      m.position.set(x0, LINE_Y, 0);
+      m.receiveShadow = true;
+      scene.add(m);
+    }
+    lineAlongZ(-HALF_W, mBasic(neonCyan));
+    lineAlongZ(HALF_W, mBasic(neonCyan));
+    lineAlongX(HALF_L, COURT_W, mBasic(neonViolet));
+    lineAlongX(-HALF_L, COURT_W, mBasic(neonViolet));
+    lineAlongX(0, COURT_W, mBasic(neonMagenta));
+    lineAlongX(ATTACK_DIST, COURT_W, mBasic(neonLime));
+    lineAlongX(-ATTACK_DIST, COURT_W, mBasic(neonLime));
+
+    const netTexCanvas = document.createElement('canvas');
+    netTexCanvas.width = 256;
+    netTexCanvas.height = 256;
+    const nctx = netTexCanvas.getContext('2d');
+    nctx.fillStyle = '#0a0e18';
+    nctx.fillRect(0, 0, 256, 256);
+    nctx.strokeStyle = 'rgba(0,255,234,0.5)';
+    nctx.lineWidth = 2;
+    for (let i = 0; i <= 256; i += 14) {
+      nctx.beginPath();
+      nctx.moveTo(i, 0);
+      nctx.lineTo(i, 256);
+      nctx.stroke();
+      nctx.beginPath();
+      nctx.moveTo(0, i);
+      nctx.lineTo(256, i);
+      nctx.stroke();
+    }
+    const netTex = new THREE.CanvasTexture(netTexCanvas);
+    netTex.colorSpace = THREE.SRGBColorSpace;
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3);
+    const net = new THREE.Mesh(
+      new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M),
+      new THREE.MeshStandardMaterial({
+        map: netTex,
+        color: 0x7cf0ff,
+        transparent: true,
+        opacity: 0.75,
+        side: THREE.DoubleSide,
+        emissive: new THREE.Color(0x00fff0),
+        emissiveIntensity: 0.25,
+        emissiveMap: netTex,
+      }),
+    );
+    net.position.set(0, NET_CENTER_Y, 0);
+    scene.add(net);
+
+    const poleGeo = new THREE.CylinderGeometry(0.1, 0.108, POLE_HEIGHT_M, 16);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xd8e4f0,
+      metalness: 0.7,
+      roughness: 0.3,
+      emissive: new THREE.Color(0x4488aa),
+      emissiveIntensity: 0.2,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const p = new THREE.Mesh(poleGeo, poleMat);
+      p.position.set(x, POLE_HEIGHT_M / 2, 0);
+      p.castShadow = true;
+      scene.add(p);
+    });
+
+    function makePlayer(x, z, color, tag) {
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+      const r = 0.22;
+      const h = 1.15;
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(r * 0.94, r * 1.04, h, 14, 1, false),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.15 }),
+      );
+      body.position.y = h / 2;
+      body.castShadow = true;
+      g.add(body);
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14, 12, 10),
+        new THREE.MeshStandardMaterial({ color: 0xffe0d0, roughness: 0.55 }),
+      );
+      head.position.y = h + 0.12;
+      g.add(head);
+      const div = document.createElement('div');
+      div.style.cssText =
+        'font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(5,5,12,0.9);border:1px solid rgba(255,255,255,0.12);color:#ffdd88';
+      div.textContent = tag;
+      const lbl = new CSS2DObject(div);
+      lbl.position.set(0, h + 0.45, 0);
+      g.add(lbl);
+      scene.add(g);
+      return { group: g, body, head };
+    }
+
+    makePlayer(1.65, 1.05, 0x4488ff, 'S');
+
+    const ohH = 1.12;
+    const ohTorso = new THREE.Group();
+    const ohBody = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.21, 0.23, ohH, 14, 1, false),
+      new THREE.MeshStandardMaterial({ color: 0xff6ec7, roughness: 0.5, metalness: 0.15 }),
+    );
+    ohBody.position.y = ohH / 2;
+    ohBody.castShadow = true;
+    ohTorso.add(ohBody);
+    const ohHead = new THREE.Mesh(
+      new THREE.SphereGeometry(0.14, 12, 10),
+      new THREE.MeshStandardMaterial({ color: 0xffe0d0, roughness: 0.55 }),
+    );
+    ohHead.position.y = ohH + 0.13;
+    ohTorso.add(ohHead);
+    const ohDiv = document.createElement('div');
+    ohDiv.style.cssText =
+      'font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(5,5,12,0.9);border:1px solid rgba(255,255,255,0.12);color:#ffdd88';
+    ohDiv.textContent = 'OH';
+    const ohLbl = new CSS2DObject(ohDiv);
+    ohLbl.position.set(0, ohH + 0.44, 0);
+    ohTorso.add(ohLbl);
+    scene.add(ohTorso);
+
+    function makeFootGeo() {
+      const g = new THREE.CylinderGeometry(0.092, 0.102, 0.04, 12);
+      g.rotateX(Math.PI / 2);
+      return g;
+    }
+    const ohFootL = new THREE.Mesh(
+      makeFootGeo(),
+      new THREE.MeshStandardMaterial({ color: 0xffc0d8, roughness: 0.45, metalness: 0.12 }),
+    );
+    const ohFootR = new THREE.Mesh(
+      makeFootGeo(),
+      new THREE.MeshStandardMaterial({ color: 0xff4d9a, roughness: 0.45, metalness: 0.12 }),
+    );
+    ohFootL.castShadow = true;
+    ohFootR.castShadow = true;
+    scene.add(ohFootL);
+    scene.add(ohFootR);
+
+    function footTag(text, color) {
+      const d = document.createElement('div');
+      d.style.cssText = `font-size:9px;font-weight:800;padding:1px 4px;border-radius:3px;background:rgba(5,5,12,0.92);border:1px solid ${color};color:${color}`;
+      d.textContent = text;
+      const o = new CSS2DObject(d);
+      o.position.set(0, 0.14, 0);
+      return o;
+    }
+    ohFootL.add(footTag('L', '#ffc0d8'));
+    ohFootR.add(footTag('R', '#ff4d9a'));
+
+    const ball = new THREE.Mesh(
+      new THREE.SphereGeometry(0.13, 20, 16),
+      new THREE.MeshStandardMaterial({
+        color: 0xfff8e8,
+        emissive: new THREE.Color(0xffaa66),
+        emissiveIntensity: 0.45,
+      }),
+    );
+    ball.castShadow = true;
+    scene.add(ball);
+
+    let ballCurve = buildBallCurve('five');
+    const trailMat = new THREE.LineBasicMaterial({
+      color: 0xffcc88,
+      transparent: true,
+      opacity: 0.35,
+    });
+    let trailLine = new THREE.Line(new THREE.BufferGeometry(), trailMat);
+    scene.add(trailLine);
+
+    const pathMat = new THREE.LineBasicMaterial({ color: 0x8844aa, transparent: true, opacity: 0.4 });
+    let approachLine = new THREE.Line(new THREE.BufferGeometry(), pathMat);
+    scene.add(approachLine);
+
+    function rebuildTrail(setKey) {
+      ballCurve = buildBallCurve(setKey);
+      const pts = ballCurve.getPoints(80);
+      trailLine.geometry.dispose();
+      trailLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+      const c = SET_BASE[setKey].color;
+      trailLine.material.color.setHex(c);
+    }
+
+    function rebuildApproachLine() {
+      const pts = [OH_START.clone(), OH_CONTACT_FOOT.clone()];
+      pts[0].y = 0.06;
+      pts[1].y = 0.06;
+      approachLine.geometry.dispose();
+      approachLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+    }
+    rebuildTrail('five');
+    rebuildApproachLine();
+
+    function fillInfo() {
+      const setKey = document.getElementById('setPick').value;
+      const steps = document.getElementById('stepPick').value;
+      const c = COACHING[setKey];
+      const el = document.getElementById('info');
+      el.innerHTML = `
+        <h4>Reading the other side (when to call this)</h4>
+        <p>${c.read}</p>
+        <h4>Footwork &amp; outside entry</h4>
+        <p>${c.approach}</p>
+        <h4>Hitting patterns that fit this set</h4>
+        <p>${c.patterns}</p>
+        <h4>Approach choice (${steps}-step)</h4>
+        <p>${
+          setKey === 'five'
+            ? 'High ball: both 3- and 4-step are common; 4-step gives max rhythm when there is time. 3-step is fine if the pass pulls the hitter in early.'
+            : setKey === 'four'
+              ? 'Hut is often taught as 1st-step tempo on 4-step, or a compact 3-step when the pass is inside.'
+              : 'Shoot is usually 2nd-step tempo—3-step is the classic pairing; 4-step shown here is a late-go variation for athletes who need an extra gather step.'
+        }</p>
+        <h4>Timeline</h4>
+        <p>One shared clock drives the ball along the Bézier and the OH along the approach line. Slow speeds are for learning <em>which step lines up with which part of the set</em>, not for literal FIVB timing.</p>
+      `;
+    }
+
+    fillInfo();
+
+    document.getElementById('setPick').addEventListener('change', () => {
+      rebuildTrail(document.getElementById('setPick').value);
+      fillInfo();
+    });
+    document.getElementById('stepPick').addEventListener('change', fillInfo);
+    document.getElementById('btnRestart').addEventListener('click', () => {
+      animU = 0;
+    });
+
+    let animU = 0;
+    const BASE_CYCLE_SEC = 5.2;
+    const clock = new THREE.Clock();
+
+    function tick() {
+      requestAnimationFrame(tick);
+      const spd = parseFloat(document.getElementById('speedPick').value, 10) || 1;
+      const dt = clock.getDelta();
+      animU += dt / (BASE_CYCLE_SEC / spd);
+      if (animU > 1) animU -= 1;
+
+      const setKey = document.getElementById('setPick').value;
+      const steps = parseInt(document.getElementById('stepPick').value, 10);
+
+      const bp = ballCurve.getPoint(animU);
+      ball.position.copy(bp);
+
+      const pose = ohPoseAt(setKey, steps, animU);
+      const fw = feetWorld(pose.hip, pose.lf, pose.rf);
+      ohFootL.position.copy(fw.L);
+      ohFootR.position.copy(fw.R);
+      ohTorso.position.set(pose.hip.x, pose.yBody, pose.hip.z);
+      ohTorso.rotation.y = Math.atan2(approachFwd.x, approachFwd.z);
+      document.getElementById('phase-big').textContent = pose.phase;
+      document.getElementById('phase-sub').textContent = `${SET_BASE[setKey].label} · ${steps}-step · L/R feet + hips synced · u=${animU.toFixed(2)}`;
+      document.getElementById('timeline-fill').style.width = `${animU * 100}%`;
+
+      trailLine.visible = document.getElementById('showTrail').checked;
+      approachLine.visible = document.getElementById('showPath').checked;
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+    tick();
+  </script>
+</body>
+</html>
