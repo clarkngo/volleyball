@@ -44,13 +44,11 @@ Each item below is intended to ship as its **own** interactive prototype later (
 
 ---
 
-## 4. Basic drills for practice
+## ~~4. Basic drills for practice~~ → shipped
 
 **Concept:** A small **library of fundamental drills** (pepper progressions, wall ball, serving targets, passing ladders, etc.) — each as a **short repeatable loop** or checklist with optional 3D context (court zones, targets).
 
-**Implemented as its own prototype?** No.
-
-*Related shipped work:* none.
+**Implemented as its own prototype?** **Yes** — [`prototypes/08-basic-drills.html`](../prototypes/08-basic-drills.html) (pepper progression, wall ball, serving targets, passing ladder, solo wall sequence; checklists + rings + optional ball motion).
 
 ---
 

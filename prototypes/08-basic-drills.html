@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Prototype 08 — Basic drills</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: #050508;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      touch-action: manipulation;
+    }
+    #hud {
+      position: fixed;
+      z-index: 20;
+      left: 12px;
+      top: 12px;
+      max-width: min(380px, calc(100vw - 24px));
+      padding: 10px 12px;
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-top: max(12px, env(safe-area-inset-top));
+      color: #e8f4ff;
+      font-size: 12px;
+      line-height: 1.45;
+      text-shadow: 0 0 8px rgba(0, 245, 212, 0.12), 0 1px 2px #000;
+      pointer-events: auto;
+    }
+    #hud strong { color: #7cf0ff; }
+    #hud select, #hud button {
+      margin: 4px 8px 4px 0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #12141c;
+      color: #00f5d4;
+      border: 1px solid rgba(0, 245, 212, 0.4);
+      font-size: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    #hud label { display: block; margin: 6px 0 0; }
+    #checklist {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(8, 12, 22, 0.92);
+      border: 1px solid rgba(0, 245, 212, 0.25);
+      max-height: min(28vh, 220px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    #checklist h3 {
+      margin: 0 0 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffcc66;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    #checklist ol {
+      margin: 0;
+      padding-left: 1.15rem;
+      color: #c8d4e4;
+      font-size: 11px;
+    }
+    #checklist li { margin: 4px 0; }
+    #checklist .note {
+      margin-top: 8px;
+      font-size: 10px;
+      color: #8a9cb0;
+      line-height: 1.4;
+    }
+    canvas { display: block; touch-action: none; }
+    code.path {
+      background: #12141c;
+      color: #ff6ec7;
+      padding: 0 4px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+    @media (max-width: 640px) {
+      #hud {
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        max-width: none;
+        max-height: min(38vh, 100dvh - 100px);
+        padding: 8px 10px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+        border-radius: 12px 12px 0 0;
+        background: rgba(5, 6, 14, 0.94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        overflow-y: auto;
+        overscroll-behavior-y: contain;
+      }
+      #hud select { min-height: 40px; font-size: 16px; width: 100%; margin: 4px 0 0; }
+      #hud button { min-height: 40px; width: 100%; margin-top: 6px; font-size: 15px; }
+      #checklist { max-height: min(18vh, 140px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <strong>08 — Basic drills</strong>
+    <label>Drill
+      <select id="drillPick"></select>
+    </label>
+    <button type="button" id="btnToggleMotion">Motion: on</button>
+    <div id="checklist"></div>
+    <p style="margin:8px 0 0;font-size:10px;opacity:0.8">
+      <code class="path">prototypes/08-basic-drills.html</code> · Teaching cues; not a full practice plan.
+    </p>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const COURT_L = 18;
+    const COURT_W = 9;
+    const HALF_L = COURT_L / 2;
+    const HALF_W = COURT_W / 2;
+    const LINE = 0.05;
+    const ATTACK_DIST = 3;
+    const FREE = 3;
+    const NET_LENGTH_M = 9.5;
+    const NET_MESH_HEIGHT_M = 1.0;
+    const NET_TOP_M = 2.43;
+    const NET_BOTTOM_M = NET_TOP_M - NET_MESH_HEIGHT_M;
+    const NET_CENTER_Y = (NET_TOP_M + NET_BOTTOM_M) / 2;
+    const POLE_OUTSIDE_M = 0.5;
+    const POLE_HEIGHT_M = 2.55;
+    const POLE_X = HALF_W + POLE_OUTSIDE_M;
+    const ANTENNA_ABOVE_NET_M = 0.8;
+    const LINE_Y = 0.018;
+
+    const DRILLS = [
+      {
+        id: 'pepper',
+        name: 'Pepper progression',
+        html: `
+          <h3>Checklist</h3>
+          <ol>
+            <li><strong>Throw-catch-catch</strong> — control distance &amp; height first.</li>
+            <li><strong>Throw-set-catch</strong> — same rhythm; platform to target.</li>
+            <li><strong>Pass-set-catch</strong> — feet to ball; high, off the net line.</li>
+            <li><strong>Pass-set-hit</strong> — roll shot / tip first, then swing down.</li>
+            <li><strong>Full pepper</strong> — pass–set–hit loop; reset on error.</li>
+          </ol>
+          <p class="note">Scene: two floor spots + ball shuttle (stylized). Stay on one half; clear the attack line when hitting.</p>
+        `,
+        cameraTarget: new THREE.Vector3(0, 0.5, 4),
+        cameraPos: new THREE.Vector3(10, 9, 14),
+        build(scene, drillRoot, helpers) {
+          const ringInner = 0.35;
+          const ringOuter = 0.5;
+          const ringMat = (hex, a = 0.55) =>
+            new THREE.MeshBasicMaterial({
+              color: hex,
+              transparent: true,
+              opacity: a,
+              depthWrite: false,
+              side: THREE.DoubleSide,
+            });
+          const r1 = new THREE.Mesh(
+            new THREE.RingGeometry(ringInner, ringOuter, 32),
+            ringMat(0x00f5d4),
+          );
+          r1.rotation.x = -Math.PI / 2;
+          r1.position.set(-2.2, 0.03, 4.2);
+          drillRoot.add(r1);
+          const r2 = new THREE.Mesh(
+            new THREE.RingGeometry(ringInner, ringOuter, 32),
+            ringMat(0xff6ec7),
+          );
+          r2.rotation.x = -Math.PI / 2;
+          r2.position.set(2.0, 0.03, 5.4);
+          drillRoot.add(r2);
+          helpers.ballPath = 'pepper';
+          helpers.pepperA = new THREE.Vector3(-2.2, 0.12, 4.2);
+          helpers.pepperB = new THREE.Vector3(2.0, 0.12, 5.4);
+        },
+      },
+      {
+        id: 'wall',
+        name: 'Wall ball (passing)',
+        html: `
+          <h3>Checklist</h3>
+          <ol>
+            <li>Mark a spot <strong>2–3 m</strong> from the wall; athletic stance.</li>
+            <li><strong>Platform square</strong> — shoulders face target; minimal swing.</li>
+            <li>Goal: <strong>same contact height</strong> every rep (low variance).</li>
+            <li>Add <strong>one step</strong> when comfortable; then lateral approach.</li>
+          </ol>
+          <p class="note">Scene: wall plane + “you” spot. Real wall height ~2.7 m+; this is a visual anchor only.</p>
+        `,
+        cameraTarget: new THREE.Vector3(-5, 1.2, -2),
+        cameraPos: new THREE.Vector3(4, 6, 10),
+        build(scene, drillRoot, helpers) {
+          const wallMat = new THREE.MeshStandardMaterial({
+            color: 0x1a2435,
+            roughness: 0.85,
+            metalness: 0.15,
+            emissive: new THREE.Color(0x00fff0),
+            emissiveIntensity: 0.08,
+          });
+          const wall = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.8, 5), wallMat);
+          wall.position.set(-HALF_W - FREE - 0.5, 1.4, -1);
+          wall.castShadow = true;
+          drillRoot.add(wall);
+          const spot = new THREE.Mesh(
+            new THREE.RingGeometry(0.4, 0.55, 32),
+            new THREE.MeshBasicMaterial({
+              color: 0x00f5d4,
+              transparent: true,
+              opacity: 0.5,
+              depthWrite: false,
+              side: THREE.DoubleSide,
+            }),
+          );
+          spot.rotation.x = -Math.PI / 2;
+          spot.position.set(-3.2, 0.03, -1);
+          drillRoot.add(spot);
+          helpers.ballPath = 'wall';
+          helpers.wallHit = wall.position.clone();
+          helpers.wallPasser = spot.position.clone();
+          helpers.wallPasser.y = 0.15;
+        },
+      },
+      {
+        id: 'serve',
+        name: 'Serving targets',
+        html: `
+          <h3>Checklist</h3>
+          <ol>
+            <li>Pick <strong>deep corners</strong> or <strong>short zone</strong> — one intent per rep.</li>
+            <li>Toss <strong>consistent</strong> (float) or <strong>release point</strong> (topspin).</li>
+            <li>Land the ball <strong>inside</strong> the target ring before moving it smaller.</li>
+            <li>Track <strong>make %</strong> over 10 balls, not single makes.</li>
+          </ol>
+          <p class="note">Scene: four floor targets on the far end (receive side). Server stands behind baseline (your side).</p>
+        `,
+        cameraTarget: new THREE.Vector3(0, 0.4, -2),
+        cameraPos: new THREE.Vector3(-2, 14, 12),
+        build(scene, drillRoot, helpers) {
+          const positions = [
+            { x: -2.8, z: -HALF_L + 1.2, c: 0xff6ec7, label: 'L deep' },
+            { x: 2.8, z: -HALF_L + 1.2, c: 0x00f5d4, label: 'R deep' },
+            { x: -1.5, z: -HALF_L + 3.5, c: 0xc8ff00, label: 'L short' },
+            { x: 1.5, z: -HALF_L + 3.5, c: 0xa855f7, label: 'R short' },
+          ];
+          helpers.serveTargets = [];
+          for (const p of positions) {
+            const ring = new THREE.Mesh(
+              new THREE.RingGeometry(0.55, 0.75, 40),
+              new THREE.MeshBasicMaterial({
+                color: p.c,
+                transparent: true,
+                opacity: 0.45,
+                depthWrite: false,
+                side: THREE.DoubleSide,
+              }),
+            );
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.set(p.x, 0.03, p.z);
+            ring.userData.label = p.label;
+            drillRoot.add(ring);
+            helpers.serveTargets.push(ring.position.clone());
+          }
+          helpers.ballPath = 'serve';
+        },
+      },
+      {
+        id: 'ladder',
+        name: 'Passing ladder',
+        html: `
+          <h3>Checklist</h3>
+          <ol>
+            <li>Line of targets on the floor; pass <strong>in order</strong> (or call random).</li>
+            <li><strong>Stop &amp; reset</strong> feet between reps — no drifting.</li>
+            <li>Partner feeds from <strong>net</strong> or <strong>attack line</strong> to vary angle.</li>
+            <li>Increase <strong>tempo</strong> only when accuracy holds.</li>
+          </ol>
+          <p class="note">Scene: five rings toward the left front; passer spot at Z6-ish depth.</p>
+        `,
+        cameraTarget: new THREE.Vector3(-1, 0.4, 3),
+        cameraPos: new THREE.Vector3(8, 11, 10),
+        build(scene, drillRoot, helpers) {
+          helpers.ladderPts = [];
+          for (let i = 0; i < 5; i++) {
+            const t = i / 4;
+            const x = -3.2 + t * 1.6;
+            const z = 2.0 + t * 2.2;
+            const ring = new THREE.Mesh(
+              new THREE.RingGeometry(0.38, 0.52, 28),
+              new THREE.MeshBasicMaterial({
+                color: 0x00f5d4,
+                transparent: true,
+                opacity: 0.5,
+                depthWrite: false,
+                side: THREE.DoubleSide,
+              }),
+            );
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.set(x, 0.03, z);
+            drillRoot.add(ring);
+            helpers.ladderPts.push(new THREE.Vector3(x, 0.12, z));
+          }
+          const passer = new THREE.Mesh(
+            new THREE.RingGeometry(0.45, 0.6, 32),
+            new THREE.MeshBasicMaterial({
+              color: 0xff6ec7,
+              transparent: true,
+              opacity: 0.35,
+              depthWrite: false,
+              side: THREE.DoubleSide,
+            }),
+          );
+          passer.rotation.x = -Math.PI / 2;
+          passer.position.set(2.2, 0.03, 5.0);
+          drillRoot.add(passer);
+          helpers.ballPath = 'ladder';
+          helpers.ladderFeed = new THREE.Vector3(0.5, 1.6, 1.0);
+        },
+      },
+      {
+        id: 'pepper-solo',
+        name: 'Solo: toss + pass + set (wall)',
+        html: `
+          <h3>Checklist</h3>
+          <ol>
+            <li>Toss to self → <strong>pass</strong> to wall → read rebound.</li>
+            <li>Second touch: <strong>set</strong> to an imagined pin (high hands).</li>
+            <li>Optional: <strong>catch</strong> the third to verify location.</li>
+          </ol>
+          <p class="note">Same wall as wall-ball; reinforces sequence when no partner.</p>
+        `,
+        cameraTarget: new THREE.Vector3(-5, 1.0, -2),
+        cameraPos: new THREE.Vector3(5, 7, 9),
+        build(scene, drillRoot, helpers) {
+          DRILLS.find((d) => d.id === 'wall').build(scene, drillRoot, helpers);
+          helpers.ballPath = 'wallSolo';
+        },
+      },
+    ];
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050508);
+    scene.fog = new THREE.FogExp2(0x0a0c14, 0.008);
+
+    const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 150);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.maxPolarAngle = Math.PI * 0.49;
+    controls.minDistance = 7;
+    controls.maxDistance = 52;
+
+    const hemi = new THREE.HemisphereLight(0x8899bb, 0x151820, 0.72);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xe8f0ff, 0.85);
+    sun.position.set(-12, 24, 10);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.near = 1;
+    sun.shadow.camera.far = 70;
+    const ext = HALF_L + FREE + 5;
+    sun.shadow.camera.left = -ext;
+    sun.shadow.camera.right = ext;
+    sun.shadow.camera.top = ext;
+    sun.shadow.camera.bottom = -ext;
+    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0x405070, 0.25));
+
+    const fillCyan = new THREE.PointLight(0x00fff0, 0.4, 45);
+    fillCyan.position.set(-8, 8, 6);
+    scene.add(fillCyan);
+    const fillMagenta = new THREE.PointLight(0xff2ec4, 0.28, 40);
+    fillMagenta.position.set(8, 6, -6);
+    scene.add(fillMagenta);
+
+    const neonCyan = 0x00f5d4;
+    const neonMagenta = 0xff2ec4;
+    const neonLime = 0xc8ff00;
+    const neonViolet = 0xa855f7;
+    const lineBoundaryMat = new THREE.MeshBasicMaterial({ color: neonCyan });
+    const lineCenterMat = new THREE.MeshBasicMaterial({ color: neonMagenta });
+    const lineAttackMat = new THREE.MeshBasicMaterial({ color: neonLime });
+    const lineEndMat = new THREE.MeshBasicMaterial({ color: neonViolet });
+    const courtMat = new THREE.MeshStandardMaterial({
+      color: 0x12151f,
+      roughness: 0.88,
+      metalness: 0.12,
+      emissive: new THREE.Color(0x040608),
+      emissiveIntensity: 0.4,
+    });
+    const freeMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0c12,
+      roughness: 0.98,
+      metalness: 0.08,
+      emissive: new THREE.Color(0x12081f),
+      emissiveIntensity: 0.25,
+    });
+
+    const outerL = COURT_L + FREE * 2;
+    const outerW = COURT_W + FREE * 2;
+    const freeFloor = new THREE.Mesh(new THREE.PlaneGeometry(outerW, outerL), freeMat);
+    freeFloor.rotation.x = -Math.PI / 2;
+    freeFloor.position.y = -0.005;
+    freeFloor.receiveShadow = true;
+    scene.add(freeFloor);
+
+    const playFloor = new THREE.Mesh(new THREE.PlaneGeometry(COURT_W, COURT_L), courtMat);
+    playFloor.rotation.x = -Math.PI / 2;
+    playFloor.receiveShadow = true;
+    scene.add(playFloor);
+
+    function lineAlongX(z0, widthSpan, mat) {
+      const g = new THREE.BoxGeometry(widthSpan, LINE_Y * 2, LINE);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(0, LINE_Y, z0);
+      scene.add(m);
+    }
+    function lineAlongZ(x0, mat) {
+      const g = new THREE.BoxGeometry(LINE, LINE_Y * 2, COURT_L);
+      const m = new THREE.Mesh(g, mat);
+      m.position.set(x0, LINE_Y, 0);
+      scene.add(m);
+    }
+
+    lineAlongZ(-HALF_W, lineBoundaryMat);
+    lineAlongZ(HALF_W, lineBoundaryMat);
+    lineAlongX(HALF_L, COURT_W, lineEndMat);
+    lineAlongX(-HALF_L, COURT_W, lineEndMat);
+    lineAlongX(0, COURT_W, lineCenterMat);
+    lineAlongX(ATTACK_DIST, COURT_W, lineAttackMat);
+    lineAlongX(-ATTACK_DIST, COURT_W, lineAttackMat);
+
+    function makeNetTexture() {
+      const c = document.createElement('canvas');
+      c.width = 256;
+      c.height = 256;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#0a0e18';
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = 'rgba(0, 255, 234, 0.65)';
+      ctx.lineWidth = 2;
+      const step = 14;
+      for (let x = 0; x <= 256; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 256);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= 256; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(256, y);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+    const netTex = makeNetTexture();
+    netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
+    netTex.repeat.set(14, 3);
+    const netMat = new THREE.MeshStandardMaterial({
+      map: netTex,
+      color: 0x7cf0ff,
+      transparent: true,
+      opacity: 0.82,
+      side: THREE.DoubleSide,
+      roughness: 0.35,
+      metalness: 0.15,
+      emissive: new THREE.Color(0x00fff0),
+      emissiveIntensity: 0.35,
+      emissiveMap: netTex,
+    });
+    const net = new THREE.Mesh(new THREE.PlaneGeometry(NET_LENGTH_M, NET_MESH_HEIGHT_M), netMat);
+    net.position.set(0, NET_CENTER_Y, 0);
+    net.castShadow = true;
+    scene.add(net);
+
+    const poleR = 0.1;
+    const poleGeo = new THREE.CylinderGeometry(poleR, poleR * 1.08, POLE_HEIGHT_M, 24);
+    const poleMat = new THREE.MeshStandardMaterial({
+      color: 0xe2edf5,
+      roughness: 0.28,
+      metalness: 0.82,
+      emissive: new THREE.Color(0x40fff8),
+      emissiveIntensity: 0.45,
+    });
+    [-POLE_X, POLE_X].forEach((x) => {
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.position.set(x, POLE_HEIGHT_M / 2, 0);
+      pole.castShadow = true;
+      scene.add(pole);
+    });
+
+    const antMat = new THREE.MeshStandardMaterial({
+      color: 0xff4d00,
+      roughness: 0.35,
+      metalness: 0.2,
+      emissive: new THREE.Color(0xff6600),
+      emissiveIntensity: 0.8,
+    });
+    const antGeo = new THREE.CylinderGeometry(0.025, 0.025, ANTENNA_ABOVE_NET_M, 8);
+    [-HALF_W, HALF_W].forEach((x) => {
+      const a = new THREE.Mesh(antGeo, antMat);
+      a.position.set(x, NET_TOP_M + ANTENNA_ABOVE_NET_M / 2, 0);
+      a.castShadow = true;
+      scene.add(a);
+    });
+
+    const ballR = 0.105;
+    const ball = new THREE.Mesh(
+      new THREE.SphereGeometry(ballR, 28, 20),
+      new THREE.MeshStandardMaterial({
+        color: 0xf5f0e8,
+        roughness: 0.35,
+        metalness: 0.1,
+        emissive: new THREE.Color(0xffaa66),
+        emissiveIntensity: 0.15,
+      }),
+    );
+    ball.castShadow = true;
+    scene.add(ball);
+
+    const drillRoot = new THREE.Group();
+    scene.add(drillRoot);
+
+    const motion = { on: true, t: 0 };
+    const drillHelpers = {
+      ballPath: 'none',
+      pepperA: null,
+      pepperB: null,
+      wallHit: null,
+      wallPasser: null,
+      serveTargets: null,
+      ladderPts: null,
+      ladderFeed: null,
+    };
+
+    const pick = document.getElementById('drillPick');
+    const checklistEl = document.getElementById('checklist');
+    for (const d of DRILLS) {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = d.name;
+      pick.appendChild(opt);
+    }
+
+    function clearDrill() {
+      while (drillRoot.children.length > 0) {
+        const ch = drillRoot.children[0];
+        drillRoot.remove(ch);
+        ch.traverse((obj) => {
+          if (obj.geometry) obj.geometry.dispose();
+          if (obj.material) {
+            const mats = obj.material;
+            if (Array.isArray(mats)) mats.forEach((m) => m.dispose());
+            else mats.dispose();
+          }
+        });
+      }
+      drillHelpers.ballPath = 'none';
+      drillHelpers.pepperA = null;
+      drillHelpers.pepperB = null;
+      drillHelpers.wallHit = null;
+      drillHelpers.wallPasser = null;
+      drillHelpers.serveTargets = null;
+      drillHelpers.ladderPts = null;
+      drillHelpers.ladderFeed = null;
+    }
+
+    function applyDrill(id) {
+      const d = DRILLS.find((x) => x.id === id);
+      if (!d) return;
+      clearDrill();
+      checklistEl.innerHTML = d.html;
+      controls.target.copy(d.cameraTarget);
+      camera.position.copy(d.cameraPos);
+      d.build(scene, drillRoot, drillHelpers);
+      controls.update();
+    }
+
+    pick.addEventListener('change', () => applyDrill(pick.value));
+
+    document.getElementById('btnToggleMotion').addEventListener('click', () => {
+      motion.on = !motion.on;
+      document.getElementById('btnToggleMotion').textContent = motion.on ? 'Motion: on' : 'Motion: off';
+    });
+
+    applyDrill(DRILLS[0].id);
+
+    function syncRenderSize() {
+      const vv = window.visualViewport;
+      const w = Math.max(1, vv?.width ?? window.innerWidth);
+      const h = Math.max(1, vv?.height ?? window.innerHeight);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      controls.update();
+    }
+    window.addEventListener('resize', syncRenderSize);
+    window.addEventListener('load', syncRenderSize);
+    requestAnimationFrame(syncRenderSize);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncRenderSize);
+      window.visualViewport.addEventListener('scroll', syncRenderSize);
+    }
+
+    const tmpV = new THREE.Vector3();
+    function updateBall(dt) {
+      if (!motion.on) return;
+      motion.t += dt;
+      const path = drillHelpers.ballPath;
+      if (path === 'pepper' && drillHelpers.pepperA && drillHelpers.pepperB) {
+        const u = (Math.sin(motion.t * 1.8) * 0.5 + 0.5);
+        tmpV.lerpVectors(drillHelpers.pepperA, drillHelpers.pepperB, u);
+        tmpV.y += 0.35 + 0.55 * Math.sin(Math.PI * u);
+        ball.position.copy(tmpV);
+      } else if (path === 'wall' && drillHelpers.wallPasser) {
+        const u = (Math.sin(motion.t * 2.2) * 0.5 + 0.5);
+        const p0 = drillHelpers.wallPasser;
+        const p1 = drillHelpers.wallHit.clone();
+        p1.y = 1.35;
+        tmpV.lerpVectors(p0, p1, u);
+        tmpV.y += 0.25 * Math.sin(Math.PI * u);
+        ball.position.copy(tmpV);
+      } else if (path === 'wallSolo' && drillHelpers.wallPasser) {
+        const cycle = motion.t * 0.9;
+        const phase = cycle % 3;
+        const p0 = drillHelpers.wallPasser;
+        const wall = drillHelpers.wallHit.clone();
+        wall.y = 1.2;
+        if (phase < 1) {
+          const u = phase;
+          tmpV.lerpVectors(p0, wall, u);
+          tmpV.y += 0.4 * Math.sin(Math.PI * u);
+        } else if (phase < 2) {
+          const u = phase - 1;
+          tmpV.lerpVectors(wall, p0, u);
+          tmpV.y += 0.35 * Math.sin(Math.PI * u);
+        } else {
+          const u = phase - 2;
+          tmpV.copy(p0);
+          tmpV.y += 0.5 + 0.3 * Math.sin(u * Math.PI * 2);
+        }
+        ball.position.copy(tmpV);
+      } else if (path === 'serve' && drillHelpers.serveTargets?.length) {
+        const idx = Math.floor(motion.t * 0.45) % drillHelpers.serveTargets.length;
+        const tgt = drillHelpers.serveTargets[idx];
+        const u = (Math.sin(motion.t * 2.8) * 0.5 + 0.5);
+        const start = new THREE.Vector3(0.5, 1.4, HALF_L - 0.8);
+        tmpV.lerpVectors(start, tgt, u);
+        tmpV.y += 0.6 * Math.sin(Math.PI * u) + ballR;
+        ball.position.copy(tmpV);
+      } else if (path === 'ladder' && drillHelpers.ladderPts?.length && drillHelpers.ladderFeed) {
+        const n = drillHelpers.ladderPts.length;
+        const stepT = motion.t * 0.55;
+        const i = Math.floor(stepT) % n;
+        const u = stepT - Math.floor(stepT);
+        const from = drillHelpers.ladderFeed;
+        const to = drillHelpers.ladderPts[i];
+        tmpV.lerpVectors(from, to, u);
+        tmpV.y += 0.45 * Math.sin(Math.PI * u) + ballR * 0.5;
+        ball.position.copy(tmpV);
+      } else {
+        ball.position.set(0, ballR + 0.02, 2);
+      }
+    }
+
+    let last = performance.now();
+    function tick(now) {
+      requestAnimationFrame(tick);
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      updateBall(dt);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    tick(last);
+  </script>
+</body>
+</html>
