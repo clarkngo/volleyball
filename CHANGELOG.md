@@ -20,6 +20,7 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 ### Changed
 
+- `prototypes/09-setter-footwork.html` — Timeline opens on **set base** (hold + reset to release); **CSS2D** **L** / **R** foot chips; ball parked on target until approach segment; dual renderer resize.
 - **`docs/IDEAS.md`** — Item **5 (setter footwork)** marked shipped (**09**). (Item **4** / **08** from earlier commit.)
 - **`index.html`** — Links for prototypes **06**–**09**; doc links for **IDEAS**, **PRE_WRITE**, **POST_WRITE**.
 - **`README.md`** — Prototypes **06**–**09**; backlog + **PRE_WRITE** pointer.

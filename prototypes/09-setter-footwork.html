@@ -95,6 +95,23 @@
     #info ul { margin: 4px 0 0 1.1rem; padding: 0; }
     canvas { display: block; touch-action: none; }
     code.path { background: #12141c; color: #ff6ec7; padding: 0 4px; border-radius: 4px; font-size: 10px; }
+    .foot-tag {
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: #0a0e14;
+      background: linear-gradient(135deg, #7cf0ff, #a5f3fc);
+      border: 1px solid rgba(0, 245, 212, 0.6);
+      border-radius: 6px;
+      padding: 2px 8px;
+      pointer-events: none;
+      user-select: none;
+      text-shadow: none;
+    }
+    .foot-tag.r {
+      background: linear-gradient(135deg, #fda4af, #fbcfe8);
+      border-color: rgba(255, 110, 199, 0.55);
+    }
     @media (max-width: 640px) {
       #hud {
         left: 0;
@@ -159,6 +176,7 @@
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
     window.addEventListener('error', (ev) => {
       const el = document.getElementById('load-error');
@@ -341,6 +359,52 @@
       },
     ];
 
+    /** Timeline: hold squared base first, quick reset to release, then original approach → base again. */
+    const PLAY_START_U = 0.14;
+    function buildKeyframesStartingAtBase(raw) {
+      const last = raw[raw.length - 1];
+      const first = raw[0];
+      const scale = 1 - PLAY_START_U;
+      const out = [
+        {
+          u: 0,
+          phase: 'Set base (ready)',
+          cue: 'Setter starts at the squared base behind the ball. Loop then resets to release for the next approach.',
+          lf: last.lf.clone(),
+          rf: last.rf.clone(),
+        },
+        {
+          u: 0.08,
+          phase: 'Set base (ready)',
+          cue: 'Hold: neutral feet, hands ready — same finish pose you want each rep.',
+          lf: last.lf.clone(),
+          rf: last.rf.clone(),
+        },
+        {
+          u: PLAY_START_U,
+          phase: first.phase,
+          cue: first.cue,
+          lf: first.lf.clone(),
+          rf: first.rf.clone(),
+        },
+      ];
+      for (let i = 1; i < raw.length; i++) {
+        const k = raw[i];
+        out.push({
+          u: PLAY_START_U + k.u * scale,
+          phase: k.phase,
+          cue: k.cue,
+          lf: k.lf.clone(),
+          rf: k.rf.clone(),
+        });
+      }
+      return out;
+    }
+
+    for (const s of SCENARIOS) {
+      s.keyframes = buildKeyframesStartingAtBase(s.keyframes);
+    }
+
     function smoothstep(t) {
       const x = Math.min(1, Math.max(0, t));
       return x * x * (3 - 2 * x);
@@ -378,14 +442,30 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    document.body.appendChild(renderer.domElement);
+    const glCanvas = renderer.domElement;
+    glCanvas.style.display = 'block';
+    glCanvas.style.position = 'fixed';
+    glCanvas.style.left = '0';
+    glCanvas.style.top = '0';
+    glCanvas.style.zIndex = '0';
+    document.body.appendChild(glCanvas);
+
+    const labelRenderer = new CSS2DRenderer();
+    const labelLayer = labelRenderer.domElement;
+    labelLayer.style.position = 'fixed';
+    labelLayer.style.left = '0';
+    labelLayer.style.top = '0';
+    labelLayer.style.zIndex = '1';
+    labelLayer.style.pointerEvents = 'none';
+    labelLayer.style.background = 'transparent';
+    document.body.appendChild(labelLayer);
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050508);
     scene.fog = new THREE.FogExp2(0x0a0c14, 0.007);
 
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 150);
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, glCanvas);
     controls.maxPolarAngle = Math.PI * 0.49;
     controls.minDistance = 6;
     controls.maxDistance = 50;
@@ -571,6 +651,17 @@
     rfMesh.castShadow = true;
     overlay.add(lfMesh, rfMesh);
 
+    function makeFootTag(letter, cssClass) {
+      const div = document.createElement('div');
+      div.className = `foot-tag ${cssClass}`.trim();
+      div.textContent = letter;
+      const obj = new CSS2DObject(div);
+      obj.position.set(0, 0.22, 0);
+      return obj;
+    }
+    lfMesh.add(makeFootTag('L', ''));
+    rfMesh.add(makeFootTag('R', 'r'));
+
     const ballR = 0.105;
     const ball = new THREE.Mesh(
       new THREE.SphereGeometry(ballR, 28, 20),
@@ -670,6 +761,7 @@
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      labelRenderer.setSize(w, h);
       controls.update();
     }
     window.addEventListener('resize', syncRenderSize);
@@ -699,13 +791,19 @@
       document.getElementById('phase-sub').textContent = samp.cue;
       document.getElementById('timeline-fill').style.width = `${u * 100}%`;
 
-      const bu = Math.min(1, u / scenario.ballTravelEndU);
-      ballCurve.getPoint(smoothstep(bu), tmpB);
-      ball.position.copy(tmpB);
+      if (u < PLAY_START_U) {
+        tmpB.copy(scenario.ballEnd);
+        ball.position.copy(tmpB);
+      } else {
+        const playU = (u - PLAY_START_U) / (1 - PLAY_START_U);
+        const bu = Math.min(1, playU / scenario.ballTravelEndU);
+        ballCurve.getPoint(smoothstep(bu), tmpB);
+        ball.position.copy(tmpB);
+      }
 
       const showTrail = document.getElementById('showTrail').checked;
       trailLine.visible = showTrail;
-      if (u < 0.03) {
+      if (u < 0.025 || u < PLAY_START_U) {
         trailRing.length = 0;
         trailGeo.setDrawRange(0, 0);
       }
@@ -723,6 +821,7 @@
 
       controls.update();
       renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
     }
     tick(last);
   </script>
