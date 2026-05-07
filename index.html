@@ -3,161 +3,604 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Volleyball · Three.js prototypes</title>
+  <title>Volleyball · Three.js Prototypes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #050508;
-      --panel: #0f1218;
-      --text: #e8f4ff;
-      --muted: #8a9cb0;
-      --cyan: #00f5d4;
-      --pink: #ff6ec7;
-      --violet: #a855f7;
+      --bg: #060810;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,165,50,0.4);
+      --text: #f0f4ff;
+      --muted: #7a8aaa;
+      --orange: #ff8c00;
+      --amber: #ffb730;
+      --blue: #3b82f6;
+      --sky: #7dd3fc;
+      --glow-orange: rgba(255,140,0,0.15);
+      --glow-blue: rgba(59,130,246,0.12);
     }
-    * { box-sizing: border-box; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
     }
-    .wrap {
-      max-width: 42rem;
+
+    /* ── Ambient background blobs ── */
+    .blobs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.35;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .blob-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, #ff8c00 0%, transparent 70%);
+      top: -200px; left: -200px;
+      animation-duration: 22s;
+    }
+    .blob-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+      bottom: -150px; right: -150px;
+      animation-duration: 18s;
+      animation-delay: -8s;
+    }
+    .blob-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #ffb730 0%, transparent 70%);
+      top: 40%; left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.15;
+      animation-duration: 25s;
+      animation-delay: -4s;
+    }
+    @keyframes drift {
+      0%   { transform: translate(0, 0) scale(1); }
+      33%  { transform: translate(40px, -30px) scale(1.05); }
+      66%  { transform: translate(-20px, 50px) scale(0.95); }
+      100% { transform: translate(30px, 20px) scale(1.02); }
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 2.5rem 1.25rem 4rem;
+      padding: 0 1.5rem 6rem;
     }
-    h1 {
-      font-size: 1.65rem;
+
+    /* ── Nav ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+    .nav-logo {
+      font-size: 1rem;
       font-weight: 700;
-      margin: 0 0 0.35rem;
-      color: #7cf0ff;
-      text-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
+      color: var(--amber);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .lede {
-      color: var(--muted);
-      font-size: 0.95rem;
-      margin: 0 0 2rem;
-    }
-    ul {
+    .nav-logo svg { width: 22px; height: 22px; }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
       list-style: none;
-      padding: 0;
-      margin: 0;
     }
-    li {
-      margin-bottom: 0.65rem;
-    }
-    a.card {
-      display: block;
-      padding: 1rem 1.15rem;
-      border-radius: 10px;
-      background: var(--panel);
-      border: 1px solid rgba(0, 245, 212, 0.18);
-      color: var(--text);
-      text-decoration: none;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    a.card:hover {
-      border-color: rgba(0, 245, 212, 0.45);
-      box-shadow: 0 0 24px rgba(0, 245, 212, 0.08);
-    }
-    a.card strong {
-      display: block;
-      font-size: 1.02rem;
-      color: var(--cyan);
-      margin-bottom: 0.25rem;
-    }
-    a.card span {
-      font-size: 0.88rem;
-      color: var(--muted);
-    }
-    .meta {
-      margin-top: 2.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    .nav-links a {
       font-size: 0.85rem;
       color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
     }
-    .meta a {
-      color: var(--pink);
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: 5rem 0 4rem;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,140,0,0.1);
+      border: 1px solid rgba(255,140,0,0.25);
+      color: var(--amber);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1.75rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 .line1 { color: var(--text); }
+    .hero h1 .line2 {
+      background: linear-gradient(135deg, var(--orange) 0%, var(--amber) 50%, var(--sky) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--orange), var(--amber));
+      color: #000;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      padding: 0.75rem 1.75rem;
+      border-radius: 100px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(255,140,0,0.3);
+    }
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(255,140,0,0.45);
+    }
+
+    /* ── Stats strip ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin: 3rem 0 4rem;
+      padding: 1.5rem 2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .stat { text-align: center; }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--orange), var(--amber));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Section heading ── */
+    .section-head {
+      margin-bottom: 1.5rem;
+    }
+    .section-head h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .section-head p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Cards grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1rem;
+      list-style: none;
+    }
+
+    a.card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 1.4rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+    a.card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--glow-orange) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    a.card:hover {
+      border-color: var(--border-hover);
+      background: var(--surface-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 40px rgba(255,140,0,0.12);
+    }
+    a.card:hover::before { opacity: 1; }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .card-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: rgba(255,140,0,0.12);
+      border: 1px solid rgba(255,140,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .card-num {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,0.05);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .card-desc {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--amber);
+      background: rgba(255,183,48,0.1);
+      border: 1px solid rgba(255,183,48,0.2);
+      padding: 0.2rem 0.55rem;
+      border-radius: 100px;
+      margin-top: 0.25rem;
+      width: fit-content;
+    }
+
+    /* ── Featured card (wide) ── */
+    .card.featured {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      gap: 2rem;
+      padding: 2rem;
+      border-color: rgba(255,140,0,0.3);
+      background: linear-gradient(135deg, rgba(255,140,0,0.07), rgba(59,130,246,0.05));
+    }
+    .card.featured .card-body { flex: 1; }
+    .card.featured .card-title { font-size: 1.2rem; }
+    .card.featured .card-desc { font-size: 0.9rem; }
+    .card.featured .card-icon {
+      width: 56px; height: 56px;
+      font-size: 1.6rem;
+      background: rgba(255,140,0,0.15);
+    }
+    .featured-arrow {
+      color: var(--orange);
+      font-size: 1.4rem;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .card.featured:hover .featured-arrow {
+      opacity: 1;
+      transform: translateX(4px);
+    }
+
+    /* ── Docs section ── */
+    .docs-strip {
+      margin-top: 3rem;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+    }
+    .docs-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      flex-shrink: 0;
+    }
+    .docs-strip a {
+      font-size: 0.83rem;
+      color: var(--sky);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .docs-strip a:hover { color: var(--text); }
+    .docs-sep { color: var(--border); }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--sky); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .stats { gap: 1.5rem; flex-wrap: wrap; }
+      .card.featured { flex-direction: column; }
+      nav { flex-direction: column; gap: 1rem; align-items: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Volleyball · Three.js prototypes</h1>
-    <p class="lede">
-      Interactive demos (Three.js from CDN). Works on
-      <a href="https://pages.github.com/" style="color: var(--cyan)">GitHub Pages</a>
-      over HTTPS. Each link opens a full-page scene.
-    </p>
-    <ul>
-      <li>
-        <a class="card" href="prototypes/03-standard-volleyball-court.html">
-          <strong>Standard court (FIVB scale)</strong>
-          <span>18×9 m, neon lines, net, posts, attack lines.</span>
-        </a>
-      </li>
+
+  <div class="blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <div class="page">
+
+    <nav>
+      <div class="nav-logo">
+        <!-- volleyball SVG -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 2C12 2 8 6 8 12C8 18 12 22 12 22" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 2C12 2 16 6 16 12C16 18 12 22 12 22" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M2 12H22" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        VB · Three.js
+      </div>
+      <ul class="nav-links">
+        <li><a href="README.md">README</a></li>
+        <li><a href="docs/ideas.html">Ideas</a></li>
+        <li><a href="docs/THREE_JS_PLAN.md">Plan</a></li>
+      </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-badge">
+        <!-- spark icon -->
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0l1.5 5.5L15 7l-5.5 1.5L8 14l-1.5-5.5L1 7l5.5-1.5z"/></svg>
+        Interactive Three.js Visualizations
+      </div>
+      <h1>
+        <span class="line1">Volleyball</span><br />
+        <span class="line2">Training Visualizer</span>
+      </h1>
+      <p>3D interactive drills, court mechanics, and tactical breakdowns — built with Three.js. Opens directly in the browser.</p>
+      <a class="hero-cta" href="prototypes/03-standard-volleyball-court.html">
+        Open Court Demo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value">9</div>
+        <div class="stat-label">Prototypes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">3D</div>
+        <div class="stat-label">Interactive</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">FIVB</div>
+        <div class="stat-label">Scale</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">CDN</div>
+        <div class="stat-label">No build step</div>
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="section-head">
+      <h2>Prototypes</h2>
+      <p>Click any scene to open it full-page.</p>
+    </div>
+
+    <ul class="grid">
+
+      <!-- Featured -->
+      <a class="card featured" href="prototypes/03-standard-volleyball-court.html">
+        <div class="card-icon">🏐</div>
+        <div class="card-body">
+          <div class="card-title">Standard Court (FIVB Scale)</div>
+          <div class="card-desc">18×9 m regulation court with neon boundary lines, net, antenna posts, and 3-metre attack lines. The definitive reference scene.</div>
+          <div class="card-tag">⭐ Start here</div>
+        </div>
+        <div class="featured-arrow">→</div>
+      </a>
+
       <li>
         <a class="card" href="prototypes/01-court-scene.html">
-          <strong>Court scene</strong>
-          <span>Earlier stylized court + orbit camera.</span>
+          <div class="card-header">
+            <div class="card-icon">🏟️</div>
+            <div class="card-num">01</div>
+          </div>
+          <div class="card-title">Court Scene</div>
+          <div class="card-desc">Stylized early court with orbit camera. The first scene prototype.</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/02-ball-arc.html">
-          <strong>Ball arc</strong>
-          <span>Serve-style Bézier path, replay.</span>
+          <div class="card-header">
+            <div class="card-icon">🌀</div>
+            <div class="card-num">02</div>
+          </div>
+          <div class="card-title">Ball Arc</div>
+          <div class="card-desc">Serve-style Bézier flight path with looping replay animation.</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/04-player-positions.html">
-          <strong>Player positions</strong>
-          <span>USAV zones Z1–Z6, formations dropdown, CSS2D labels.</span>
+          <div class="card-header">
+            <div class="card-icon">📍</div>
+            <div class="card-num">04</div>
+          </div>
+          <div class="card-title">Player Positions</div>
+          <div class="card-desc">USAV zones Z1–Z6, formations dropdown, CSS2D floating labels.</div>
+          <div class="card-tag">Formations</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/05-outside-hitter-defense.html">
-          <strong>Outside hitter · defense</strong>
-          <span>Perimeter vs rotational D, animation, cones &amp; responsibility rings.</span>
+          <div class="card-header">
+            <div class="card-icon">🛡️</div>
+            <div class="card-num">05</div>
+          </div>
+          <div class="card-title">Outside Hitter · Defense</div>
+          <div class="card-desc">Perimeter vs rotational defense, live animation, responsibility cones &amp; rings.</div>
+          <div class="card-tag">Defense</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/06-attack-sets.html">
-          <strong>Attack sets</strong>
-          <span>Net zones 1–9, front-row + back-row (Pipe, Bic, 30, 10, D) + dump.</span>
+          <div class="card-header">
+            <div class="card-icon">⚡</div>
+            <div class="card-num">06</div>
+          </div>
+          <div class="card-title">Attack Sets</div>
+          <div class="card-desc">Net zones 1–9, front-row &amp; back-row (Pipe, Bic, 30, 10, D) plus setter dump.</div>
+          <div class="card-tag">Offense</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/07-outside-hitter-approach.html">
-          <strong>OH approach · 5 / 4 / Shoot</strong>
-          <span>Wide outside entry; L/R feet + ball synced; slow playback; reads &amp; patterns.</span>
+          <div class="card-header">
+            <div class="card-icon">👟</div>
+            <div class="card-num">07</div>
+          </div>
+          <div class="card-title">OH Approach · 5 / 4 / Shoot</div>
+          <div class="card-desc">Wide outside entry; L/R feet &amp; ball synced; slow playback; read patterns.</div>
+          <div class="card-tag">Footwork</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/08-basic-drills.html">
-          <strong>Basic drills</strong>
-          <span>Pepper, wall ball, serving targets, passing ladder, solo wall sequence; floor rings + motion.</span>
+          <div class="card-header">
+            <div class="card-icon">🔄</div>
+            <div class="card-num">08</div>
+          </div>
+          <div class="card-title">Basic Drills</div>
+          <div class="card-desc">Pepper, wall ball, serving targets, passing ladder, solo wall sequence with floor rings &amp; motion.</div>
+          <div class="card-tag">Drills</div>
         </a>
       </li>
+
       <li>
         <a class="card" href="prototypes/09-setter-footwork.html">
-          <strong>Setter footwork · OOS &amp; first ball</strong>
-          <span>In-system, tight, off-net, inside seam, wide pin; L/R feet + ball arc; phases + step counts.</span>
+          <div class="card-header">
+            <div class="card-icon">🎯</div>
+            <div class="card-num">09</div>
+          </div>
+          <div class="card-title">Setter Footwork · OOS &amp; First Ball</div>
+          <div class="card-desc">In-system, tight, off-net, inside seam, wide pin; L/R feet &amp; ball arc; phases &amp; step counts.</div>
+          <div class="card-tag">Setter</div>
         </a>
       </li>
+
     </ul>
-    <div class="meta">
-      Docs in repo:
-      <a href="README.md">README.md</a> ·
-      <a href="docs/ideas.html">Ideas backlog</a>
-      (<a href="docs/IDEAS.md">IDEAS.md</a>) ·
-      <a href="docs/THREE_JS_PLAN.md">THREE_JS_PLAN.md</a> ·
-      <a href="docs/LESSONS_LEARNED.md">LESSONS_LEARNED.md</a> ·
-      <a href="docs/PRE_WRITE.md">PRE_WRITE</a> ·
+
+    <!-- Docs -->
+    <div class="docs-strip">
+      <span class="docs-label">Docs</span>
+      <a href="README.md">README</a>
+      <span class="docs-sep">·</span>
+      <a href="docs/ideas.html">Ideas Backlog</a>
+      <span class="docs-sep">·</span>
+      <a href="docs/IDEAS.md">IDEAS.md</a>
+      <span class="docs-sep">·</span>
+      <a href="docs/THREE_JS_PLAN.md">THREE_JS_PLAN.md</a>
+      <span class="docs-sep">·</span>
+      <a href="docs/LESSONS_LEARNED.md">LESSONS_LEARNED.md</a>
+      <span class="docs-sep">·</span>
+      <a href="docs/PRE_WRITE.md">PRE_WRITE</a>
+      <span class="docs-sep">·</span>
       <a href="docs/POST_WRITE.md">POST_WRITE</a>
     </div>
+
+    <footer>
+      Built with <a href="https://threejs.org">Three.js</a> — served via CDN, no build step. Hosted on <a href="https://pages.github.com">GitHub Pages</a>.
+    </footer>
+
   </div>
+
 </body>
 </html>
