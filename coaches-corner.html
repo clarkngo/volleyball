@@ -208,6 +208,21 @@
     .note { font-size: 0.75rem; color: var(--muted); margin-top: 1rem; }
 
     /* Situations */
+    /* Pressure scenario scoreboard */
+    .sb-status { text-align: center; font-size: 0.85rem; color: var(--muted); min-height: 1.5rem; margin-bottom: 0.75rem; }
+    .sb-hot { color: var(--amber); font-weight: 700; }
+    .sb-win { color: var(--good); font-weight: 800; font-size: 1rem; }
+    .sb-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.75rem; align-items: center; }
+    .sb-side { text-align: center; padding: 1rem 0.5rem; border-radius: 14px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); transition: border-color 0.2s, background 0.2s; }
+    .sb-side.serving { border-color: rgba(255,183,48,0.45); background: rgba(255,140,0,0.07); }
+    .sb-side.won { border-color: rgba(74,222,128,0.5); background: rgba(74,222,128,0.08); }
+    .sb-name { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .sb-score { font-size: clamp(3rem, 9vw, 4.5rem); font-weight: 900; line-height: 1.05; font-variant-numeric: tabular-nums; margin: 0.25rem 0 0.6rem; }
+    .sb-dash { font-size: 2rem; color: var(--muted); font-weight: 300; }
+    .sb-plus { width: 100%; padding: 0.6rem; font-size: 0.9rem; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .sb-tools { justify-content: center; margin-top: 0.9rem; }
+
     /* Plyometrics */
     .tag.int-low { color: var(--good); background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); }
     .tag.int-moderate { color: var(--amber); background: rgba(255,183,48,0.08); border-color: rgba(255,183,48,0.25); }
@@ -305,9 +320,33 @@
     <!-- ───────────── Drills ───────────── -->
     <section class="panel" id="panel-drills" role="tabpanel" aria-labelledby="tab-drills">
       <div class="section-head">
-        <h2>Drill library</h2>
-        <p>Filter by skill and level. Open a drill for setup, flow, coaching cues, and how to make it harder.</p>
+        <h2>Drills</h2>
+        <p>Pressure scenarios for game-like reps, plus a drill library you can filter by skill and level.</p>
       </div>
+
+      <div class="planner" id="pressure">
+        <div class="box">
+          <div class="box-title">
+            <span>Pressure scenario</span>
+            <div class="btn-row">
+              <select id="sc-length" aria-label="Set length">
+                <option value="any">Any set</option>
+                <option value="25">Set to 25</option>
+                <option value="15">Fifth set (15)</option>
+              </select>
+              <button class="btn primary" id="sc-deal" type="button">🎲 Deal scenario</button>
+            </div>
+          </div>
+          <div id="sc-card"></div>
+          <p class="note">Deal a tight-game situation, read it out to the team, then scrimmage from that score. Pair it with any drill tagged <b>Game pressure</b>.</p>
+        </div>
+        <div class="box">
+          <div class="box-title"><span>Scoreboard</span><span style="text-transform:none;letter-spacing:0;font-weight:500">Rally scoring · winner serves</span></div>
+          <div id="sc-board"></div>
+        </div>
+      </div>
+
+      <h3 class="sub-head">Drill library <small>Open a drill for setup, flow, coaching cues, and how to make it harder</small></h3>
       <div class="filters">
         <input class="search" id="drill-search" type="search" placeholder="Search drills…" aria-label="Search drills" />
         <select id="drill-level" aria-label="Level">
@@ -465,7 +504,7 @@
       flow: ['Serve zone 1; move to the next zone only after a make.', 'First player through all six zones wins.', 'Add short zones (2, 3, 4 front) once players are consistent.'],
       cues: ['Consistent toss — same height, same spot, every time.', 'Firm wrist and contact the middle of the ball for a float.', 'Finish toward the target; aim with the follow-through.'],
       harder: 'Miss = go back one zone. Add a passer standing in the target zone.' },
-    { id: 'pressure-serve', name: 'Pressure Serving', skills: ['serve'], level: 'Intermediate', players: 'Team', time: '10 min',
+    { id: 'pressure-serve', name: 'Pressure Serving', skills: ['serve', 'pressure'], level: 'Intermediate', players: 'Team', time: '10 min',
       summary: 'Serving under consequence — the closest you get to 23–24 in practice.',
       setup: 'Whole team on the end line. Coach calls a target zone for each round.',
       flow: ['Each player serves once in turn; the team needs a set number of consecutive makes (e.g. 12).', 'A miss resets the count to zero.', 'Teammates may cheer but not coach during a serve.'],
@@ -537,7 +576,7 @@
       flow: ['Set the hitter; coach blocks the ball back down.', 'Coverage players form a cup around the hitter and play it up.', 'Re-set and attack again.'],
       cues: ['Low and close: 1–2 m from the hitter, eyes on the hands.', 'Shape: 3 close, 2 deep.', 'Hitter calls "cover" on the approach.'],
       harder: 'Rally continues until a clean kill. Count covered balls as team points.' },
-    { id: 'wash', name: 'Wash Drill (Big Point / Little Point)', skills: ['team', 'pass', 'serve'], level: 'Advanced', players: '12', time: '20 min',
+    { id: 'wash', name: 'Wash Drill (Big Point / Little Point)', skills: ['team', 'pass', 'serve', 'pressure'], level: 'Advanced', players: '12', time: '20 min',
       summary: 'Six vs six where you score a big point only by winning serve receive and the next free ball.',
       setup: 'Two full teams. One serves, one receives.',
       flow: ['Serve → rally. Winner earns a little point.', 'Coach immediately sends a free ball to the other team → rally. Winner earns a little point.', 'Win both little points = big point. Split = "wash," no score. Play to 5 big points per rotation.'],
@@ -567,11 +606,84 @@
       flow: ['20 s shuffle sideline to sideline in a low stance.', '10 s sprint to the 3 m line and back to base.', '20 s rest; repeat 6–8 rounds.'],
       cues: ['Stay low — hips below shoulders.', 'Push off the outside foot; don\'t cross feet on shuffles.', 'Quality reps over speed.'],
       harder: 'Coach tosses a ball at the end of each round to dig or pursue.' },
+    // ── Game pressure: game-like drills that make every rally feel like 23–23.
+    { id: 'start-22', name: 'Start at 22–22', skills: ['pressure', 'team'], level: 'Intermediate', players: '12', time: '20–25 min',
+      summary: 'Scrimmage mini-games that start at the end of a tight set. Every rally is a late-game rally.',
+      setup: 'Two full teams. Start the score at 22–22 with the receiving team chosen by coin flip. Play to 25, win by 2.',
+      flow: ['Play the mini-game exactly like a match: rally scoring, same serve and rotation rules.', 'After each mini-game, both teams rotate once and the loser serves first.', 'Track mini-games won; first team to 5 wins the drill.'],
+      cues: ['Same routine on every serve — the score doesn\'t change your toss.', 'Talk before every rally: who\'s serving, who\'s hot, where the setter is.', 'Aggressive and in: no free points, no free balls out of fear.'],
+      harder: 'Start at 23–23 or 24–24. Coaches may not call timeouts — players must reset themselves.' },
+    { id: 'comeback', name: 'Down 21–24: Comeback', skills: ['pressure', 'team'], level: 'Intermediate', players: '12', time: '15–20 min',
+      summary: 'One team starts facing triple set point. Teaches staying alive one rally at a time.',
+      setup: 'Team A down 21–24, Team B serving. Play to 25, win by 2. Switch which team trails each game.',
+      flow: ['Team A must side out, then go on a serving run to survive.', 'If Team A completes the comeback, they earn a "big point."', 'Rotate both teams after each game so every rotation faces it.'],
+      cues: ['"One point" — never think about the scoreboard total.', 'Sideout with the highest-percentage play.', 'Tough serve when it\'s your turn; a missed serve ends the comeback.'],
+      harder: 'Start down 20–24 or 19–24. The trailing team gets no timeouts.' },
+    { id: 'close-out', name: 'Close It Out (Up 24–22)', skills: ['pressure', 'team', 'serve'], level: 'Intermediate', players: '12', time: '15 min',
+      summary: 'Holding a lead is its own kind of pressure. One team must finish the set before the other ties it.',
+      setup: 'Team A up 24–22 and serving. Team B must win 3 straight to take the lead.',
+      flow: ['Team A wins the game by scoring one point; Team B wins only by winning the set.', 'Rotate the leading team every game.', 'Track how many games each team closes out of their chances.'],
+      cues: ['Keep serving with intent — a soft serve gives them a free swing.', 'Set your most reliable hitter, not the flashiest play.', 'Stay loud: tight teams get quiet when they\'re ahead.'],
+      harder: 'A missed serve by the leading team immediately gives the other team a point and the serve.' },
+    { id: 'sideout-or-sit', name: 'Sideout or Sit', skills: ['pressure', 'pass', 'team'], level: 'Advanced', players: '12–15', time: '15–20 min',
+      summary: 'Receiving team must side out on the first rally or rotate off the court. Mimics the "must-sideout" late-set feeling.',
+      setup: 'One receiving side of 6 with a group waiting off-court. A serving team on the other side.',
+      flow: ['Serve live. If the receiving team wins the rally, they score and stay on.', 'If they lose, the waiting group runs on and receives next.', 'First group to 7 sideouts wins.'],
+      cues: ['Serve receive is the whole drill: pass high to the middle.', 'Hitters, take smart swings — an error sends you off.', 'Talk through the seams before every serve.'],
+      harder: 'The serving team earns a point for every ace or stuff block; first to 7 between servers and receivers.' },
+    { id: 'break-run', name: 'Run It: 3 Straight', skills: ['pressure', 'serve', 'defense', 'team'], level: 'Advanced', players: '12', time: '15 min',
+      summary: 'The serving team must win 3 rallies in a row on its own serve to score. Trains putting together a run.',
+      setup: 'Team A serves; Team B receives. Coach tracks consecutive rallies won by the serving team.',
+      flow: ['Team A scores a "run" only after winning 3 straight rallies on serve.', 'If Team B wins a rally at any point, the count resets and the teams swap roles.', 'First team to 3 runs wins.'],
+      cues: ['Serve tough to a target, not just "in."', 'Block and defense win runs: transition hard every time.', 'Next server keeps the same routine after a long rally.'],
+      harder: 'Require 4 straight. The run only counts if the same server serves all of it.' },
+    { id: 'set-point-serve', name: 'Set-Point Serve (Iced)', skills: ['pressure', 'serve'], level: 'Beginner', players: 'Team', time: '10 min',
+      summary: 'Serving after the opponent "ices" you with a timeout. The whole team waits in silence before each serve.',
+      setup: 'One server at the line. The rest of the team stands at the net in silence for 20–30 s, as if after a timeout.',
+      flow: ['Coach announces the score: "24–23, set point."', 'After the wait, the server gets one serve to a called zone.', 'Make = the team scores; miss = the opponent scores. Play to 5.'],
+      cues: ['Use the wait: breathe, pick the target, rehearse the toss.', 'Same routine — no extra bounces, no rushing.', 'Commit to a tough, in serve; a soft serve is a free ball.'],
+      harder: 'A passer stands in the target zone; the serve only scores if the pass is a 0 or 1.' },
+    { id: 'fifth-set', name: 'Fifth-Set Simulation', skills: ['pressure', 'team'], level: 'Intermediate', players: '12', time: '15–20 min',
+      summary: 'Full games to 15 with match rules. Short sets punish slow starts and every error is magnified.',
+      setup: 'Two full teams. Play to 15, win by 2. Switch sides at 8, like a deciding set.',
+      flow: ['Coin toss for serve; each team gets 2 timeouts.', 'Bench players track rotation errors and serving errors aloud.', 'Play best of three.'],
+      cues: ['Start fast — 0–3 in a set to 15 is like 0–5 in a set to 25.', 'Use timeouts early to stop runs.', 'Serve in; serving errors decide short sets.'],
+      harder: 'Start at 8–8 after the side switch, or at 12–12.' },
+    { id: 'error-double', name: 'Errors Count Double', skills: ['pressure', 'team'], level: 'Intermediate', players: '12', time: '15–20 min',
+      summary: 'Unforced errors (missed serves, hitting out, net faults) give the opponent 2 points. Teaches clean play when it matters.',
+      setup: 'Regular 6 vs 6 scrimmage, starting at 15–15 to 25.',
+      flow: ['A kill, ace, or block earns 1 point as normal.', 'An unforced error gives the opponent 2 points.', 'Coach is the only judge of "unforced."'],
+      cues: ['Hit high off the block or roll deep instead of swinging into the net.', 'Serve aggressive but with margin above the tape.', 'Win the long rally — patience is a weapon.'],
+      harder: 'Aces and stuff blocks also count double, so risk and reward both go up.' },
+    { id: 'momentum-ball', name: 'Momentum Swing', skills: ['pressure', 'team', 'defense'], level: 'Advanced', players: '12', time: '15–20 min',
+      summary: 'After every rally, the coach sends a down ball to the team that just lost. Teams must handle swings in momentum.',
+      setup: 'Two full teams, coach on the sideline with balls. Start at 18–18.',
+      flow: ['Play a served rally. The winner scores 1.', 'Coach immediately sends a down ball or free ball to the losing team; play it out for 1 point.', 'Play to 25, win by 2.'],
+      cues: ['Reset instantly — the next ball is already coming.', 'Winners: don\'t celebrate on the court; get back to base.', 'Losers: the bonus ball is your chance to steal it back.'],
+      harder: 'The bonus ball is a hard driven attack from a box instead of a free ball.' },
+    { id: 'adversity', name: 'Coach\'s Curveball', skills: ['pressure', 'team'], level: 'Advanced', players: '12+', time: '20 min',
+      summary: 'In the middle of a tight scrimmage, the coach throws in a real-match disruption, and the team must adjust without stopping.',
+      setup: 'Scrimmage from 16–16. The coach has a deck of curveball cards (or uses the scenario dealer above).',
+      flow: ['At random moments the coach calls a curveball: "setter out," "libero off," "your best hitter can\'t attack," "no timeouts left."', 'The team adjusts on the fly with one 20-second huddle.', 'Play to 25 with the curveball in place.'],
+      cues: ['Captains lead the reset — one clear instruction.', 'Players know a backup role (who sets if the setter is out?).', 'Stay calm: adjust the plan, not the effort.'],
+      harder: 'Two curveballs at once. No huddle — the team must adjust while play continues.' },
+    { id: 'crowd-noise', name: 'Crowd Noise Scrimmage', skills: ['pressure', 'team'], level: 'Beginner', players: '12', time: '15 min',
+      summary: 'Play with loud crowd noise or a cheering bench on the opponent\'s side to make communication hard.',
+      setup: 'A speaker playing crowd noise, or the bench (reserves) loudly cheering for one side. Scrimmage from 18–18.',
+      flow: ['Communication must happen through eye contact, hand signals, and loud, early calls.', 'Switch which team the noise supports every game.', 'Play to 25.'],
+      cues: ['Call it early and loud, then call it again.', 'Setter uses hand signals for the play.', 'Look at teammates between rallies; don\'t retreat inward.'],
+      harder: 'Add a coach-run "bad call" now and then. Players must reset immediately without arguing.' },
+    { id: 'rotation-escape', name: 'Rotation Escape', skills: ['pressure', 'pass', 'team'], level: 'Intermediate', players: '12', time: '15–20 min',
+      summary: 'Start a team in its weakest rotation. They cannot rotate until they win two rallies in a row. Simulates being stuck.',
+      setup: 'Team A in their lowest-scoring rotation, receiving. Team B serves with a tough server.',
+      flow: ['Team A must win 2 straight rallies to "escape" and rotate.', 'Track how many rallies it takes to escape each rotation.', 'Swap teams after all six rotations, or after 10 minutes.'],
+      cues: ['Change something: receive formation, serve-receive seams, or the first set.', 'Set the most reliable attacker in the rotation.', 'Captain calls a 15-second reset after two losses.'],
+      harder: 'Team B scores a point for every rally Team A loses; first to 10.' },
   ];
 
   const SKILLS = [
     ['all', 'All'], ['serve', 'Serving'], ['pass', 'Passing'], ['set', 'Setting'], ['attack', 'Attacking'],
-    ['block', 'Blocking'], ['defense', 'Defense'], ['team', 'Team'], ['conditioning', 'Conditioning'],
+    ['block', 'Blocking'], ['defense', 'Defense'], ['team', 'Team'], ['pressure', 'Game pressure'], ['conditioning', 'Conditioning'],
   ];
   const SKILL_LABEL = Object.fromEntries(SKILLS);
 
@@ -1524,8 +1636,120 @@
     { t: 'Stop signs', items: ['Pain below the kneecap (jumper\'s knee), shins, or Achilles.', 'Collapsing or loud landings, knees caving in.', 'Stop, regress, and see a qualified professional if pain persists.'] },
   ].map(r => `<div class="card"><h3>${r.t}</h3><ul>${r.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('');
 
+  // ───────────────────────── Pressure scenario dealer + scoreboard ─────────────────────────
+  // Every scenario is written from Team A's point of view.
+  const SCENARIOS = [
+    { title: 'Facing set point', a: 23, b: 24, serve: 'b', to: 25, goal: 'Team A must side out, then win two more. One mistake ends the set.' },
+    { title: 'Triple set point against', a: 21, b: 24, serve: 'b', to: 25, goal: 'Team A needs a sideout and a serving run just to stay alive.' },
+    { title: 'Close it out', a: 24, b: 22, serve: 'a', to: 25, goal: 'Team A serves for the set. Team B needs three straight to steal the lead.' },
+    { title: 'Deuce battle', a: 24, b: 24, serve: 'a', to: 25, goal: 'Win by two. Nobody is safe until the gap opens.' },
+    { title: 'They\'re on a run', a: 18, b: 20, serve: 'b', to: 25, goal: 'Team B has won four straight. Team A must stop the run now.' },
+    { title: 'Neck and neck', a: 20, b: 20, serve: 'b', to: 25, goal: 'The last five points decide it. Every serve, pass, and swing counts.' },
+    { title: 'Big lead slipping', a: 22, b: 19, serve: 'b', to: 25, goal: 'Team A led by six; Team B is surging. Hold your nerve.' },
+    { title: 'Huge comeback', a: 17, b: 22, serve: 'a', to: 25, goal: 'Team A needs eight points before Team B gets three. Serve tough and dig everything.' },
+    { title: 'Fifth set: match point', a: 14, b: 13, serve: 'a', to: 15, goal: 'One point from the match. Team B must sideout and win from here.' },
+    { title: 'Fifth set: down early', a: 9, b: 12, serve: 'b', to: 15, goal: 'Short set, big gap. Team A must win 6 of the next 8 rallies.' },
+    { title: 'Fifth set: side switch', a: 8, b: 7, serve: 'b', to: 15, goal: 'Teams just switched sides. First to string three together wins.' },
+    { title: 'Fifth set: deuce', a: 14, b: 14, serve: 'b', to: 15, goal: 'Win by two to take the match.' },
+  ];
+  const TWISTS = [
+    'No timeouts left for either team.',
+    'Unforced errors give the opponent 2 points.',
+    'Team A\'s libero is out — a defensive specialist plays the back row.',
+    'Team A\'s setter is out — the opposite or libero sets.',
+    'Team A\'s best hitter can only attack from the back row.',
+    'A missed serve gives the opponent a free ball for a bonus point.',
+    'Crowd noise on — hand signals and loud early calls only.',
+    'Aces and stuff blocks are worth 2.',
+    'Team B gets one coach-called "momentum ball" (free ball to them) to use anytime.',
+    'Setter must set the middle on the first perfect pass.',
+    'Team A must serve every ball to zone 1.',
+    'No rule change — just play.',
+  ];
+  const STAKES = [
+    'Losing team collects and puts away all the balls.',
+    'Winning team picks the next drill.',
+    'Losing team does 10 block jumps together (count them toward plyo contacts).',
+    'Winning team gets first water break.',
+    'Losing team serves first in the next scrimmage, down 0–2.',
+    'Winners choose the warm-up music next practice.',
+  ];
+
+  const sb = { a: 0, b: 0, serve: 'a', to: 25, hist: [], scenario: null, twist: '', stake: '' };
+  const randOf = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  function dealScenario() {
+    const len = $('#sc-length').value;
+    const pool = SCENARIOS.filter(s => len === 'any' || String(s.to) === len);
+    let s = randOf(pool);
+    if (pool.length > 1) while (s === sb.scenario) s = randOf(pool);
+    Object.assign(sb, { a: s.a, b: s.b, serve: s.serve, to: s.to, hist: [], scenario: s, twist: randOf(TWISTS), stake: randOf(STAKES) });
+    renderScenario();
+  }
+  const winner = () => (Math.max(sb.a, sb.b) >= sb.to && Math.abs(sb.a - sb.b) >= 2) ? (sb.a > sb.b ? 'a' : 'b') : null;
+
+  function score(team) {
+    if (winner()) return;
+    sb.hist.push({ a: sb.a, b: sb.b, serve: sb.serve });
+    sb[team]++;
+    sb.serve = team; // rally scoring: the rally winner serves next
+    renderScenario();
+  }
+  function undo() {
+    const h = sb.hist.pop();
+    if (!h) return;
+    Object.assign(sb, h);
+    renderScenario();
+  }
+
+  function renderScenario() {
+    const s = sb.scenario;
+    $('#sc-card').innerHTML = `
+      <div class="verdict">${esc(s.title)}</div>
+      <div class="verdict-sub">Start at <b>Team A ${s.a} – ${s.b} Team B</b> · ${s.serve === 'a' ? 'Team A' : 'Team B'} serving · set to ${s.to}, win by 2</div>
+      <div class="plan-group"><h5>🎯 Situation</h5><ul><li>${esc(s.goal)}</li></ul></div>
+      <div class="plan-group"><h5>🌀 Twist</h5><ul><li>${esc(sb.twist)}</li></ul></div>
+      <div class="plan-group"><h5>🏆 Stakes</h5><ul><li>${esc(sb.stake)}</li></ul></div>`;
+    const w = winner();
+    let status;
+    if (w) status = `<span class="sb-win">🏆 Team ${w.toUpperCase()} wins ${Math.max(sb.a, sb.b)}–${Math.min(sb.a, sb.b)}</span>`;
+    else {
+      const lead = sb.a === sb.b ? null : sb.a > sb.b ? 'a' : 'b';
+      const atPoint = lead && sb[lead] >= sb.to - 1;
+      const point = sb.to === 15 ? 'Match point' : 'Set point';
+      status = atPoint ? `<span class="sb-hot">🔥 ${point} — Team ${lead.toUpperCase()}</span>`
+        : sb.a === sb.b && sb.a >= sb.to - 1 ? '<span class="sb-hot">Deuce — win by two</span>'
+        : `First to ${sb.to}, win by 2`;
+    }
+    const side = t => `
+      <div class="sb-side ${sb.serve === t && !w ? 'serving' : ''} ${w === t ? 'won' : ''}">
+        <div class="sb-name">Team ${t.toUpperCase()} ${sb.serve === t && !w ? '<span class="sb-ball" title="Serving">🏐</span>' : ''}</div>
+        <div class="sb-score">${sb[t]}</div>
+        <button class="btn primary sb-plus" type="button" data-team="${t}" ${w ? 'disabled' : ''} aria-label="Point Team ${t.toUpperCase()}">+1 point</button>
+      </div>`;
+    $('#sc-board').innerHTML = `
+      <div class="sb-status" role="status" aria-live="polite">${status}</div>
+      <div class="sb-row">${side('a')}<div class="sb-dash">–</div>${side('b')}</div>
+      <div class="btn-row sb-tools">
+        <button class="btn" type="button" id="sc-undo" ${sb.hist.length ? '' : 'disabled'}>↶ Undo</button>
+        <button class="btn" type="button" id="sc-restart">Restart scenario</button>
+      </div>`;
+  }
+  $('#sc-board').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.team) score(b.dataset.team);
+    else if (b.id === 'sc-undo') undo();
+    else if (b.id === 'sc-restart') {
+      Object.assign(sb, { a: sb.scenario.a, b: sb.scenario.b, serve: sb.scenario.serve, hist: [] });
+      renderScenario();
+    }
+  });
+  $('#sc-deal').addEventListener('click', dealScenario);
+  $('#sc-length').addEventListener('change', dealScenario);
+
   // ───────────────────────── Init ─────────────────────────
   renderDrills();
+  dealScenario();
   renderPlyoLibrary();
   renderSession();
   renderStrategies();
