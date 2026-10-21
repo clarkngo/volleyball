@@ -87,7 +87,7 @@
     .section-head { margin: 0 0 1.25rem; }
     .section-head h2 { font-size: 1.5rem; font-weight: 700; }
     .section-head p { font-size: 0.9rem; color: var(--muted); margin-top: 0.25rem; max-width: 720px; }
-    .sub-head { font-size: 1.1rem; font-weight: 700; margin: 2.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .sub-head { font-size: 1.1rem; font-weight: 700; margin: 2.5rem 0 1rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.5rem; }
     .sub-head small { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
 
     /* Filters */
@@ -208,6 +208,27 @@
     .note { font-size: 0.75rem; color: var(--muted); margin-top: 1rem; }
 
     /* Situations */
+    /* Plyometrics */
+    .tag.int-low { color: var(--good); background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); }
+    .tag.int-moderate { color: var(--amber); background: rgba(255,183,48,0.08); border-color: rgba(255,183,48,0.25); }
+    .tag.int-high { color: var(--orange); background: rgba(255,140,0,0.1); border-color: rgba(255,140,0,0.3); }
+    .tag.int-shock { color: var(--bad); background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.3); }
+    .card p.dose { font-size: 0.78rem; color: var(--sky); }
+    .field { display: grid; gap: 0.3rem; margin-bottom: 0.9rem; }
+    .field label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 700; }
+    .field select { width: 100%; }
+    .budget { margin-bottom: 0.5rem; }
+    .budget-top { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+    .budget-top b { color: var(--text); }
+    .budget-bar { height: 8px; border-radius: 100px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .budget-bar div { height: 100%; background: linear-gradient(90deg, var(--orange), var(--amber)); border-radius: 100px; }
+    .plyo-row { display: grid; grid-template-columns: minmax(0, 1fr) auto 7.5rem 5.5rem 6rem; gap: 0.6rem; align-items: center; padding: 0.45rem 0; border-top: 1px solid var(--border); font-size: 0.8rem; }
+    .plyo-name { font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--text); background: none; border: 0; text-align: left; cursor: pointer; padding: 0; }
+    .plyo-name:hover { color: var(--amber); text-decoration: underline; }
+    .plyo-dose { color: var(--text); }
+    .plyo-rest, .plyo-ct { color: var(--muted); }
+    .plyo-ct { text-align: right; }
+
     .sit-card .when { font-size: 0.8rem; color: var(--muted); font-style: italic; }
     .sit-card .do h4 { color: var(--good); }
     .sit-card .avoid h4 { color: var(--bad); }
@@ -230,6 +251,8 @@
     @media (max-width: 640px) {
       .page { padding: 0 1rem 4rem; }
       .tab { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
+      .plyo-row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 0.15rem; }
+      .plyo-ct { text-align: left; }
       nav { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
       .grid { grid-template-columns: 1fr; }
       .pc { grid-template-columns: 1fr; }
@@ -240,7 +263,7 @@
       .search { max-width: none; }
     }
     @media print {
-      .blobs, nav, .tabs, .hero, footer, .btn-row, #panel-drills, #panel-strategies { display: none !important; }
+      .blobs, nav, .tabs, .hero, footer, .btn-row { display: none !important; }
       body { background: #fff; color: #000; }
     }
   </style>
@@ -269,11 +292,12 @@
     <section class="hero">
       <div class="hero-badge">📋 Coaching hub</div>
       <h1>Coach's <span>Corner</span></h1>
-      <p>Drills to build skills, systems to organize your team, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
+      <p>Drills to build skills, plyometrics to jump higher, systems to organize your team, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
     </section>
 
     <div class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-drills" aria-controls="panel-drills" data-tab="drills">🏐 Drills</button>
+      <button class="tab" role="tab" id="tab-plyo" aria-controls="panel-plyo" data-tab="plyo">🦘 Plyometrics</button>
       <button class="tab" role="tab" id="tab-strategies" aria-controls="panel-strategies" data-tab="strategies">🧠 Strategies</button>
       <button class="tab" role="tab" id="tab-coach" aria-controls="panel-coach" data-tab="coach">📋 Coach's Corner</button>
     </div>
@@ -296,6 +320,68 @@
       </div>
       <div class="filters" id="drill-chips" aria-label="Skill filter"></div>
       <div class="grid" id="drill-grid"></div>
+    </section>
+
+    <!-- ───────────── Plyometrics ───────────── -->
+    <section class="panel" id="panel-plyo" role="tabpanel" aria-labelledby="tab-plyo" hidden>
+      <div class="section-head">
+        <h2>Plyometrics</h2>
+        <p>Jump training for a higher approach, faster blocks, quicker defensive feet, and a stronger arm swing. Build a session, or browse the library.</p>
+      </div>
+
+      <div class="planner">
+        <div class="box">
+          <div class="box-title"><span>Session builder</span></div>
+          <div class="field">
+            <label for="plyo-level">Athlete level</label>
+            <select id="plyo-level">
+              <option value="1">Beginner — new to plyometrics</option>
+              <option value="2" selected>Intermediate — 6+ months of jump training</option>
+              <option value="3">Advanced — trained, strong landings</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="plyo-phase">Season phase</label>
+            <select id="plyo-phase">
+              <option value="off">Off-season</option>
+              <option value="pre" selected>Pre-season</option>
+              <option value="in">In-season</option>
+              <option value="taper">Tournament week</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="plyo-focus">Focus</label>
+            <select id="plyo-focus">
+              <option value="balanced">Balanced</option>
+              <option value="block">Block &amp; vertical</option>
+              <option value="approach">Approach &amp; hitting</option>
+              <option value="defense">Defense &amp; lateral speed</option>
+              <option value="upper">Arm swing &amp; upper body</option>
+            </select>
+          </div>
+          <button class="btn primary" id="plyo-shuffle" type="button">↻ Shuffle exercises</button>
+          <p class="note">The builder caps intensity by level and phase, then trims sets to stay within a foot-contact budget. Click any exercise to see how to do it.</p>
+        </div>
+        <div class="box"><div class="box-title"><span>Today's session</span></div><div id="plyo-out"></div></div>
+      </div>
+
+      <h3 class="sub-head">Exercise library <small>Landing, vertical, horizontal, lateral, single-leg, reactive, upper body</small></h3>
+      <div class="filters">
+        <input class="search" id="plyo-search" type="search" placeholder="Search exercises…" aria-label="Search exercises" />
+        <select id="plyo-int" aria-label="Intensity">
+          <option value="">All intensities</option>
+          <option>Low</option>
+          <option>Moderate</option>
+          <option>High</option>
+          <option>Shock</option>
+        </select>
+        <span class="count" id="plyo-count"></span>
+      </div>
+      <div class="filters" id="plyo-chips" aria-label="Category filter"></div>
+      <div class="grid" id="plyo-grid"></div>
+
+      <h3 class="sub-head">Safety &amp; progression</h3>
+      <div class="rules" id="plyo-rules"></div>
     </section>
 
     <!-- ───────────── Strategies ───────────── -->
@@ -488,6 +574,201 @@
     ['block', 'Blocking'], ['defense', 'Defense'], ['team', 'Team'], ['conditioning', 'Conditioning'],
   ];
   const SKILL_LABEL = Object.fromEntries(SKILLS);
+
+  // ───────────────────────── Data: plyometrics ─────────────────────────
+  // contacts = lower-body foot contacts per set (0 for throws); lvl = minimum level (1 beg, 2 int, 3 adv).
+  const PLYO_CATS = [
+    ['all', 'All'], ['landing', 'Landing & mechanics'], ['vertical', 'Vertical'], ['horizontal', 'Horizontal'],
+    ['lateral', 'Lateral'], ['single', 'Single-leg'], ['reactive', 'Reactive & depth'], ['upper', 'Upper & total body'],
+  ];
+  const PLYO_CAT_LABEL = Object.fromEntries(PLYO_CATS);
+  const INTENSITY = { Low: 1, Moderate: 2, High: 3, Shock: 4 };
+  const REST = { Low: '30–45 s', Moderate: '60 s', High: '90 s', Shock: '2–3 min' };
+  const LEVEL_NAME = { 1: 'Beginner', 2: 'Intermediate', 3: 'Advanced' };
+
+  const PLYO = [
+    { id: 'snap-down', name: 'Snap-Down', cat: 'landing', int: 'Low', lvl: 1, eq: 'None', sets: 3, reps: '5', contacts: 5,
+      transfer: 'Rehearses the athletic landing every hit and block finishes in.',
+      how: 'Rise tall on your toes with arms overhead, then snap the arms down and drop the hips into a quarter-squat landing. Hold 2 s.',
+      cues: ['Quiet feet — land softly through the whole foot.', 'Knees track over toes; no caving in.', 'Hips back, chest over knees.'],
+      regress: 'Do it slowly with no hop off the floor.', progress: 'Snap-down straight into a vertical jump.' },
+    { id: 'drop-stick', name: 'Box Drop & Stick', cat: 'landing', int: 'Moderate', lvl: 1, eq: 'Box 30–45 cm', sets: 2, reps: '5', contacts: 5,
+      transfer: 'Teaches the body to absorb force before you ask it to produce force.',
+      how: 'Step (don\'t jump) off the box, land on both feet at the same time, and freeze in a quarter squat for 2 s.',
+      cues: ['Both feet land together.', 'Absorb through ankles, knees, and hips.', 'Freeze — no wobble or extra steps.'],
+      regress: 'Lower box or a step.', progress: 'Raise the box (max ~60 cm) or land on one foot.' },
+    { id: 'sl-stick', name: 'Single-Leg Hop & Stick', cat: 'landing', int: 'Moderate', lvl: 2, eq: 'None', sets: 2, reps: '4 / leg', contacts: 8,
+      transfer: 'Many landings after slides, off-balance swings, and blocks happen on one foot.',
+      how: 'Hop forward about a body length on one leg and stick the landing for 2 s. Alternate legs.',
+      cues: ['Knee stays over the middle of the foot.', 'Level hips — no hip drop.', 'Use the arms for balance.'],
+      regress: 'Hop in place instead of forward.', progress: 'Hop at 45° angles or laterally and stick.' },
+
+    { id: 'pogo', name: 'Pogo Hops', cat: 'vertical', int: 'Low', lvl: 1, eq: 'None', sets: 3, reps: '20', contacts: 20,
+      transfer: 'Builds ankle stiffness — the spring in a quick approach and fast block footwork.',
+      how: 'Bounce continuously on the balls of the feet with nearly straight legs, minimal knee bend.',
+      cues: ['Stiff ankles, quick contacts — the floor is hot.', 'Tall posture.', 'Small arm rhythm.'],
+      regress: 'Fewer reps, lower height.', progress: 'Forward/backward or side-to-side pogos; single-leg pogos.' },
+    { id: 'squat-jump', name: 'Paused Squat Jump', cat: 'vertical', int: 'Moderate', lvl: 1, eq: 'None', sets: 3, reps: '5', contacts: 5,
+      transfer: 'Power from a dead stop — the jump you need when you\'re caught flat under the net.',
+      how: 'Squat to a quarter/half depth, pause 2 s, then jump as high as possible with no dip. Stick the landing.',
+      cues: ['No extra dip after the pause.', 'Drive the arms up hard.', 'Land where you took off.'],
+      regress: 'Hands on hips to simplify.', progress: 'Hold light dumbbells (≤10% bodyweight).' },
+    { id: 'cmj', name: 'Countermovement Jump with Arm Swing', cat: 'vertical', int: 'Moderate', lvl: 1, eq: 'None (target optional)', sets: 3, reps: '5', contacts: 5,
+      transfer: 'The base vertical jump for blocking and setting; trains the arm swing to add height.',
+      how: 'Quick dip with the arms swinging back, then jump and reach to a target. Reset between reps.',
+      cues: ['Fast dip, fast drive.', 'Arms finish high.', 'Max effort every rep.'],
+      regress: 'No target, focus on landing.', progress: 'Jump-and-reach to a higher target; continuous reps.' },
+    { id: 'box-jump', name: 'Box Jump', cat: 'vertical', int: 'Moderate', lvl: 1, eq: 'Box 45–75 cm', sets: 3, reps: '5', contacts: 5,
+      transfer: 'Max-intent jumping with low landing stress — great early in a program.',
+      how: 'Countermovement jump onto the box, landing soft in a quarter squat. Step down; don\'t jump down.',
+      cues: ['Land in the same position you took off in.', 'Stand tall on top.', 'Step down every rep.'],
+      regress: 'Lower box.', progress: 'Seated box jump (no countermovement) or approach-step box jump.' },
+    { id: 'tuck', name: 'Tuck Jumps', cat: 'vertical', int: 'High', lvl: 2, eq: 'None', sets: 3, reps: '6', contacts: 6,
+      transfer: 'Fast hip flexion and quick rebounds for repeated jumps in long rallies.',
+      how: 'Jump and pull knees toward the chest, then land and rebound into the next rep.',
+      cues: ['Bring the knees up, don\'t bend the back down.', 'Short ground time.', 'Stop if landings get loud.'],
+      regress: 'Single tuck jumps with a reset.', progress: 'Increase reps to 8–10 for advanced athletes.' },
+    { id: 'approach-jump', name: 'Approach Jump (Max Effort)', cat: 'vertical', int: 'High', lvl: 2, eq: 'Net or reach target', sets: 3, reps: '4', contacts: 4,
+      transfer: 'The most specific jump in volleyball: the attack approach.',
+      how: 'Full 3- or 4-step approach and jump to touch as high as possible. Full rest between reps.',
+      cues: ['Slow to fast; the last two steps are quickest.', 'Big arm swing back on the plant.', 'Land on two feet, balanced.'],
+      regress: '2-step approach.', progress: 'Approach jump with a toss to hit; touch a vertec.' },
+    { id: 'block-series', name: 'Block Jump Series', cat: 'vertical', int: 'High', lvl: 2, eq: 'Net', sets: 3, reps: '6 (2 base, 2 shuffle, 2 crossover)', contacts: 6,
+      transfer: 'Blocking-specific footwork and penetration over the net.',
+      how: 'Block jump at base, then shuffle-step block left/right, then crossover-step block left/right.',
+      cues: ['Hands above the tape from the start.', 'Plant to stop drift, jump straight up.', 'Press the hands over the net.'],
+      regress: 'Base jumps only.', progress: 'Coach points the direction at the last second.' },
+    { id: 'rebound', name: 'Continuous Vertical Rebounds', cat: 'vertical', int: 'High', lvl: 2, eq: 'None', sets: 3, reps: '5', contacts: 5,
+      transfer: 'Reactive strength: jump again fast after landing (block → transition → hit).',
+      how: 'Jump for max height, then rebound immediately into the next jump with minimal ground time.',
+      cues: ['Spring off the ground — don\'t sink.', 'Every rep high.', 'Stop when height drops.'],
+      regress: 'Pogo hops.', progress: 'Rebound onto a low box on the last rep.' },
+
+    { id: 'broad', name: 'Standing Broad Jump & Stick', cat: 'horizontal', int: 'Moderate', lvl: 1, eq: 'None', sets: 3, reps: '5', contacts: 5,
+      transfer: 'Hip power and horizontal force for the approach\'s penultimate step.',
+      how: 'Swing the arms, jump forward as far as possible, and stick the landing.',
+      cues: ['Jump out and up at ~45°.', 'Pull the feet forward to land.', 'Stick with no step.'],
+      regress: 'Shorter jumps focusing on landing.', progress: 'Consecutive broad jumps.' },
+    { id: 'multi-broad', name: 'Consecutive Broad Jumps', cat: 'horizontal', int: 'High', lvl: 2, eq: 'None', sets: 3, reps: '3 jumps', contacts: 3,
+      transfer: 'Fast horizontal rebounds — the rhythm of a quick approach.',
+      how: 'Three broad jumps in a row with quick, controlled rebounds. Stick the last one.',
+      cues: ['Short ground contacts.', 'Arms swing every jump.', 'Stay balanced over the feet.'],
+      regress: 'Single broad jumps.', progress: '5 jumps in a row.' },
+    { id: 'bounds', name: 'Alternate-Leg Bounds', cat: 'horizontal', int: 'High', lvl: 3, eq: '20 m of space', sets: 3, reps: '20 m', contacts: 8,
+      transfer: 'Single-leg power and stride rhythm for approaches and long pursuits.',
+      how: 'Exaggerated running strides: push off one leg, drive the opposite knee, land on the other leg and repeat.',
+      cues: ['Drive the knee up and forward.', 'Land on the midfoot under the hips.', 'Hang in the air.'],
+      regress: 'Skips for height or distance.', progress: 'Bound for distance with fewer contacts.' },
+
+    { id: 'line-hops', name: 'Lateral Line Hops', cat: 'lateral', int: 'Low', lvl: 1, eq: 'Line on the floor', sets: 3, reps: '10 s', contacts: 20,
+      transfer: 'Quick lateral feet for defensive shuffles and blocker movement.',
+      how: 'Hop side to side over a line with both feet as quickly as possible.',
+      cues: ['Small, fast hops.', 'Stay on the balls of the feet.', 'Head and chest still.'],
+      regress: 'Slower, with a pause each side.', progress: 'Single-leg line hops or forward/back patterns.' },
+    { id: 'skater', name: 'Skater Bounds & Stick', cat: 'lateral', int: 'Moderate', lvl: 1, eq: 'None', sets: 3, reps: '5 / side', contacts: 10,
+      transfer: 'Lateral push-off power for defensive range and block closing.',
+      how: 'Bound sideways from one leg to the other, landing and sticking on one foot each time.',
+      cues: ['Push off the outside edge of the foot.', 'Land soft, knee over toes.', 'Hold 1–2 s before the next bound.'],
+      regress: 'Shorter distance, touch the free foot down.', progress: 'Continuous skaters without the stick.' },
+    { id: 'lat-hurdle', name: 'Lateral Hurdle Hops', cat: 'lateral', int: 'High', lvl: 2, eq: '3 mini hurdles (15–30 cm)', sets: 3, reps: '3 hurdles out & back', contacts: 6,
+      transfer: 'Lateral reactive strength — fast direction change at the net.',
+      how: 'Hop sideways over a row of mini hurdles, then hop back without pausing.',
+      cues: ['Knees up, quick contacts.', 'Stay square to the front.', 'Stick the final landing.'],
+      regress: 'Lines on the floor instead of hurdles.', progress: 'Taller hurdles or single-leg.' },
+    { id: 'lat-to-vert', name: 'Lateral Bound to Block Jump', cat: 'lateral', int: 'High', lvl: 2, eq: 'Net (optional)', sets: 3, reps: '3 / side', contacts: 12,
+      transfer: 'Combines a lateral move with a vertical jump, like a middle closing a block.',
+      how: 'Bound laterally onto two feet, then immediately jump vertically with hands up.',
+      cues: ['Stop the lateral momentum on the plant.', 'Go straight up — no drift.', 'Hands ready the whole time.'],
+      regress: 'Pause between the bound and the jump.', progress: 'React to a coach\'s point for the direction.' },
+
+    { id: 'sl-pogo', name: 'Single-Leg Pogos', cat: 'single', int: 'Moderate', lvl: 2, eq: 'None', sets: 2, reps: '10 / leg', contacts: 20,
+      transfer: 'Ankle and foot stiffness on one leg; a building block for hitters who take off off-balance.',
+      how: 'Bounce on one foot with a nearly straight knee and quick contacts.',
+      cues: ['Stay tall.', 'Quick off the floor.', 'Level hips.'],
+      regress: 'Fewer reps, hand on a wall.', progress: 'Forward/back or lateral single-leg pogos.' },
+    { id: 'split-jump', name: 'Split-Squat Jumps', cat: 'single', int: 'Moderate', lvl: 2, eq: 'None', sets: 3, reps: '8 total', contacts: 8,
+      transfer: 'Single-leg power and hip stability in a staggered stance.',
+      how: 'From a lunge, jump and switch legs in the air, landing softly in the opposite lunge.',
+      cues: ['Front knee over the foot.', 'Torso tall.', 'Soft landings.'],
+      regress: 'Jump without switching legs.', progress: 'Add a full pause in each landing, then explode.' },
+    { id: 'sl-box', name: 'Single-Leg Box Jump', cat: 'single', int: 'High', lvl: 3, eq: 'Box 30–45 cm', sets: 3, reps: '3 / leg', contacts: 6,
+      transfer: 'Single-leg power with low landing stress — great for slide attackers.',
+      how: 'Jump off one leg onto the box, landing on both feet (or the same leg). Step down.',
+      cues: ['Drive the free knee up.', 'Land quiet.', 'Step down every time.'],
+      regress: 'Lower box.', progress: 'Land on one leg; higher box.' },
+    { id: 'zigzag', name: 'Single-Leg Zig-Zag Hops', cat: 'single', int: 'High', lvl: 3, eq: 'Cones or line', sets: 2, reps: '6 / leg', contacts: 12,
+      transfer: 'Multi-direction single-leg control for defensive pursuits and slides.',
+      how: 'Hop forward diagonally left and right on one leg along a line.',
+      cues: ['Knee stays aligned.', 'Quick, controlled hops.', 'Eyes forward.'],
+      regress: 'Hop and stick each landing.', progress: 'Faster tempo or wider hops.' },
+
+    { id: 'hurdle-hops', name: 'Continuous Hurdle Hops', cat: 'reactive', int: 'High', lvl: 2, eq: '5 hurdles (30–60 cm)', sets: 3, reps: '5 hurdles', contacts: 5,
+      transfer: 'Short ground contact with vertical force — repeat jumping in long rallies.',
+      how: 'Two-footed hops over a row of hurdles with minimal time on the ground.',
+      cues: ['Knees up, feet under hips.', 'Bounce, don\'t sink.', 'Use the arms each hop.'],
+      regress: 'Lower hurdles or stick between each.', progress: 'Taller hurdles or single-leg hops over minis.' },
+    { id: 'depth-jump', name: 'Depth Jump', cat: 'reactive', int: 'Shock', lvl: 3, eq: 'Box 30–45 cm', sets: 3, reps: '4', contacts: 8,
+      transfer: 'Max reactive strength — the strongest stimulus for a higher, quicker jump.',
+      how: 'Step off the box, land on both feet, and immediately jump as high as possible.',
+      cues: ['Step off, don\'t jump off.', 'Minimal ground time — "hot floor."', 'If the heels crash, the box is too high.'],
+      regress: 'Box drop & stick.', progress: 'Depth jump to a reach target.' },
+    { id: 'depth-block', name: 'Drop Jump to Block', cat: 'reactive', int: 'Shock', lvl: 3, eq: 'Box 30 cm + net', sets: 2, reps: '4', contacts: 8,
+      transfer: 'Reactive jumping into a blocking position at the net.',
+      how: 'Step off a low box near the net, land, and immediately block jump with hands over the net.',
+      cues: ['Fast off the floor.', 'Hands up through the whole move.', 'Land balanced, both feet.'],
+      regress: 'Box drop & stick, then block jump.', progress: 'Drop, shuffle, then block.' },
+
+    { id: 'mb-chest', name: 'Med Ball Chest Pass', cat: 'upper', int: 'Low', lvl: 1, eq: 'Med ball 2–3 kg', sets: 3, reps: '8', contacts: 0,
+      transfer: 'Upper-body speed and core bracing.',
+      how: 'Explosively push the ball from the chest to a partner or wall and catch.',
+      cues: ['Step into the throw.', 'Full arm extension.', 'Fast release.'],
+      regress: 'Lighter ball, half-kneeling.', progress: 'Catch and return without a pause.' },
+    { id: 'mb-slam', name: 'Overhead Med Ball Slam', cat: 'upper', int: 'Moderate', lvl: 1, eq: 'Slam ball 4–6 kg', sets: 3, reps: '6', contacts: 0,
+      transfer: 'Downward core drive, like the trunk flexion in a spike.',
+      how: 'Reach tall on your toes, then slam the ball into the floor in front of you as hard as possible.',
+      cues: ['Full extension at the top.', 'Crunch the trunk down.', 'Hips back.'],
+      regress: 'Lighter ball.', progress: 'Add a jump before the slam.' },
+    { id: 'mb-overhead', name: 'Overhead Wall Throw', cat: 'upper', int: 'Moderate', lvl: 1, eq: 'Med ball 1–2 kg + wall', sets: 3, reps: '8', contacts: 0,
+      transfer: 'Two-arm overhead speed; builds shoulder and core.',
+      how: 'Soccer-style throw-in against a wall from 2–3 m. Catch and repeat.',
+      cues: ['Arch slightly and whip forward.', 'Ball released overhead.', 'Brace the core.'],
+      regress: 'Kneeling throws.', progress: 'Step-in throws.' },
+    { id: 'mb-spike', name: 'Single-Arm "Spike" Throw', cat: 'upper', int: 'Moderate', lvl: 2, eq: '1 kg ball or volleyball', sets: 3, reps: '6 / arm', contacts: 0,
+      transfer: 'Arm speed for hitting and serving, plus shoulder deceleration.',
+      how: 'Mimic a hitting arm swing with a light ball, throwing it hard down into the floor or a wall.',
+      cues: ['Elbow high, bow-and-arrow.', 'Rotate the trunk, then the arm.', 'Follow through across the body.'],
+      regress: 'Volleyball only.', progress: 'Jump and throw at the top of the jump.' },
+    { id: 'mb-rotate', name: 'Rotational Scoop Toss', cat: 'upper', int: 'Moderate', lvl: 1, eq: 'Med ball 3–4 kg + wall', sets: 3, reps: '6 / side', contacts: 0,
+      transfer: 'Hip-to-shoulder sequencing that powers a hitter\'s swing.',
+      how: 'Stand side-on to a wall, load the back hip, and rotate to throw the ball into the wall.',
+      cues: ['Hips lead, arms follow.', 'Pivot the back foot.', 'Throw through the wall.'],
+      regress: 'Lighter ball, half-kneeling.', progress: 'Step-behind rotational throw.' },
+    { id: 'mb-backward', name: 'Backward Overhead Toss', cat: 'upper', int: 'Moderate', lvl: 1, eq: 'Med ball 3–5 kg', sets: 3, reps: '5', contacts: 0,
+      transfer: 'Full-body triple extension — the same hip/knee/ankle drive as jumping.',
+      how: 'Squat with the ball between the legs, then explode up and throw it backward over your head.',
+      cues: ['Drive through the legs first.', 'Full extension, arms long.', 'Clear space behind you.'],
+      regress: 'Lighter ball.', progress: 'Heavier ball (≤6 kg) or add a jump.' },
+    { id: 'plyo-pushup', name: 'Plyometric Push-Up', cat: 'upper', int: 'High', lvl: 2, eq: 'None', sets: 3, reps: '6', contacts: 0,
+      transfer: 'Upper-body reactive strength; helps with diving and sprawling.',
+      how: 'Lower into a push-up and push hard enough for the hands to leave the floor. Land softly.',
+      cues: ['Rigid plank.', 'Soft elbows on landing.', 'Fast push.'],
+      regress: 'Incline on a box or bench.', progress: 'Clap or drop from low boxes.' },
+  ];
+
+  const PHASES = {
+    off:  { name: 'Off-season', factor: 1, cap: 4, perWeek: '2–3 sessions / week', note: 'Build the base: landing quality first, then increase intensity across 4–6 weeks.' },
+    pre:  { name: 'Pre-season', factor: 0.85, cap: 4, perWeek: '2 sessions / week', note: 'Most specific phase: approach, block, and reactive jumps. Keep quality high.' },
+    in:   { name: 'In-season', factor: 0.5, cap: 3, perWeek: '1–2 short sessions / week', note: 'Practice already includes hundreds of jumps. Short, sharp, and at least 48 h before a match.' },
+    taper:{ name: 'Tournament week', factor: 0.3, cap: 2, perWeek: '0–1 light session', note: 'Prime, don\'t fatigue: a few low-volume, fast reps 2–3 days out — or skip entirely.' },
+  };
+  const BUDGET = { 1: 80, 2: 100, 3: 120 };
+  const FOCUS = {
+    balanced: { name: 'Balanced', cats: ['vertical', 'lateral', 'horizontal', 'single', 'reactive'], pin: [], upper: 1 },
+    block:    { name: 'Block & vertical', cats: ['vertical', 'reactive', 'lateral', 'single'], pin: ['block-series', 'lat-to-vert'], upper: 1 },
+    approach: { name: 'Approach & hitting', cats: ['vertical', 'horizontal', 'single', 'reactive'], pin: ['approach-jump', 'mb-spike'], upper: 1 },
+    defense:  { name: 'Defense & lateral speed', cats: ['lateral', 'single', 'horizontal', 'vertical'], pin: ['skater', 'line-hops'], upper: 1 },
+    upper:    { name: 'Arm swing & upper body', cats: ['vertical', 'lateral'], pin: ['mb-spike', 'mb-rotate'], upper: 3 },
+  };
 
   // ───────────────────────── Data: strategies ─────────────────────────
   const STRATEGIES = [
@@ -720,7 +1001,7 @@
   }
 
   // ───────────────────────── Tabs ─────────────────────────
-  const TABS = ['drills', 'strategies', 'coach'];
+  const TABS = ['drills', 'plyo', 'strategies', 'coach'];
   function showTab(name, push = true) {
     if (!TABS.includes(name)) name = 'drills';
     TABS.forEach(t => {
@@ -1055,8 +1336,198 @@
   $('#rules').innerHTML = RULES.map(r => `
     <div class="card"><h3>${r.t}</h3><ul>${r.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('');
 
+  // ───────────────────────── Plyometrics: library ─────────────────────────
+  let plyoCat = 'all';
+  const intTag = i => `<span class="tag int-${i.toLowerCase()}">${i}</span>`;
+  $('#plyo-chips').innerHTML = PLYO_CATS.map(([k, l]) =>
+    `<button class="chip" type="button" data-cat="${k}" aria-pressed="${k === 'all'}">${l}</button>`).join('');
+  $('#plyo-chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    plyoCat = b.dataset.cat;
+    document.querySelectorAll('#plyo-chips .chip').forEach(c => c.setAttribute('aria-pressed', String(c === b)));
+    renderPlyoLibrary();
+  });
+  $('#plyo-search').addEventListener('input', renderPlyoLibrary);
+  $('#plyo-int').addEventListener('change', renderPlyoLibrary);
+
+  function renderPlyoLibrary() {
+    const q = $('#plyo-search').value.trim().toLowerCase();
+    const int = $('#plyo-int').value;
+    const list = PLYO.filter(p =>
+      (plyoCat === 'all' || p.cat === plyoCat) &&
+      (!int || p.int === int) &&
+      (!q || (p.name + ' ' + p.transfer + ' ' + p.eq + ' ' + PLYO_CAT_LABEL[p.cat]).toLowerCase().includes(q)));
+    $('#plyo-count').textContent = `${list.length} of ${PLYO.length} exercises`;
+    $('#plyo-grid').innerHTML = list.length ? list.map(p => `
+      <article class="card" id="plyo-${p.id}">
+        <h3>${esc(p.name)}</h3>
+        <div class="meta">
+          ${intTag(p.int)}
+          <span class="tag">${PLYO_CAT_LABEL[p.cat]}</span>
+          <span class="tag lvl">${LEVEL_NAME[p.lvl]}+</span>
+          <span class="tag plain">🧰 ${esc(p.eq)}</span>
+        </div>
+        <p><strong>Volleyball transfer:</strong> ${esc(p.transfer)}</p>
+        <p class="dose">${p.sets} × ${esc(p.reps)} · rest ${REST[p.int]}${p.contacts ? ` · ${p.contacts} foot contacts / set` : ' · throws (no foot contacts)'}</p>
+        <details>
+          <summary>How to, cues &amp; progressions</summary>
+          <div class="detail">
+            <div><h4>How to</h4><p>${esc(p.how)}</p></div>
+            <div><h4>Coaching cues</h4><ul>${p.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+            <div class="pc">
+              <div><h4>Easier</h4><p>${esc(p.regress)}</p></div>
+              <div><h4>Harder</h4><p>${esc(p.progress)}</p></div>
+            </div>
+          </div>
+        </details>
+      </article>`).join('') : '<p class="empty">No exercises match those filters.</p>';
+  }
+
+  function jumpToPlyo(id) {
+    plyoCat = 'all';
+    $('#plyo-search').value = '';
+    $('#plyo-int').value = '';
+    document.querySelectorAll('#plyo-chips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.cat === 'all')));
+    renderPlyoLibrary();
+    const card = document.getElementById('plyo-' + id);
+    if (!card) return;
+    card.querySelector('details').open = true;
+    card.classList.add('flash');
+    setTimeout(() => card.classList.remove('flash'), 1600);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ───────────────────────── Plyometrics: session builder ─────────────────────────
+  let plyoSeed = 1;
+  function mulberry32(a) {
+    return () => {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildSession(level, phaseKey, focusKey, seed) {
+    const ph = PHASES[phaseKey], fc = FOCUS[focusKey];
+    const maxInt = Math.min({ 1: 2, 2: 3, 3: 4 }[level], ph.cap);
+    const ok = e => e.lvl <= level && INTENSITY[e.int] <= maxInt;
+    const rand = mulberry32(seed);
+    const used = new Set();
+    const pick = list => {
+      const pool = list.filter(e => ok(e) && !used.has(e.id));
+      if (!pool.length) return null;
+      const e = pool[Math.floor(rand() * pool.length)];
+      used.add(e.id);
+      return e;
+    };
+    const pinned = cond => fc.pin.map(id => PLYO.find(e => e.id === id)).filter(e => e && cond(e) && ok(e) && !used.has(e.id));
+    const light = phaseKey === 'in' || phaseKey === 'taper';
+
+    // Landing prep: always for beginners, and in the base-building phases.
+    const landing = [];
+    if (level === 1 || phaseKey === 'off' || (phaseKey === 'pre' && level < 3)) {
+      const e = pick(PLYO.filter(e => e.cat === 'landing'));
+      if (e) landing.push(e);
+    }
+
+    // Main lower-body jumps: focus pins first, then rotate through focus categories.
+    const nMain = focusKey === 'upper' || light || level === 1 ? 2 : 3;
+    const main = [];
+    pinned(e => e.cat !== 'upper').forEach(e => { if (main.length < nMain) { used.add(e.id); main.push(e); } });
+    for (let i = 0; main.length < nMain && i < 20; i++) {
+      // Trained athletes in heavier phases: main slot is for Moderate+ jumps (pogos etc. belong in warm-up).
+      const minInt = maxInt >= 3 && i < 10 ? 2 : 1;
+      const e = pick(PLYO.filter(x => x.cat === fc.cats[i % fc.cats.length] && INTENSITY[x.int] >= minInt));
+      if (e) main.push(e);
+    }
+    main.sort((a, b) => INTENSITY[b.int] - INTENSITY[a.int]);
+
+    // Upper & total body.
+    const nUp = phaseKey === 'taper' ? Math.min(fc.upper, 1) : fc.upper;
+    const upper = [];
+    pinned(e => e.cat === 'upper').forEach(e => { if (upper.length < nUp) { used.add(e.id); upper.push(e); } });
+    while (upper.length < nUp) {
+      const e = pick(PLYO.filter(x => x.cat === 'upper'));
+      if (!e) break;
+      upper.push(e);
+    }
+
+    const row = e => ({ e, sets: light ? Math.max(1, e.sets - 1) : e.sets });
+    const lower = [...landing, ...main].map(row);
+    const budget = Math.round(BUDGET[level] * ph.factor);
+    const total = () => lower.reduce((s, r) => s + r.sets * r.e.contacts, 0);
+    // Trim sets (from the lowest-priority row up) until the session fits the contact budget.
+    while (total() > budget) {
+      const r = lower.slice().reverse().find(r => r.sets > 1 && r.e.contacts > 0)
+        || lower.slice().reverse().find(r => r.sets > 1);
+      if (!r) break;
+      r.sets--;
+    }
+    // Still over at one set each: drop the highest-volume exercise, keeping at least one main jump.
+    while (total() > budget && lower.length > 1) {
+      const removable = lower.filter(r => !(main.includes(r.e) && lower.filter(x => main.includes(x.e)).length === 1));
+      const r = removable.sort((x, y) => y.e.contacts - x.e.contacts)[0];
+      if (!r) break;
+      lower.splice(lower.indexOf(r), 1);
+    }
+    return {
+      ph, fc, maxInt, budget, total: total(),
+      landing: lower.filter(r => landing.includes(r.e)), main: lower.filter(r => main.includes(r.e)), upper: upper.map(row),
+    };
+  }
+
+  function renderSession() {
+    const level = Number($('#plyo-level').value), phaseKey = $('#plyo-phase').value, focusKey = $('#plyo-focus').value;
+    const s = buildSession(level, phaseKey, focusKey, plyoSeed);
+    const maxName = Object.keys(INTENSITY).find(k => INTENSITY[k] === s.maxInt);
+    const pct = Math.min(100, Math.round(s.total / s.budget * 100));
+    const rows = list => list.map(r => `
+      <div class="plyo-row">
+        <button class="plyo-name" type="button" data-plyo="${r.e.id}">${esc(r.e.name)}</button>
+        <span>${intTag(r.e.int)}</span>
+        <span class="plyo-dose">${r.sets} × ${esc(r.e.reps)}</span>
+        <span class="plyo-rest">rest ${REST[r.e.int]}</span>
+        <span class="plyo-ct">${r.e.contacts ? r.sets * r.e.contacts + ' contacts' : 'no foot contacts'}</span>
+      </div>`).join('');
+    const block = (title, list, hint) => list.length
+      ? `<div class="plan-group"><h5>${title}</h5>${hint ? `<p class="note" style="margin:0 0 0.4rem">${hint}</p>` : ''}${rows(list)}</div>` : '';
+    $('#plyo-out').innerHTML = `
+      <div class="verdict">${LEVEL_NAME[level]} · ${s.ph.name} · ${s.fc.name}</div>
+      <div class="verdict-sub">${s.ph.perWeek} · max intensity <b>${maxName}</b>. ${s.ph.note}</div>
+      <div class="budget">
+        <div class="budget-top"><span>Foot contacts vs. session cap</span><b>${s.total} / ${s.budget}</b></div>
+        <div class="budget-bar"><div style="width:${pct}%"></div></div>
+      </div>
+      <div class="plan-group"><h5>🔥 Warm-up (8–10 min)</h5>
+        <ul><li>Light jog, skips, and carioca — 2–3 min.</li><li>Dynamic mobility: leg swings, walking lunges with rotation, hip openers, arm circles.</li><li>A-skips and 2 × 10 easy pogos to wake up the ankles.</li></ul></div>
+      ${block('🦶 Landing prep', s.landing, 'Perfect landings before power — stick every rep.')}
+      ${block('⚡ Main jumps', s.main, 'Highest intensity first, while fresh. Full rest — every rep at max intent.')}
+      ${block('💪 Upper & total body', s.upper)}
+      <div class="plan-group"><h5>🧊 Cool-down</h5>
+        <ul><li>Easy walk, then calf, quad, hip-flexor, and lat stretches — 5 min.</li></ul></div>
+      <p class="note">Stop a set when landings get loud, slow, or knees cave in. Quality beats quantity.</p>`;
+  }
+  ['#plyo-level', '#plyo-phase', '#plyo-focus'].forEach(id => $(id).addEventListener('change', () => { plyoSeed = 1; renderSession(); }));
+  $('#plyo-shuffle').addEventListener('click', () => { plyoSeed++; renderSession(); });
+  $('#plyo-out').addEventListener('click', e => {
+    const b = e.target.closest('[data-plyo]');
+    if (b) jumpToPlyo(b.dataset.plyo);
+  });
+
+  $('#plyo-rules').innerHTML = [
+    { t: 'Earn the right to jump', items: ['Master snap-downs and stuck landings before reactive or depth work.', 'Bodyweight squat and lunge with control come first.', 'Beginners: Low and Moderate intensity only.'] },
+    { t: 'Volume (foot contacts / session)', items: ['Beginner ~80, intermediate ~100, advanced ~120 in the off-season.', 'In-season, practice already includes a lot of jumping — cut plyo volume about in half.', 'Count every landing, not just every jump.'] },
+    { t: 'Recovery & timing', items: ['48–72 h between high-intensity jump sessions.', 'Do plyos fresh — after the warm-up, before lifting or conditioning.', 'Rest fully between High and Shock sets.'] },
+    { t: 'Progression', items: ['Change one thing at a time: volume → intensity → complexity.', 'Raise weekly volume gradually (about 10–20%).', 'Two-leg before single-leg; stick before rebound.'] },
+    { t: 'Surface & setup', items: ['Court, turf, grass, or sprung floor — never concrete.', 'Supportive court shoes.', 'Depth jumps: 30–45 cm boxes; higher is rarely better.'] },
+    { t: 'Stop signs', items: ['Pain below the kneecap (jumper\'s knee), shins, or Achilles.', 'Collapsing or loud landings, knees caving in.', 'Stop, regress, and see a qualified professional if pain persists.'] },
+  ].map(r => `<div class="card"><h3>${r.t}</h3><ul>${r.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('');
+
   // ───────────────────────── Init ─────────────────────────
   renderDrills();
+  renderPlyoLibrary();
+  renderSession();
   renderStrategies();
   renderRatings();
   renderPlan();

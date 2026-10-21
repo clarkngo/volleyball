@@ -2,7 +2,7 @@
 
 **Homepage:** open **`index.html`** for links to all prototypes (works on **GitHub Pages** from repo root).
 
-**Coach's Corner:** **`coaches-corner.html`** — **drill library** (filter by skill/level), **team strategies** (offense systems, serve receive, defense, blocking, serving, attack), and a **matchup planner**: rate each position **strong / neutral / weak** for your team and the opponent to get a game plan (where to set, who to serve, blocking/defense, lineup), plus a **situational playbook** for in-match adjustments.
+**Coach's Corner:** **`coaches-corner.html`** — **drill library** (filter by skill/level), **plyometrics** (32-exercise library across landing, vertical, horizontal, lateral, single-leg, reactive/depth, and upper-body + a **session builder** by level, season phase, and focus with foot-contact budgets), **team strategies** (offense systems, serve receive, defense, blocking, serving, attack), and a **matchup planner**: rate each position **strong / neutral / weak** for your team and the opponent to get a game plan (where to set, who to serve, blocking/defense, lineup), plus a **situational playbook** for in-match adjustments.
 
 **Tactical board (app):** **`tactical-board/`** — interactive **3D play visualizer**: drag team silhouettes, edit ball Bézier arcs, timeline scrub/playback, camera presets, JSON + URL hash share. See **`tactical-board/README.md`**.
 
