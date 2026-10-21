@@ -2,6 +2,8 @@
 
 **Homepage:** open **`index.html`** for links to all prototypes (works on **GitHub Pages** from repo root).
 
+**Tactical board (app):** **`tactical-board/`** — interactive **3D play visualizer**: drag team silhouettes, edit ball Bézier arcs, timeline scrub/playback, camera presets, JSON + URL hash share. See **`tactical-board/README.md`**.
+
 3D direction: **Three.js** prototypes and plan live under:
 
 - **`docs/THREE_JS_PLAN.md`** — roadmap and stack notes  

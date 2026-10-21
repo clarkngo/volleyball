@@ -11,6 +11,7 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 ### Added
 
+- **`tactical-board/`** — Static **3D tactical board & play visualizer** (ES modules + Three.js CDN): FIVB court, Team A/B pose silhouettes (setter / attacker / blocker / receiver), raycast drag, ball Bézier path handles, keyframes, timeline dock (play/scrub/speed), camera presets, JSON export/import, URL hash share; **`tactical-board/README.md`** with GitHub Pages deploy steps.
 - `prototypes/09-setter-footwork.html` — Setter OOS / first-ball scenarios (in-system, tight, off-net, inside seam, wide pin); L/R foot keyframes + synced ball arc; phase strip, step badge, trail toggle; mobile framing.
 - `prototypes/08-basic-drills.html` — Drill picker (pepper, wall ball, serve targets, passing ladder, solo wall); HUD checklists; floor rings / wall anchor; stylized ball loops; motion toggle; mobile-friendly HUD.
 - **`docs/ideas.html`** — Renders **`IDEAS.md`** on **GitHub Pages** via `fetch` + **marked** (same-origin).
@@ -22,7 +23,7 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 - `prototypes/09-setter-footwork.html` — Timeline opens on **set base** (hold + reset to release); **CSS2D** **L** / **R** foot chips; ball parked on target until approach segment; dual renderer resize.
 - **`docs/IDEAS.md`** — Item **5 (setter footwork)** marked shipped (**09**). (Item **4** / **08** from earlier commit.)
-- **`index.html`** — Links for prototypes **06**–**09**; doc links for **IDEAS**, **PRE_WRITE**, **POST_WRITE**.
+- **`index.html`** — Hero CTA + featured card for **`tactical-board/`**; prototype links **06**–**09**.
 - **`README.md`** — Prototypes **06**–**09**; backlog + **PRE_WRITE** pointer.
 - **`docs/POST_WRITE.md`** — Note to update **`IDEAS.md`** when backlog items ship.
 - **Net (FIVB):** length **9.5 m**, mesh height **1 m**, top at **2.43 m** (men) at court centre, plane on **z = 0**; posts **2.55 m** at **0.5 m** outside sidelines; antennas **0.8 m** above net top (`standard-volleyball-court`, `01`, `02`).
