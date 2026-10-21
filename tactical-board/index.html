@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Volleyball Tactical Board · 3D Play Visualizer</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <aside id="sidebar" aria-label="Tactics panel">
+    <header class="sidebar-head">
+      <h1>Tactical Board</h1>
+      <p class="muted">Drag players · scrub timeline · export plays</p>
+    </header>
+
+    <section class="panel">
+      <h2>Tool</h2>
+      <div class="btn-row">
+        <button type="button" class="btn active" data-tool="select">Select / drag</button>
+        <button type="button" class="btn" data-tool="ball">Ball path</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Add player</h2>
+      <label>Team
+        <select id="addTeam">
+          <option value="A">Team A (blue)</option>
+          <option value="B">Team B (orange)</option>
+        </select>
+      </label>
+      <label>Role / pose
+        <select id="addRole">
+          <option value="setter">Setter</option>
+          <option value="attacker">Attacker</option>
+          <option value="blocker">Blocker</option>
+          <option value="receiver">Receiver</option>
+        </select>
+      </label>
+      <button type="button" class="btn primary" id="btnAddPlayer">+ Add to court</button>
+    </section>
+
+    <section class="panel" id="selectionPanel" hidden>
+      <h2>Selected</h2>
+      <p id="selSummary" class="muted">—</p>
+      <label>Role
+        <select id="selRole">
+          <option value="setter">Setter</option>
+          <option value="attacker">Attacker</option>
+          <option value="blocker">Blocker</option>
+          <option value="receiver">Receiver</option>
+        </select>
+      </label>
+      <button type="button" class="btn" id="btnKeyframe">Keyframe at playhead</button>
+      <button type="button" class="btn danger" id="btnDelete">Delete</button>
+    </section>
+
+    <section class="panel">
+      <h2>Play</h2>
+      <label>Duration (s)
+        <input type="number" id="durationInput" min="2" max="30" step="0.5" value="6" />
+      </label>
+      <div class="btn-row">
+        <button type="button" class="btn" id="btnExport">Export JSON</button>
+        <button type="button" class="btn" id="btnImport">Import JSON</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden />
+      </div>
+      <button type="button" class="btn" id="btnShareLink">Copy share link</button>
+      <button type="button" class="btn ghost" id="btnReset">Reset demo play</button>
+    </section>
+
+    <p class="footnote">
+      <code>tactical-board/</code> · Three.js · GitHub Pages static
+    </p>
+  </aside>
+
+  <main id="stage">
+    <canvas id="canvas" aria-label="3D court view"></canvas>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
+  </main>
+
+  <footer id="dock" aria-label="Timeline and camera">
+    <div class="dock-row">
+      <button type="button" class="dock-btn" id="btnPlay" title="Play / Pause">▶</button>
+      <input type="range" id="scrubber" min="0" max="1000" value="0" aria-label="Playhead" />
+      <span id="timeLabel" class="time-label">0.0s</span>
+      <div class="speed-group" role="group" aria-label="Playback speed">
+        <button type="button" class="speed-btn" data-speed="0.25">0.25×</button>
+        <button type="button" class="speed-btn" data-speed="0.5">0.5×</button>
+        <button type="button" class="speed-btn active" data-speed="1">1×</button>
+        <button type="button" class="speed-btn" data-speed="1.5">1.5×</button>
+      </div>
+    </div>
+    <div class="dock-row cam-row">
+      <span class="dock-label">Camera</span>
+      <button type="button" class="cam-btn active" data-cam="orbit">Free orbit</button>
+      <button type="button" class="cam-btn" data-cam="top">Top-down</button>
+      <button type="button" class="cam-btn" data-cam="coach">Coach iso</button>
+      <button type="button" class="cam-btn" data-cam="server">Behind server</button>
+    </div>
+  </footer>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
