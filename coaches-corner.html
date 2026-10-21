@@ -223,6 +223,17 @@
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .sb-tools { justify-content: center; margin-top: 0.9rem; }
 
+    /* Team talks */
+    .steps { padding-left: 1.2rem; display: grid; gap: 0.4rem; }
+    .steps li { font-size: 0.84rem; color: var(--muted); }
+    .steps b { color: var(--text); }
+    .say { display: grid; gap: 0.4rem; }
+    .say blockquote { font-size: 0.86rem; color: var(--text); border-left: 3px solid var(--orange); background: rgba(255,140,0,0.06); padding: 0.45rem 0.7rem; border-radius: 0 8px 8px 0; }
+    .talk-card .avoid h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--bad); margin-bottom: 0.15rem; }
+    .talk-card .avoid ul { padding-left: 1.1rem; }
+    .tone { font-size: 0.8rem !important; color: var(--sky) !important; }
+    .talk-copy { align-self: flex-start; margin-top: auto; }
+
     /* Plyometrics */
     .tag.int-low { color: var(--good); background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); }
     .tag.int-moderate { color: var(--amber); background: rgba(255,183,48,0.08); border-color: rgba(255,183,48,0.25); }
@@ -307,13 +318,14 @@
     <section class="hero">
       <div class="hero-badge">📋 Coaching hub</div>
       <h1>Coach's <span>Corner</span></h1>
-      <p>Drills to build skills, plyometrics to jump higher, systems to organize your team, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
+      <p>Drills to build skills, plyometrics to jump higher, systems to organize your team, what to say in the huddle, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
     </section>
 
     <div class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-drills" aria-controls="panel-drills" data-tab="drills">🏐 Drills</button>
       <button class="tab" role="tab" id="tab-plyo" aria-controls="panel-plyo" data-tab="plyo">🦘 Plyometrics</button>
       <button class="tab" role="tab" id="tab-strategies" aria-controls="panel-strategies" data-tab="strategies">🧠 Strategies</button>
+      <button class="tab" role="tab" id="tab-talks" aria-controls="panel-talks" data-tab="talks">🗣️ Team Talks</button>
       <button class="tab" role="tab" id="tab-coach" aria-controls="panel-coach" data-tab="coach">📋 Coach's Corner</button>
     </div>
 
@@ -431,6 +443,29 @@
       </div>
       <div class="strat-nav" id="strat-nav"></div>
       <div id="strat-body"></div>
+    </section>
+
+    <!-- ───────────── Team talks ───────────── -->
+    <section class="panel" id="panel-talks" role="tabpanel" aria-labelledby="tab-talks" hidden>
+      <div class="section-head">
+        <h2>Team talks</h2>
+        <p>What to say before the match, in timeouts, between sets, after the final point, and one-on-one, for wins, losses, lost composure, protecting a lead, tough opponents, and more.</p>
+      </div>
+
+      <h3 class="sub-head" style="margin-top:0">Talk frameworks <small>A simple structure for each moment</small></h3>
+      <div class="rules" id="talk-frameworks"></div>
+
+      <h3 class="sub-head">Situations <small>Example lines to adapt in your own voice</small></h3>
+      <div class="filters">
+        <input class="search" id="talk-search" type="search" placeholder="Search talks…" aria-label="Search talks" />
+        <span class="count" id="talk-count"></span>
+      </div>
+      <div class="filters" id="talk-moments" aria-label="Moment filter"></div>
+      <div class="filters" id="talk-topics" aria-label="Situation filter"></div>
+      <div class="grid" id="talk-grid"></div>
+
+      <h3 class="sub-head">Phrase bank &amp; principles</h3>
+      <div class="rules" id="talk-phrases"></div>
     </section>
 
     <!-- ───────────── Coach's Corner ───────────── -->
@@ -882,6 +917,195 @@
     upper:    { name: 'Arm swing & upper body', cats: ['vertical', 'lateral'], pin: ['mb-spike', 'mb-rotate'], upper: 3 },
   };
 
+  // ───────────────────────── Data: team talks ─────────────────────────
+  const TALK_MOMENTS = [
+    ['all', 'All'], ['pregame', 'Pre-game'], ['timeout', 'Timeout'], ['between', 'Between sets'], ['postgame', 'Post-game'], ['individual', 'One-on-one'],
+  ];
+  const TALK_MOMENT_LABEL = Object.fromEntries(TALK_MOMENTS);
+
+  const TALK_FRAMEWORKS = [
+    { moment: 'Pre-game', time: '2–3 min', steps: [
+      ['Connect', 'Eye contact, calm voice. Name what today means without making it bigger.'],
+      ['Two keys', 'Two controllable focuses for the match (e.g. "serve to zone 1," "talk on every ball").'],
+      ['Belief', 'Remind them why they\'re ready: the work they\'ve done.'],
+      ['Break', 'Team chant or hands in — end on energy.'],
+    ]},
+    { moment: 'Timeout', time: '30–60 s', steps: [
+      ['Breathe', 'First 10 seconds: let them drink and breathe. Say nothing yet.'],
+      ['One fix', 'One specific, tactical instruction. Not three.'],
+      ['One cue', 'A short phrase they can carry back: "high to middle," "next ball."'],
+      ['Send', 'Calm, confident close: "We\'re fine. Go get this one."'],
+    ]},
+    { moment: 'Between sets', time: '~2–3 min', steps: [
+      ['Reset', 'Win or lose, the last set is over. Start from 0–0.'],
+      ['What worked', 'Name one thing to keep doing — with evidence.'],
+      ['One adjustment', 'One change for this set: serving target, block, rotation.'],
+      ['Start fast', 'A goal for the first five points.'],
+    ]},
+    { moment: 'Post-game', time: '2–5 min', steps: [
+      ['Acknowledge', 'Name the result and the feeling honestly.'],
+      ['Effort & growth', 'Praise specific effort or improvement — not just the score.'],
+      ['One takeaway', 'One lesson to carry forward. Save the film-room detail for practice.'],
+      ['Close', 'What\'s next (schedule, recovery) and end together.'],
+    ]},
+  ];
+
+  const TALKS = [
+    // Pre-game
+    { moment: 'pregame', title: 'Facing a tougher opponent', tags: ['underdog', 'tough opponent'],
+      goal: 'Turn fear into focus. Shrink the opponent to a set of problems you have answers for.',
+      say: ['"Nobody expects us to win this. That\'s freedom — we get to play loose and swing."', '"They\'re good, and we\'ve prepared for exactly what they do. Serve their #4, block their outside line."', '"Win the next rally. Then the next one. That\'s the whole plan."'],
+      avoid: ['Praising the opponent so much the team feels beaten before the first serve.', 'Promising a win — promise effort and execution instead.'],
+      tone: 'Calm, confident, a little playful. Underdogs play best when they\'re relaxed.' },
+    { moment: 'pregame', title: 'Heavy favorite (avoid complacency)', tags: ['favored', 'weaker opponent'],
+      goal: 'Keep standards high when the opponent won\'t push you.',
+      say: ['"Today we play against our standard, not against them."', '"Our goals: fewer than five service errors, pass average over 2, talk on every ball."', '"Respect every team by giving them our best volleyball."'],
+      avoid: ['"This should be easy."', 'Talking about the next, bigger opponent.'],
+      tone: 'Businesslike. Set measurable targets so the match still means something.' },
+    { moment: 'pregame', title: 'Big stage: rivalry or playoffs', tags: ['nerves', 'big game'],
+      goal: 'Name the nerves as normal and channel the energy into routines.',
+      say: ['"Butterflies mean you care. Let them fly in formation."', '"Same game as every practice: serve, pass, swing. The court is the same size."', '"When it gets loud, we get louder with each other."'],
+      avoid: ['Adding pressure: "This is the biggest game of your lives."', 'Changing the routine or warm-up on game day.'],
+      tone: 'Steady and warm. Your calm is contagious.' },
+    { moment: 'pregame', title: 'Bouncing back from a bad loss', tags: ['after loss', 'confidence'],
+      goal: 'Close the door on the last match and focus on fixes you\'ve practiced.',
+      say: ['"Last match is done. We learned from it, we practiced it, now we show it."', '"Today\'s focus is the thing we fixed: serve receive. Trust the reps."', '"Nobody remembers the loss if we answer it today."'],
+      avoid: ['Re-hashing the loss in detail before the game.', 'Singling out players who struggled last time.'],
+      tone: 'Forward-looking and firm.' },
+    { moment: 'pregame', title: 'Young team / first big tournament', tags: ['nerves', 'youth'],
+      goal: 'Make it fun and simple. Give them permission to make mistakes.',
+      say: ['"You\'re going to make mistakes today. Great — mistakes mean you\'re going for it."', '"Two jobs: call the ball and help your teammates. That\'s it."', '"Look how far you\'ve come since the first practice."'],
+      avoid: ['Too many instructions.', 'Talking about rankings or results.'],
+      tone: 'Light, encouraging, smiling.' },
+
+    // Timeouts
+    { moment: 'timeout', title: 'Opponent on a run', tags: ['momentum', 'losing composure'],
+      goal: 'Stop the bleeding with one fix and a reset.',
+      say: ['"Breathe. It\'s a 3-point run, not the match."', '"Their server is hitting zone 1 — libero, slide over and take it. Pass high to the middle."', '"Sideout, then we serve tough. One point."'],
+      avoid: ['Yelling about effort.', 'Three different fixes at once.'],
+      tone: 'Lower your voice and slow down. Kneel or crouch to their level.' },
+    { moment: 'timeout', title: 'Team losing composure', tags: ['losing composure', 'frustration'],
+      goal: 'Bring heart rates down before giving any tactics.',
+      say: ['"Everyone take one slow breath with me. In… and out."', '"Look at each other. We\'re together. Next ball."', '"Simple: high pass, high set, big swing. Nothing fancy."'],
+      avoid: ['Matching their panic with your own.', 'Asking "What are you doing?"'],
+      tone: 'Very calm, slow, quiet. Use names and eye contact.' },
+    { moment: 'timeout', title: 'Protecting a lead', tags: ['keeping the lead', 'closing'],
+      goal: 'Keep them aggressive — leads are lost by playing not to lose.',
+      say: ['"We earned this lead by attacking. Keep attacking."', '"Serve aggressive and in. Their #9 is struggling to pass — stay on them."', '"Play the next point like it\'s 0–0."'],
+      avoid: ['"Just don\'t mess up."', 'Talking about the score.'],
+      tone: 'Upbeat and decisive.' },
+    { moment: 'timeout', title: 'Down big', tags: ['comeback', 'fight', 'momentum'],
+      goal: 'Give a realistic path and a reason to compete every point.',
+      say: ['"We need runs of three. Let\'s get the first one."', '"Let\'s win the next five rallies. That\'s the only scoreboard right now."', '"Whatever happens, we\'re going to make them earn every point."'],
+      avoid: ['Giving up visibly (sighs, crossed arms).', 'Sarcasm.'],
+      tone: 'Honest and gritty.' },
+    { moment: 'timeout', title: 'Tight late game (23–23)', tags: ['close game', 'clutch', 'nerves'],
+      goal: 'Clear minds; give the play and trust them.',
+      say: ['"This is the fun part. This is why we practice."', '"Receive: libero and outsides, high to middle. We\'re setting the outside — big swing, high hands."', '"Whatever happens on this point, we play the next one."'],
+      avoid: ['Introducing a new play.', 'Showing nerves.'],
+      tone: 'Smile. Short sentences. Confidence.' },
+    { moment: 'timeout', title: 'Errors piling up', tags: ['frustration', 'mistakes', 'losing composure'],
+      goal: 'Break the error streak with a simple cue and margin.',
+      say: ['"Our serves are fine — aim 1 meter higher over the tape."', '"Hitters: high off the block or roll deep. Make them play defense."', '"Errors happen. We\'re one good touch away."'],
+      avoid: ['Listing every error.', 'Blaming individuals in the huddle.'],
+      tone: 'Matter-of-fact. Treat errors as fixable, not personal.' },
+    { moment: 'timeout', title: 'After a bad referee call', tags: ['losing composure', 'adversity'],
+      goal: 'Model composure and redirect energy to the next rally.',
+      say: ['"That call is gone. We can\'t change it — we can win the next one."', '"Their best response is us getting rattled. Don\'t give it to them."', '"Use the energy. Serve tough."'],
+      avoid: ['Arguing in front of the team.', 'Letting the call become the story.'],
+      tone: 'Composed. Your reaction is their template.' },
+    { moment: 'timeout', title: 'Tough opponent dominating', tags: ['tough opponent', 'adjustment'],
+      goal: 'Show you have a plan; give one counter.',
+      say: ['"Their outside is killing us cross. Libero, you\'re in zone 5. Blockers, take the line."', '"Make that hitter swing into two hands every time."', '"We don\'t need to stop them every time — just enough."'],
+      avoid: ['Praising their star to your team.', 'Abandoning your whole system.'],
+      tone: 'Analytical and assured.' },
+
+    // Between sets
+    { moment: 'between', title: 'Won the set', tags: ['win', 'keeping the lead', 'momentum'],
+      goal: 'Stay hungry. Teams often dip after winning a set.',
+      say: ['"Great set. Now forget it — 0–0."', '"Keep doing what worked: serving their zone 1 and running the middle."', '"First five points. Make them feel it again."'],
+      avoid: ['Celebrating like the match is over.', 'Relaxing the standards.'],
+      tone: 'Pleased but sharp.' },
+    { moment: 'between', title: 'Lost a close set', tags: ['loss', 'close loss', 'confidence'],
+      goal: 'Show them they\'re right there; give one edge.',
+      say: ['"We\'re in this. Two points decided that set."', '"One change: our setter in front row — let\'s go quick with the middle."', '"Win the start of this set and it\'s ours."'],
+      avoid: ['Dwelling on the last point.', 'Blaming the player who made the final error.'],
+      tone: 'Confident and specific.' },
+    { moment: 'between', title: 'Lost a set badly', tags: ['loss', 'blowout', 'momentum'],
+      goal: 'Reset completely; simplify; set a small, winnable goal.',
+      say: ['"That set is gone. New set, new score."', '"We\'re simplifying: high sets to the outside, serve to their #12."', '"Goal: win the first five points."'],
+      avoid: ['Long lectures.', 'Changing everyone in the lineup in a panic.'],
+      tone: 'Firm and calm.' },
+    { moment: 'between', title: 'Deciding set', tags: ['clutch', 'fifth set', 'nerves'],
+      goal: 'Urgency without panic: short set, fast start.',
+      say: ['"Fifteen points. Start fast and stay together."', '"Serve in. Errors decide short sets."', '"This is the moment we\'ve trained for."'],
+      avoid: ['New strategies.', 'Overloading information.'],
+      tone: 'Energized but clear.' },
+
+    // Post-game
+    { moment: 'postgame', title: 'Win', tags: ['win'],
+      goal: 'Celebrate the effort; stay humble and growth-minded.',
+      say: ['"Enjoy this — you earned it."', '"I loved how we passed under pressure in set 3."', '"Tomorrow we\'ll watch film and keep getting better."'],
+      avoid: ['Talking down the opponent.', 'Only praising the stars.'],
+      tone: 'Warm and proud.' },
+    { moment: 'postgame', title: 'Sloppy win', tags: ['win', 'standards'],
+      goal: 'Acknowledge the win without ignoring the standard.',
+      say: ['"A win is a win, and I\'m glad we found a way."', '"We know that wasn\'t our best volleyball. That\'s good news — there\'s more in us."', '"Practice Tuesday: serve receive and serving errors."'],
+      avoid: ['Making the team feel like they lost.', 'A long critique right away.'],
+      tone: 'Balanced.' },
+    { moment: 'postgame', title: 'Upset win vs a tough opponent', tags: ['win', 'tough opponent'],
+      goal: 'Celebrate the belief and connect it to the work.',
+      say: ['"Nobody thought we could do that. You did."', '"That came from every passing rep in practice."', '"Remember how this feels — and what it took."'],
+      avoid: ['Getting overconfident about the next match.'],
+      tone: 'Joyful.' },
+    { moment: 'postgame', title: 'Close loss', tags: ['loss', 'close loss'],
+      goal: 'Validate the disappointment; show it\'s fixable.',
+      say: ['"It hurts because we cared and we were close."', '"We were two points away. I\'m proud of the fight."', '"Let\'s rest. We\'ll talk about the details at practice."'],
+      avoid: ['Picking apart the final points right away.', 'Pointing to one player\'s mistake.'],
+      tone: 'Quiet, empathetic, brief.' },
+    { moment: 'postgame', title: 'Blowout loss', tags: ['loss', 'blowout'],
+      goal: 'Honesty without humiliation. Find one thing to build on.',
+      say: ['"That wasn\'t who we are. Today they were better."', '"One thing I saw that we can build on: our coverage."', '"We\'ll respond in practice. That\'s where this changes."'],
+      avoid: ['Yelling or punishment talk right after.', 'Pretending it was fine.'],
+      tone: 'Calm and serious. Short.' },
+    { moment: 'postgame', title: 'Season-ending loss', tags: ['loss', 'seniors'],
+      goal: 'Honor the season and the people, not just the result.',
+      say: ['"Today doesn\'t define this season."', '"Seniors — thank you for what you built here."', '"Look around. These are your people."'],
+      avoid: ['Analyzing the match.', 'Rushing the moment.'],
+      tone: 'Heartfelt, slow, personal.' },
+
+    // One-on-one
+    { moment: 'individual', title: 'Player made the costly error', tags: ['mistakes', 'confidence'],
+      goal: 'Protect confidence; separate the error from the person.',
+      say: ['"That one\'s on all of us — we had 24 other points."', '"I\'d set you again in that situation every time."', '"What did you see on that ball? Okay — next time you\'ve got it."'],
+      avoid: ['Public criticism.', 'Silence that feels like punishment.'],
+      tone: 'Private, supportive, brief.' },
+    { moment: 'individual', title: 'Subbing out a struggling player', tags: ['substitution', 'confidence'],
+      goal: 'Give a reset and a reason, so it isn\'t a judgment.',
+      say: ['"Take a breath. I\'m giving you a reset, not a verdict."', '"Watch their blockers from here — tell me what you see."', '"I\'ll need you back in this match."'],
+      avoid: ['Ignoring the player on the bench.', 'Sarcasm or visible frustration.'],
+      tone: 'Matter-of-fact, kind.' },
+    { moment: 'individual', title: 'Player losing composure', tags: ['losing composure', 'frustration'],
+      goal: 'De-escalate before re-engaging.',
+      say: ['"Look at me. Breathe."', '"Your team needs your energy, not the frustration."', '"Next ball — serve aggressive and in."'],
+      avoid: ['Matching their volume.', 'Lecturing during play.'],
+      tone: 'Very calm, low, close.' },
+    { moment: 'individual', title: 'Star player in a slump', tags: ['confidence', 'star player'],
+      goal: 'Shrink the task and remind them of their strengths.',
+      say: ['"Forget kills for now. Just swing high and in."', '"Their block is keying on you — use them: high hands, wipe off."', '"You\'ve done this a thousand times."'],
+      avoid: ['Pulling them without a word.', 'Making them feel like the team depends only on them.'],
+      tone: 'Confident and private.' },
+  ];
+
+  const PHRASE_BANK = [
+    { t: 'Reset', items: ['"Next ball."', '"Flush it."', '"0–0."', '"Breathe and play."'] },
+    { t: 'Confidence', items: ['"You\'ve done this a thousand times."', '"Trust your reps."', '"I\'d set you again."', '"Go get it."'] },
+    { t: 'Focus cues', items: ['"High to middle."', '"Serve aggressive and in."', '"See the block, hit the hole."', '"Talk early."'] },
+    { t: 'Composure', items: ['"One point."', '"Control what we control."', '"Slow it down."', '"Stay together."'] },
+    { t: 'Do', items: ['One message per timeout.', 'Say what to do ("pass high"), not what not to do ("don\'t shank").', 'Use names and eye contact.', 'Praise effort and process, not just results.'] },
+    { t: 'Avoid', items: ['Criticizing players in front of the team.', 'Long tactical lectures post-game.', 'Showing panic on the bench.', 'Talking about the score instead of the next rally.'] },
+  ];
+
   // ───────────────────────── Data: strategies ─────────────────────────
   const STRATEGIES = [
     { id: 'offense', name: 'Offensive systems', items: [
@@ -1113,7 +1337,7 @@
   }
 
   // ───────────────────────── Tabs ─────────────────────────
-  const TABS = ['drills', 'plyo', 'strategies', 'coach'];
+  const TABS = ['drills', 'plyo', 'strategies', 'talks', 'coach'];
   function showTab(name, push = true) {
     if (!TABS.includes(name)) name = 'drills';
     TABS.forEach(t => {
@@ -1747,6 +1971,63 @@
   $('#sc-deal').addEventListener('click', dealScenario);
   $('#sc-length').addEventListener('change', dealScenario);
 
+  // ───────────────────────── Team talks UI ─────────────────────────
+  const TALK_TOPICS = ['all', 'win', 'loss', 'losing composure', 'keeping the lead', 'tough opponent', 'confidence', 'nerves', 'mistakes', 'momentum'];
+  let talkMoment = 'all', talkTopic = 'all';
+
+  $('#talk-frameworks').innerHTML = TALK_FRAMEWORKS.map(f => `
+    <div class="card">
+      <div class="meta"><span class="tag lvl">${f.moment}</span><span class="tag plain">⏱ ${f.time}</span></div>
+      <ol class="steps">${f.steps.map(([h, d]) => `<li><b>${h}</b> — ${esc(d)}</li>`).join('')}</ol>
+    </div>`).join('');
+
+  function renderTalkChips() {
+    $('#talk-moments').innerHTML = TALK_MOMENTS.map(([k, l]) =>
+      `<button class="chip" type="button" data-m="${k}" aria-pressed="${k === talkMoment}">${l}</button>`).join('');
+    $('#talk-topics').innerHTML = TALK_TOPICS.map(k =>
+      `<button class="chip" type="button" data-t="${k}" aria-pressed="${k === talkTopic}">${k === 'all' ? 'Any situation' : k[0].toUpperCase() + k.slice(1)}</button>`).join('');
+  }
+  function renderTalks() {
+    const q = $('#talk-search').value.trim().toLowerCase();
+    const list = TALKS.filter(t =>
+      (talkMoment === 'all' || t.moment === talkMoment) &&
+      (talkTopic === 'all' || t.tags.includes(talkTopic)) &&
+      (!q || [t.title, t.goal, ...t.say, ...t.tags].join(' ').toLowerCase().includes(q)));
+    $('#talk-count').textContent = `${list.length} of ${TALKS.length} talks`;
+    $('#talk-grid').innerHTML = list.length ? list.map(t => `
+      <article class="card talk-card">
+        <div class="meta">
+          <span class="tag lvl">${TALK_MOMENT_LABEL[t.moment]}</span>
+          ${t.tags.map(g => `<span class="tag">${esc(g)}</span>`).join('')}
+        </div>
+        <h3>${esc(t.title)}</h3>
+        <p><strong>Goal:</strong> ${esc(t.goal)}</p>
+        <div class="say">${t.say.map(s => `<blockquote>${esc(s)}</blockquote>`).join('')}</div>
+        <div class="avoid"><h4>Avoid</h4><ul>${t.avoid.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>
+        <p class="tone">🎙️ ${esc(t.tone)}</p>
+        <button class="btn talk-copy" type="button" data-i="${TALKS.indexOf(t)}">Copy script</button>
+      </article>`).join('') : '<p class="empty">No talks match those filters.</p>';
+  }
+  $('#talk-moments').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    talkMoment = b.dataset.m; renderTalkChips(); renderTalks();
+  });
+  $('#talk-topics').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    talkTopic = b.dataset.t; renderTalkChips(); renderTalks();
+  });
+  $('#talk-search').addEventListener('input', renderTalks);
+  $('#talk-grid').addEventListener('click', async e => {
+    const b = e.target.closest('.talk-copy'); if (!b) return;
+    const t = TALKS[Number(b.dataset.i)];
+    const text = [`${TALK_MOMENT_LABEL[t.moment].toUpperCase()}: ${t.title}`, `Goal: ${t.goal}`, '', 'Say:', ...t.say.map(s => '- ' + s),
+      '', 'Avoid:', ...t.avoid.map(a => '- ' + a), '', `Tone: ${t.tone}`].join('\n');
+    try { await navigator.clipboard.writeText(text); toast('Script copied'); }
+    catch (err) { toast('Copy not available in this browser'); }
+  });
+  $('#talk-phrases').innerHTML = PHRASE_BANK.map(r => `
+    <div class="card"><h3>${r.t}</h3><ul>${r.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('');
+
   // ───────────────────────── Init ─────────────────────────
   renderDrills();
   dealScenario();
@@ -1756,6 +2037,8 @@
   renderRatings();
   renderPlan();
   renderSituations();
+  renderTalkChips();
+  renderTalks();
   showTab(location.hash.slice(1) || 'drills', false);
   </script>
 </body>
