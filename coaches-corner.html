@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coach's Corner</title>
+  <meta name="description" content="Volleyball drills, team strategies, a matchup-based game planner, and a situational playbook for coaches." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #060810;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,165,50,0.4);
+      --text: #f0f4ff;
+      --muted: #8a99b8;
+      --orange: #ff8c00;
+      --amber: #ffb730;
+      --blue: #3b82f6;
+      --sky: #7dd3fc;
+      --good: #4ade80;
+      --bad: #f87171;
+      --neutral: #94a3b8;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    .blobs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; }
+    .blob-1 { width: 600px; height: 600px; background: radial-gradient(circle, #ff8c00 0%, transparent 70%); top: -220px; left: -200px; }
+    .blob-2 { width: 560px; height: 560px; background: radial-gradient(circle, #3b82f6 0%, transparent 70%); bottom: -160px; right: -160px; }
+
+    .page { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 1.5rem 6rem; }
+
+    /* Nav */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+    .nav-logo { font-size: 1rem; font-weight: 700; color: var(--amber); display: flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+    .nav-logo svg { width: 22px; height: 22px; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero { padding: 3.5rem 0 2rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.25); color: var(--amber);
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.3rem 0.85rem; border-radius: 100px; margin-bottom: 1.25rem;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 0.9rem; }
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--orange) 0%, var(--amber) 50%, var(--sky) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p { font-size: 1.02rem; color: var(--muted); max-width: 620px; }
+
+    /* Tabs */
+    .tabs {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; gap: 0.4rem; padding: 0.75rem 0; margin-bottom: 2rem;
+      background: linear-gradient(var(--bg) 70%, transparent);
+      overflow-x: auto;
+    }
+    .tab {
+      flex-shrink: 0;
+      font: inherit; font-size: 0.9rem; font-weight: 600;
+      color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+      padding: 0.55rem 1.1rem; border-radius: 100px; cursor: pointer; transition: all 0.2s;
+    }
+    .tab:hover { color: var(--text); border-color: var(--border-hover); }
+    .tab[aria-selected="true"] { color: #000; background: linear-gradient(135deg, var(--orange), var(--amber)); border-color: transparent; }
+    .panel[hidden] { display: none; }
+
+    .section-head { margin: 0 0 1.25rem; }
+    .section-head h2 { font-size: 1.5rem; font-weight: 700; }
+    .section-head p { font-size: 0.9rem; color: var(--muted); margin-top: 0.25rem; max-width: 720px; }
+    .sub-head { font-size: 1.1rem; font-weight: 700; margin: 2.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .sub-head small { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+
+    /* Filters */
+    .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1.25rem; }
+    .search {
+      font: inherit; font-size: 0.88rem; color: var(--text);
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.5rem 0.8rem; min-width: 0; flex: 1 1 220px; max-width: 320px;
+    }
+    .search:focus, select:focus { outline: 2px solid rgba(255,140,0,0.5); outline-offset: 1px; }
+    select {
+      font: inherit; font-size: 0.85rem; color: var(--text); background: #0d1220;
+      border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.7rem;
+    }
+    .chip {
+      font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+      padding: 0.3rem 0.75rem; border-radius: 100px; transition: all 0.15s;
+    }
+    .chip:hover { color: var(--text); }
+    .chip[aria-pressed="true"] { color: var(--amber); background: rgba(255,183,48,0.12); border-color: rgba(255,183,48,0.35); }
+    .count { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+
+    /* Cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.25rem 1.35rem; display: flex; flex-direction: column; gap: 0.55rem;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .card:hover { border-color: rgba(255,165,50,0.25); }
+    .card.flash { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,183,48,0.2); }
+    .card h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+    .card p, .card li { font-size: 0.85rem; color: var(--muted); }
+    .card strong { color: var(--text); font-weight: 600; }
+    .meta { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .tag {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em;
+      color: var(--sky); background: rgba(125,211,252,0.08); border: 1px solid rgba(125,211,252,0.18);
+      padding: 0.12rem 0.5rem; border-radius: 100px;
+    }
+    .tag.lvl { color: var(--amber); background: rgba(255,183,48,0.08); border-color: rgba(255,183,48,0.2); }
+    .tag.plain { color: var(--muted); background: rgba(255,255,255,0.04); border-color: var(--border); }
+    details summary {
+      cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--amber);
+      list-style: none; margin-top: 0.15rem;
+    }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::before { content: '▸ '; }
+    details[open] summary::before { content: '▾ '; }
+    .detail { margin-top: 0.6rem; display: grid; gap: 0.6rem; }
+    .detail h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text); margin-bottom: 0.15rem; }
+    .detail ul, .card ul { padding-left: 1.1rem; display: grid; gap: 0.2rem; }
+    .empty { color: var(--muted); font-size: 0.9rem; padding: 2rem 0; text-align: center; }
+
+    /* Strategy */
+    .strat-nav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
+    .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .pc h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.2rem; }
+    .pc .pro h4 { color: var(--good); }
+    .pc .con h4 { color: var(--bad); }
+    .use { font-size: 0.82rem; color: var(--text); background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 0.5rem 0.7rem; }
+    .use b { color: var(--sky); }
+
+    /* Planner */
+    .planner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1.25rem; align-items: start; }
+    .box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; }
+    .box-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; margin-bottom: 0.9rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .rate-table { width: 100%; border-collapse: collapse; }
+    .rate-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 700; text-align: left; padding: 0 0 0.5rem; }
+    .rate-table th.us { color: var(--amber); }
+    .rate-table th.them { color: var(--sky); }
+    .rate-table td { padding: 0.35rem 0; vertical-align: middle; border-top: 1px solid var(--border); }
+    .pos-name { font-size: 0.85rem; font-weight: 600; }
+    .pos-name small { display: block; font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+    .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
+    .seg input { position: absolute; opacity: 0; pointer-events: none; }
+    .seg label {
+      font-size: 0.7rem; font-weight: 700; padding: 0.32rem 0.5rem; cursor: pointer; color: var(--muted);
+      border-left: 1px solid var(--border); transition: background 0.15s, color 0.15s; user-select: none;
+    }
+    .seg label:first-of-type { border-left: 0; }
+    .seg input:focus-visible + label { outline: 2px solid var(--amber); outline-offset: -2px; }
+    .seg input[value="-1"]:checked + label { background: rgba(248,113,113,0.2); color: var(--bad); }
+    .seg input[value="0"]:checked + label { background: rgba(148,163,184,0.18); color: var(--text); }
+    .seg input[value="1"]:checked + label { background: rgba(74,222,128,0.18); color: var(--good); }
+    .btn {
+      font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      color: var(--text); background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      border-radius: 9px; padding: 0.35rem 0.7rem;
+    }
+    .btn:hover { border-color: var(--border-hover); }
+    .btn.primary { color: #000; background: linear-gradient(135deg, var(--orange), var(--amber)); border-color: transparent; }
+    .btn-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    .verdict { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .verdict-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+    .lanes { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
+    .lanes h5 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.4rem; }
+    .lane { display: grid; grid-template-columns: 9.5rem 1fr 6.5rem; gap: 0.6rem; align-items: center; font-size: 0.8rem; padding: 0.2rem 0; }
+    .lane-label { color: var(--text); font-weight: 600; line-height: 1.25; }
+    .lane-label small { display: block; color: var(--muted); font-weight: 500; font-size: 0.7rem; }
+    .bar { position: relative; height: 10px; background: rgba(255,255,255,0.05); border-radius: 100px; }
+    .bar::after { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: rgba(255,255,255,0.25); }
+    .bar-fill { position: absolute; top: 0; bottom: 0; border-radius: 100px; transition: all 0.3s; }
+    .lane-val { font-weight: 700; text-align: right; font-size: 0.75rem; }
+    .pos { color: var(--good); } .neg { color: var(--bad); } .even { color: var(--neutral); }
+
+    .plan-group { margin-top: 1rem; }
+    .plan-group h5 { font-size: 0.78rem; font-weight: 700; color: var(--amber); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+    .plan-group ul { list-style: none; display: grid; gap: 0.45rem; }
+    .plan-group li { font-size: 0.85rem; color: var(--muted); padding-left: 1rem; position: relative; }
+    .plan-group li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+    .plan-group li b { color: var(--text); font-weight: 600; }
+    .drill-links { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.4rem; }
+    .drill-link { font: inherit; font-size: 0.75rem; color: var(--sky); background: rgba(125,211,252,0.08); border: 1px solid rgba(125,211,252,0.2); border-radius: 100px; padding: 0.15rem 0.6rem; cursor: pointer; }
+    .drill-link:hover { color: var(--text); }
+    .note { font-size: 0.75rem; color: var(--muted); margin-top: 1rem; }
+
+    /* Situations */
+    .sit-card .when { font-size: 0.8rem; color: var(--muted); font-style: italic; }
+    .sit-card .do h4 { color: var(--good); }
+    .sit-card .avoid h4 { color: var(--bad); }
+
+    .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(150%);
+      background: #111827; border: 1px solid var(--border-hover); color: var(--text); font-size: 0.85rem;
+      padding: 0.6rem 1rem; border-radius: 10px; transition: transform 0.25s; z-index: 20;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: center; font-size: 0.82rem; color: var(--muted); }
+    footer a { color: var(--sky); text-decoration: none; }
+
+    @media (max-width: 900px) {
+      .planner { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .page { padding: 0 1rem 4rem; }
+      .tab { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
+      nav { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+      .pc { grid-template-columns: 1fr; }
+      .lane { grid-template-columns: 1fr 5.5rem; }
+      .lane .bar { grid-column: 1 / -1; grid-row: 2; }
+      .seg label { padding: 0.32rem 0.4rem; }
+      .box { padding: 1rem; }
+      .search { max-width: none; }
+    }
+    @media print {
+      .blobs, nav, .tabs, .hero, footer, .btn-row, #panel-drills, #panel-strategies { display: none !important; }
+      body { background: #fff; color: #000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
+
+  <div class="page">
+    <nav>
+      <a class="nav-logo" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 2C12 2 8 6 8 12C8 18 12 22 12 22" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 2C12 2 16 6 16 12C16 18 12 22 12 22" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M2 12H22" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        VB · Three.js
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="tactical-board/">Tactical Board</a></li>
+        <li><a href="prototypes/08-basic-drills.html">3D Drills</a></li>
+      </ul>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-badge">📋 Coaching hub</div>
+      <h1>Coach's <span>Corner</span></h1>
+      <p>Drills to build skills, systems to organize your team, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-drills" aria-controls="panel-drills" data-tab="drills">🏐 Drills</button>
+      <button class="tab" role="tab" id="tab-strategies" aria-controls="panel-strategies" data-tab="strategies">🧠 Strategies</button>
+      <button class="tab" role="tab" id="tab-coach" aria-controls="panel-coach" data-tab="coach">📋 Coach's Corner</button>
+    </div>
+
+    <!-- ───────────── Drills ───────────── -->
+    <section class="panel" id="panel-drills" role="tabpanel" aria-labelledby="tab-drills">
+      <div class="section-head">
+        <h2>Drill library</h2>
+        <p>Filter by skill and level. Open a drill for setup, flow, coaching cues, and how to make it harder.</p>
+      </div>
+      <div class="filters">
+        <input class="search" id="drill-search" type="search" placeholder="Search drills…" aria-label="Search drills" />
+        <select id="drill-level" aria-label="Level">
+          <option value="">All levels</option>
+          <option>Beginner</option>
+          <option>Intermediate</option>
+          <option>Advanced</option>
+        </select>
+        <span class="count" id="drill-count"></span>
+      </div>
+      <div class="filters" id="drill-chips" aria-label="Skill filter"></div>
+      <div class="grid" id="drill-grid"></div>
+    </section>
+
+    <!-- ───────────── Strategies ───────────── -->
+    <section class="panel" id="panel-strategies" role="tabpanel" aria-labelledby="tab-strategies" hidden>
+      <div class="section-head">
+        <h2>Team strategies</h2>
+        <p>Offensive systems, serve-receive patterns, defensive schemes, blocking, serving, and attacking — when to use each and what it costs you.</p>
+      </div>
+      <div class="strat-nav" id="strat-nav"></div>
+      <div id="strat-body"></div>
+    </section>
+
+    <!-- ───────────── Coach's Corner ───────────── -->
+    <section class="panel" id="panel-coach" role="tabpanel" aria-labelledby="tab-coach" hidden>
+      <div class="section-head">
+        <h2>Matchup planner</h2>
+        <p>Rate each position for your team and the opponent. The planner compares who faces whom at the net and builds a game plan: where to set, who to serve, how to block, and what to protect.</p>
+      </div>
+
+      <div class="planner">
+        <div class="box">
+          <div class="box-title">
+            <span>Position ratings</span>
+            <div class="btn-row">
+              <button class="btn" id="btn-reset" type="button">Reset</button>
+              <button class="btn" id="btn-sample" type="button">Try a sample</button>
+            </div>
+          </div>
+          <table class="rate-table">
+            <thead><tr><th>Position</th><th class="us">Us</th><th class="them">Opponent</th></tr></thead>
+            <tbody id="rate-body"></tbody>
+          </table>
+          <p class="note"><b style="color:var(--bad)">W</b> weak · <b style="color:var(--text)">N</b> neutral · <b style="color:var(--good)">S</b> strong. Rate the player's overall impact in that role. Attackers face the blockers across the net: your outsides vs their opposite + setter, middles vs middles, your opposite vs their outsides.</p>
+        </div>
+
+        <div class="box" id="plan-box">
+          <div class="box-title">
+            <span>Game plan</span>
+            <div class="btn-row">
+              <button class="btn" id="btn-copy" type="button">Copy plan</button>
+              <button class="btn" id="btn-print" type="button">Print</button>
+            </div>
+          </div>
+          <div id="plan-out"></div>
+        </div>
+      </div>
+
+      <h3 class="sub-head">Situational playbook <small>What to do when the match turns</small></h3>
+      <div class="filters" id="sit-chips"></div>
+      <div class="grid" id="sit-grid"></div>
+
+      <h3 class="sub-head">Bench rules of thumb</h3>
+      <div class="rules" id="rules"></div>
+    </section>
+
+    <footer>
+      Part of the <a href="index.html">Volleyball Training Visualizer</a>. Diagram plays on the <a href="tactical-board/">3D Tactical Board</a>.
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  // ───────────────────────── Data: drills ─────────────────────────
+  const DRILLS = [
+    { id: 'butterfly', name: 'Butterfly Passing', skills: ['pass', 'serve'], level: 'Beginner', players: '8–12', time: '10–15 min',
+      summary: 'Continuous serve → pass → target rotation. High reps of serve receive with built-in serving practice.',
+      setup: 'Servers on one end line. Passers in zones 1 and 5 on the other side. A target player stands at the setter spot (right of center, ~1 m off the net).',
+      flow: ['Server serves to the passer line.', 'Passer passes to target; target catches.', 'Rotate: server → passer, passer → target, target → shag and back to the serve line.'],
+      cues: ['Feet beat the ball — get behind it before it arrives.', 'Angle the platform toward the target early; quiet arms, no swing.', 'Call "mine" before the ball crosses the net.'],
+      harder: 'Team needs 10 passes rated 2+ in a row. Add a passer in zone 6 to train seams.' },
+    { id: 'sr-ladder', name: 'Serve-Receive Ladder', skills: ['pass'], level: 'Intermediate', players: '3 passers + servers', time: '15 min',
+      summary: 'Three passers vs tough serves, every pass rated 0–3. Builds the passing standard your offense depends on.',
+      setup: 'Your real 3-person receive (libero + two outsides). Servers rotate from all six serving spots. Setter or target at the net.',
+      flow: ['Serve live; passers receive in formation.', 'Coach calls each pass rating: 3 perfect, 2 setter moves a step, 1 only a high set, 0 ace/overpass.', 'Track the average over 10 serves; rotate passers after each set of 10.'],
+      cues: ['Seams: the player moving toward the target takes it.', 'Pass high to the middle of the court when in doubt — a 2 beats a gamble.', 'Reset feet between serves; read the server\'s toss and shoulders.'],
+      harder: 'Require a 2.2 average to advance; servers earn a point for every 0 or 1.' },
+    { id: 'serve-zones', name: 'Around-the-World Serving', skills: ['serve'], level: 'Beginner', players: 'Any', time: '10 min',
+      summary: 'Serve zones 1 through 6 in order. Turns serving into accuracy, not just getting it over.',
+      setup: 'Place cones or hoops in all six zones on the receiving side. Servers line up behind the end line.',
+      flow: ['Serve zone 1; move to the next zone only after a make.', 'First player through all six zones wins.', 'Add short zones (2, 3, 4 front) once players are consistent.'],
+      cues: ['Consistent toss — same height, same spot, every time.', 'Firm wrist and contact the middle of the ball for a float.', 'Finish toward the target; aim with the follow-through.'],
+      harder: 'Miss = go back one zone. Add a passer standing in the target zone.' },
+    { id: 'pressure-serve', name: 'Pressure Serving', skills: ['serve'], level: 'Intermediate', players: 'Team', time: '10 min',
+      summary: 'Serving under consequence — the closest you get to 23–24 in practice.',
+      setup: 'Whole team on the end line. Coach calls a target zone for each round.',
+      flow: ['Each player serves once in turn; the team needs a set number of consecutive makes (e.g. 12).', 'A miss resets the count to zero.', 'Teammates may cheer but not coach during a serve.'],
+      cues: ['Routine: same breath, same bounces, same toss.', 'Commit to the target before the toss.', 'Aggressive but in — the goal is a tough serve, not a perfect one.'],
+      harder: 'Makes only count if they land in the called zone. Increase the target count.' },
+    { id: 'setter-move', name: 'Setter Release & Target', skills: ['set'], level: 'Intermediate', players: '3–4', time: '10–15 min',
+      summary: 'Setter releases from the back row, beats the ball to target, and sets a called option.',
+      setup: 'Setter starts in right back (zone 1). Coach tosses from zone 6 to varied spots near target. Catchers at the left and right pins.',
+      flow: ['Coach tosses as the setter releases.', 'Setter gets to the ball, squares to the left pin, and sets the call (4, 5, 1, or back set).', 'Rotate after 8 balls.'],
+      cues: ['Right foot forward on arrival; hips face the left pin.', 'Get under the ball — set from the forehead, not the chest.', 'Same body shape for front and back sets to hide the choice.'],
+      harder: 'Toss tight to the net or off the net. Coach calls the set late — after the toss.' },
+    { id: 'oos-set', name: 'Out-of-System High Ball', skills: ['set', 'attack'], level: 'Intermediate', players: '4–6', time: '10 min',
+      summary: 'Non-setters set hittable high balls from deep in the court — the play that decides close sets.',
+      setup: 'Coach sends a bad pass deep or wide. A non-setter (often the libero or right back) must set. Hitter at the left pin.',
+      flow: ['Coach sends the scramble ball.', 'Nearest player calls "help," squares to the target, and sets high to the left pin.', 'Hitter attacks with a full approach.'],
+      cues: ['Height buys time: high and a meter off the net.', 'Square your hips to where you want the ball to go.', 'Hand-set if you can; bump-set with a firm platform and lift from the legs.'],
+      harder: 'Add a 2-person block. Hitter must score, not just keep it in.' },
+    { id: 'hit-lines', name: 'Approach & Hitting Lines', skills: ['attack'], level: 'Beginner', players: '6–12', time: '15 min',
+      summary: 'Approach rhythm with coach tosses, progressing to live sets.',
+      setup: 'Hitting lines at zone 4 (and 2 later). Coach or setter at target. Shaggers on the other side.',
+      flow: ['Coach tosses a high ball; hitter runs a full approach and attacks.', 'After 5 reps each, switch to live sets from the setter.', 'Move the line to zone 2 for right-side attackers.'],
+      cues: ['Slow to fast: the last two steps are the fastest.', 'Arms swing back on the plant, then drive up.', 'Contact high and in front of the hitting shoulder; snap the wrist.'],
+      harder: 'Set a target cone deep cross; hitter must land 3 of 5 behind the 3 m line.' },
+    { id: 'line-cross', name: 'Line vs Cross Hitting', skills: ['attack'], level: 'Intermediate', players: '6–10', time: '15 min',
+      summary: 'Hitters learn to hit two directions off the same approach — the start of shot range.',
+      setup: 'Hitters at zone 4. Targets (chairs or mats) in the deep line and deep cross corners. A coach on a box can hold up a "line" block.',
+      flow: ['Live set to the left pin.', 'Coach calls "line" or "cross" mid-approach, or shows a blocker\'s hands.', 'Hitter attacks the open lane.'],
+      cues: ['Line: turn the shoulder less, hit with the wrist through the ball.', 'Cross: open up and swing across the body.', 'Watch the block in the corner of your eye during the approach.'],
+      harder: 'Add a live block that moves late. Score 2 points for a kill in the open lane.' },
+    { id: 'shots', name: 'Tool the Block & Shots', skills: ['attack'], level: 'Advanced', players: '6–8', time: '10–15 min',
+      summary: 'Wipes, roll shots, and tips into open space — scoring when the swing is blocked.',
+      setup: 'Two blockers on a box or live. Targets: zone 1/5 deep corners, the middle of the court (roll), and behind the block (tip).',
+      flow: ['Live set to the pin against a formed block.', 'Hitter chooses: wipe off the outside hand, roll deep seam, or tip over the block.', 'Coach rewards smart choices, not just power.'],
+      cues: ['Wipe: swing high and hit the outside edge of the outside hand toward the antenna.', 'Roll: same arm speed, open hand, topspin into the deep middle.', 'Disguise — every shot starts as a full swing.'],
+      harder: 'Blockers choose to commit or read; hitter must score 3 different ways.' },
+    { id: 'block-foot', name: 'Block Footwork: Shuffle & Crossover', skills: ['block'], level: 'Beginner', players: '3–6', time: '10 min',
+      summary: 'Middle blockers learn to get from base to the pins and close the block.',
+      setup: 'Middle at center base. Outside blockers at each pin. Coach points to a direction.',
+      flow: ['Short move: shuffle-step and jump.', 'Long move: crossover step (step–cross–plant) to the pin and close next to the outside blocker.', 'Alternate sides for 10 reps.'],
+      cues: ['Hands up and in front at base — never drop them.', 'Plant the outside foot to stop drift, then go straight up.', 'Press over the net; thumbs up, fingers spread, hands angled into the court.'],
+      harder: 'Coach tosses to a hitter after the call; blocker must be on time and closed.' },
+    { id: 'read-block', name: 'Read Block: See-Set-Hitter', skills: ['block'], level: 'Advanced', players: '6+', time: '15 min',
+      summary: 'Blockers read the pass, the setter, then the hitter — instead of guessing.',
+      setup: 'Live setter with two or three hitters. Three blockers at the net.',
+      flow: ['Coach tosses a pass to the setter.', 'Blockers call out loud: "good pass," "set left," "hitter approaching cross."', 'Blockers move only after the setter releases the ball.'],
+      cues: ['Eyes: ball → setter → ball → hitter.', 'Patience: be late and big, not early and wrong.', 'Middle leads, pins hold the edge.'],
+      harder: 'Setter runs a quick middle option; blockers must stay home on the quick before closing.' },
+    { id: 'dig-box', name: 'Box Digging', skills: ['defense'], level: 'Intermediate', players: '2–6', time: '10–15 min',
+      summary: 'Coach hits from a box at the net into defensive positions to train reading the attacker.',
+      setup: 'Coach on a box at the left or right pin. Diggers in base positions for your defensive system. Target at the setter spot.',
+      flow: ['Coach hits line, cross, roll, or tip.', 'Defender digs high to the middle of the court.', 'Rotate positions every 6 balls.'],
+      cues: ['Be still and low on contact — move before, not during, the attack.', 'Weight forward, platform out in front.', 'Dig up and in: a high ball to the middle is a good dig.'],
+      harder: 'Coach mixes speeds and shots. Diggers score only if the dig is settable.' },
+    { id: 'pursuit', name: 'Pursuit & Scramble', skills: ['defense'], level: 'Advanced', players: '4+', time: '10 min',
+      summary: 'Chasing down shanks and deflections — effort plays that swing momentum.',
+      setup: 'Coach sends balls off the court, off the net, and into the seams.',
+      flow: ['Player pursues the ball; a teammate calls the target.', 'Play it back with a one-arm, a run-through, or an overhead.', 'Continuous for 30–45 seconds per player.'],
+      cues: ['Run to where the ball will land, then play it.', 'Turn and face the court on deep pursuits; play it high.', 'Communicate: "short," "deep," "help."'],
+      harder: 'Ball must be playable for an attack; add a hitter finishing the rally.' },
+    { id: 'pepper', name: 'Partner Pepper', skills: ['pass', 'set', 'attack', 'defense'], level: 'Beginner', players: '2', time: '5–10 min',
+      summary: 'Pass, set, hit in pairs. The classic warm-up for ball control.',
+      setup: 'Two players about 6 m apart.',
+      flow: ['Player A passes to self or partner, B sets back, A hits down at B.', 'B digs, A sets, B hits.', 'Count consecutive contacts.'],
+      cues: ['Control first; the hit is to the digger, not past them.', 'Talk on every contact.', 'Stay low and balanced.'],
+      harder: 'Add a target count, or progress to 3-person pepper with a dedicated setter.' },
+    { id: 'coverage', name: 'Hitter Coverage', skills: ['defense', 'team'], level: 'Intermediate', players: '6', time: '10 min',
+      summary: 'Keeping blocked balls alive. Points you earn without anyone getting a kill.',
+      setup: 'Full side on the court. Coach on a box across the net with a pad, or a live block.',
+      flow: ['Set the hitter; coach blocks the ball back down.', 'Coverage players form a cup around the hitter and play it up.', 'Re-set and attack again.'],
+      cues: ['Low and close: 1–2 m from the hitter, eyes on the hands.', 'Shape: 3 close, 2 deep.', 'Hitter calls "cover" on the approach.'],
+      harder: 'Rally continues until a clean kill. Count covered balls as team points.' },
+    { id: 'wash', name: 'Wash Drill (Big Point / Little Point)', skills: ['team', 'pass', 'serve'], level: 'Advanced', players: '12', time: '20 min',
+      summary: 'Six vs six where you score a big point only by winning serve receive and the next free ball.',
+      setup: 'Two full teams. One serves, one receives.',
+      flow: ['Serve → rally. Winner earns a little point.', 'Coach immediately sends a free ball to the other team → rally. Winner earns a little point.', 'Win both little points = big point. Split = "wash," no score. Play to 5 big points per rotation.'],
+      cues: ['Finish the first ball; regroup instantly for the second.', 'Free ball: everyone off the net, call it, transition fast.', 'Every rally matters — no coasting after a win.'],
+      harder: 'Rotate only when the receiving team wins a big point.' },
+    { id: 'free-trans', name: 'Free Ball to Transition', skills: ['team', 'attack'], level: 'Intermediate', players: '6', time: '10–15 min',
+      summary: 'Defense to offense: blockers drop off the net, the pass goes up, and the team attacks with tempo.',
+      setup: 'Full side starts in base defense. Coach across the net sends free balls.',
+      flow: ['Coach slaps the ball and calls "free."', 'Front row opens off the net to approach spots; back row passes.', 'Setter runs the called play; hitters attack.'],
+      cues: ['Transition early: get to the 3 m line before the ball crosses.', 'Hitters land and get ready to attack again.', 'Setter calls the play out loud.'],
+      harder: 'Down ball or attack instead of a free ball. Score only for kills in under three contacts.' },
+    { id: 'kotc', name: 'King / Queen of the Court', skills: ['team'], level: 'Beginner', players: '9–15', time: '15–20 min',
+      summary: 'Small teams challenge the winners\' side. Fast, competitive, high-energy.',
+      setup: 'Teams of 2–3. One team on the "king" side; challengers line up on the other.',
+      flow: ['Challengers serve or receive a free ball from the coach.', 'Win the rally on the king side = score a point; win as challengers = move to the king side.', 'Losing teams go to the back of the line.'],
+      cues: ['Three contacts whenever you can.', 'Smart shots win small-court games.', 'Communicate every ball.'],
+      harder: 'Points only count if the attack is a kill on the third contact.' },
+    { id: 'short-court', name: 'Cooperative 3v3 Short Court', skills: ['team', 'pass', 'set'], level: 'Beginner', players: '6', time: '10 min',
+      summary: 'Three contacts on every side, keep the rally going. Builds ball control for new players.',
+      setup: 'Court shortened to the 3 m line or a reduced width. Three players per side.',
+      flow: ['Free ball starts the rally.', 'Each side must use pass–set–attack (a controlled hit or roll).', 'Count the team\'s consecutive three-contact sides.'],
+      cues: ['First contact high to the middle.', 'Square to where you send the ball.', 'Call every ball.'],
+      harder: 'Switch to competitive scoring. Require the third contact to be a jump attack.' },
+    { id: 'conditioning', name: 'Defensive Shuffle Circuit', skills: ['conditioning', 'defense'], level: 'Intermediate', players: 'Any', time: '8 min',
+      summary: 'Short bursts that mirror rally movements: shuffle, sprawl, sprint, recover.',
+      setup: 'Cones at the sideline, 3 m line, and end line.',
+      flow: ['20 s shuffle sideline to sideline in a low stance.', '10 s sprint to the 3 m line and back to base.', '20 s rest; repeat 6–8 rounds.'],
+      cues: ['Stay low — hips below shoulders.', 'Push off the outside foot; don\'t cross feet on shuffles.', 'Quality reps over speed.'],
+      harder: 'Coach tosses a ball at the end of each round to dig or pursue.' },
+  ];
+
+  const SKILLS = [
+    ['all', 'All'], ['serve', 'Serving'], ['pass', 'Passing'], ['set', 'Setting'], ['attack', 'Attacking'],
+    ['block', 'Blocking'], ['defense', 'Defense'], ['team', 'Team'], ['conditioning', 'Conditioning'],
+  ];
+  const SKILL_LABEL = Object.fromEntries(SKILLS);
+
+  // ───────────────────────── Data: strategies ─────────────────────────
+  const STRATEGIES = [
+    { id: 'offense', name: 'Offensive systems', items: [
+      { name: '5-1', desc: 'One setter in all six rotations. Three front-row attackers when the setter is back row, two when front row.',
+        use: 'You have one clearly best setter and want consistent tempo and decision-making.',
+        pros: ['One voice running the offense', 'Setter–hitter timing builds fast', 'Setter can dump or attack on two when front row'],
+        cons: ['Only two front-row hitters in three rotations', 'Setter is a smaller blocker in those rotations', 'Heavily dependent on one player'] },
+      { name: '6-2', desc: 'Two setters, each setting only from the back row. The front-row "setter" becomes a hitter.',
+        use: 'You have two capable setters who can also attack, or your setter is a weak blocker.',
+        pros: ['Three front-row attackers every rotation', 'No small setter block', 'More players get setting reps'],
+        cons: ['Two setters with different tempos', 'Uses substitutions', 'Harder to build timing'] },
+      { name: '4-2', desc: 'Two setters who set from the front row. Two hitters front row at all times.',
+        use: 'Youth and developmental teams; simplest setter movement.',
+        pros: ['Short setter path (front row)', 'Easy to learn', 'Two setters share the load'],
+        cons: ['Only two attackers', 'Easy for the opponent to read', 'Setter-attack options limited'] },
+    ]},
+    { id: 'receive', name: 'Serve receive', items: [
+      { name: '3-person receive', desc: 'Libero plus the two outsides split the court. The standard at most levels.',
+        use: 'Your outsides pass reliably and you want middles and opposite free to attack.',
+        pros: ['Clear seams and responsibilities', 'Hitters not passing can focus on approach', 'Libero takes the most court'],
+        cons: ['A weak outside passer gets targeted', 'Seams must be clearly owned'] },
+      { name: '2-person receive', desc: 'Libero and one outside cover the whole court.',
+        use: 'Two elite passers, or hiding a weak passer in the opposing rotation.',
+        pros: ['Best passers touch most balls', 'Frees an extra attacker'],
+        cons: ['Large areas per passer', 'Short serves and deep corners get exposed'] },
+      { name: '4-person / W formation', desc: 'Four or five players in a W or U shape spread across the court.',
+        use: 'Beginner teams or opponents with tough serves you can\'t handle with three.',
+        pros: ['Small area per passer', 'Easy to teach'],
+        cons: ['Many seams', 'Hitters passing late into approaches', 'Confusion on who takes it'] },
+      { name: 'Stacking (hiding a passer)', desc: 'Shift overlap-legal positions so a weak passer stands near the net or out of the serving lane.',
+        use: 'One player is a reliable attacker but a liability in receive.',
+        pros: ['Protects a key attacker', 'Puts your best passers in front of the serve'],
+        cons: ['Must respect overlap rules', 'Hitter may start out of their natural attack spot'] },
+    ]},
+    { id: 'defense', name: 'Defensive systems', items: [
+      { name: 'Perimeter (2-4 / middle-back)', desc: 'Two blockers, four defenders around the edges; the zone 6 player stays deep.',
+        use: 'Opponents hit hard and deep; you have a good block to take away the middle.',
+        pros: ['Covers hard-driven balls and deep corners', 'Simple reads', 'Good vs power hitters'],
+        cons: ['Open in the middle of the court for tips and rolls', 'Relies on the block covering zone 6 short'] },
+      { name: 'Rotational', desc: 'Defense rotates toward the attack: the line digger pulls up to cover tips, zone 6 rotates to the line.',
+        use: 'Opponent tips and rolls a lot, or their outside hits mostly cross.',
+        pros: ['Takes away tips behind the block', 'Strong vs cross-court hitters'],
+        cons: ['Deep line corner open', 'More movement, harder timing'] },
+      { name: 'Middle-up (6-up)', desc: 'Zone 6 player moves up behind the block to take tips and short shots.',
+        use: 'Younger or smaller opponents who rarely hit deep with power.',
+        pros: ['Nothing short falls', 'Simple for beginners'],
+        cons: ['Deep middle and corners exposed', 'Bad vs strong hitters'] },
+      { name: 'Man-back / zone 6 deep', desc: 'Back-row middle sits on the end line, wings cover the angles.',
+        use: 'Opponent attacks deep seams; your libero is your best reader.',
+        pros: ['Coverage on deep seams', 'Libero reads the whole court'],
+        cons: ['Short middle is soft', 'Wings carry big areas'] },
+    ]},
+    { id: 'block', name: 'Blocking schemes', items: [
+      { name: 'Read block', desc: 'Blockers wait for the setter to release the ball, then move.',
+        use: 'Default for most teams; vs setters who distribute well.',
+        pros: ['Rarely fooled', 'Gets to every attacker eventually'],
+        cons: ['Late vs fast tempo', 'Requires discipline and quick footwork'] },
+      { name: 'Commit block', desc: 'A blocker jumps with a specific attacker (usually the quick hitter) regardless of the set.',
+        use: 'Their middle is their best option, or a hitter dominates in one rotation.',
+        pros: ['Stops a fast first-tempo attack', 'Takes away their go-to'],
+        cons: ['If wrong, the pin is single-blocked or open'] },
+      { name: 'Bunch / spread', desc: 'Bunch: blockers start close together in the middle. Spread: start at the pins.',
+        use: 'Bunch vs strong middles and pipe; spread vs teams that live on pin sets.',
+        pros: ['Positions the block where the threat is'],
+        cons: ['Bunch leaves pins far; spread leaves middle thin'] },
+      { name: 'Swing block', desc: 'Blockers use an arm-swing approach along the net to cover distance and jump higher.',
+        use: 'Advanced teams with athletic blockers vs high-ball offenses.',
+        pros: ['More height and penetration', 'Covers more ground'],
+        cons: ['Timing is hard', 'Risk of net and drift faults'] },
+    ]},
+    { id: 'serving', name: 'Serving strategy', items: [
+      { name: 'Target the weak passer', desc: 'Serve the player whose passing rating is lowest, especially early in a set.',
+        use: 'Always — unless they\'re hiding that passer, then serve the seams around them.',
+        pros: ['Forces out-of-system offense', 'Creates frustration and subs'],
+        cons: ['They may adjust formation; keep watching'] },
+      { name: 'Serve the seams', desc: 'Aim between passers to create "who takes it" confusion.',
+        use: 'Opponent passers are individually strong but communicate poorly.',
+        pros: ['Exploits communication', 'Works vs strong passers'],
+        cons: ['Narrow targets mean more errors'] },
+      { name: 'Serve zone 1 deep', desc: 'Serve deep to right back, where the setter releases from in some rotations.',
+        use: 'Their setter penetrates from the back row and you want to slow the release.',
+        pros: ['Makes the setter turn and run', 'Shorter look for the passer'],
+        cons: ['Strong zone 1 passers handle it easily'] },
+      { name: 'Short serve at hitters', desc: 'Serve short in front of an attacker who is also passing.',
+        use: 'Their best hitter passes; you want to rush their approach.',
+        pros: ['Disrupts approach timing', 'Opponent rarely practices short serves'],
+        cons: ['Hard to execute; easy to net'] },
+    ]},
+    { id: 'attack', name: 'Attack strategy', items: [
+      { name: 'Attack the setter', desc: 'When their setter is front row, set your outside to hit at the setter\'s block.',
+        use: 'Their setter is shorter or a weak blocker.',
+        pros: ['Favorable 1-on-1 or late-block matchup'],
+        cons: ['Smart teams swing or commit the middle to help'] },
+      { name: 'Run the middle early', desc: 'Set first-tempo quick attacks early in the set to hold their middle.',
+        use: 'Your passing is good and you want to free up the pins.',
+        pros: ['Middle blocker hesitates → one-on-one at pins'],
+        cons: ['Requires in-system passes'] },
+      { name: 'High hands / tool the block', desc: 'Hit off the top or outside of the blocker\'s hands toward the antenna.',
+        use: 'Tall block with good hands; vs tight sets.',
+        pros: ['Scores against bigger blocks'],
+        cons: ['Precise contact needed'] },
+      { name: 'Back-row attack (pipe, D)', desc: 'Back-row hitters attack from behind the 3 m line.',
+        use: 'Rotations with only two front-row attackers; strong outsides.',
+        pros: ['Four attack options', 'Pulls the middle blocker back'],
+        cons: ['Needs good passing and a confident back-row hitter'] },
+    ]},
+  ];
+
+  // ───────────────────────── Data: situations ─────────────────────────
+  const SITUATIONS = [
+    { cat: 'Momentum', title: 'Opponent goes on a 3–4 point run',
+      when: 'Two or three points in a row on the same server, frustration showing.',
+      do: ['Call a timeout before it becomes 5.', 'Give one fix only — "pass high to middle," not a lecture.', 'Run your highest-percentage play out of the timeout.'],
+      avoid: ['Missing the serve after the timeout.', 'Changing three things at once.'] },
+    { cat: 'Momentum', title: 'Team is flat or rattled',
+      when: 'Body language down, quiet court, slow transitions.',
+      do: ['Sub in an energy player or a confident server.', 'Call a simple, safe play to get an easy point.', 'Ask the captain to reset the huddle between points.'],
+      avoid: ['Yelling about effort — give a task instead.'] },
+    { cat: 'Serve receive', title: 'Our serve receive is breaking down',
+      when: 'Two or more passes rated 0–1 in a rotation; one passer keeps getting served.',
+      do: ['Shrink the targeted passer\'s area — libero and stronger outside cover more.', 'Switch formations (3-person → 2-person, or add a 4th passer).', 'Tell passers: high to the middle beats perfect.'],
+      avoid: ['Leaving the same formation and hoping.', 'Running fast tempo off bad passes.'] },
+    { cat: 'Serve receive', title: 'Stuck in one rotation',
+      when: 'Three or more points lost in the same rotation.',
+      do: ['Timeout and change the receive pattern for that rotation.', 'Set your best available hitter, even if predictable.', 'Consider a substitution for a better passer or blocker.'],
+      avoid: ['Waiting for it to fix itself.'] },
+    { cat: 'Offense', title: 'Our hitter keeps getting blocked',
+      when: 'Same attacker blocked 2–3 times; their block is forming early.',
+      do: ['Hitter uses shots: wipe off the hands, roll deep, tip behind the block.', 'Set slightly higher and wider to spread the block.', 'Run the middle or the opposite to pull the block away.'],
+      avoid: ['Feeding the same set into a formed double block.'] },
+    { cat: 'Offense', title: 'Our setter is predictable',
+      when: 'The block is in place before the set; the opponent calls our plays.',
+      do: ['Set the middle on the first good pass.', 'Use the back-row attack to add a fourth option.', 'Dump on two when the setter is front row.'],
+      avoid: ['Only going to the outside on good passes.'] },
+    { cat: 'Offense', title: 'Lots of out-of-system balls',
+      when: 'Digs and passes away from the setter.',
+      do: ['High, hittable sets to the left pin (or right for a lefty).', 'Hitters: hit to the deep corners — keep it in, no error.', 'Non-setters say "help" and square up.'],
+      avoid: ['Trying fast sets from bad positions.'] },
+    { cat: 'Defense', title: 'Their big hitter is scoring at will',
+      when: 'One attacker is responsible for most of their points.',
+      do: ['Commit or bunch your block toward them.', 'Serve them — make them pass first.', 'Put your best digger in their favorite channel (cross is usually zone 5).'],
+      avoid: ['Ignoring their other hitters completely — shift, don\'t abandon.'] },
+    { cat: 'Defense', title: 'Opponent is tipping and rolling',
+      when: 'Short balls landing behind the block or in the middle.',
+      do: ['Switch to rotational or middle-up defense.', 'Blockers call "tip" while landing.', 'Line digger reads the hitter\'s arm speed.'],
+      avoid: ['Diggers sitting on their heels deep.'] },
+    { cat: 'Defense', title: 'Their setter is front row',
+      when: 'The setter can dump on two and blocks their right side.',
+      do: ['Assign a blocker (usually your left-side) to watch the dump.', 'Attack your outside at the setter\'s block.', 'Serve away from their best passer to force a jump-set.'],
+      avoid: ['Letting the dump surprise you twice.'] },
+    { cat: 'Serving', title: 'Serving errors are piling up',
+      when: 'Three or more missed serves in a set, especially after timeouts.',
+      do: ['Ask for "aggressive and in" — deeper targets, not more speed.', 'Remind servers of their routine.', 'Rest a struggling server if you can sub.'],
+      avoid: ['Switching to soft "just get it in" serves that become free balls.'] },
+    { cat: 'End of set', title: 'Down 3+ points late (20+)',
+      when: 'Opponent near 25 and pulling away.',
+      do: ['Serve tough — you need runs, not safe points.', 'Use your remaining timeouts to break their server.', 'Sub in your best server or blocker for the critical rotations.'],
+      avoid: ['Saving timeouts you will never use.'] },
+    { cat: 'End of set', title: 'Up late in a close set',
+      when: 'Leading 22–20 or similar; nerves showing.',
+      do: ['Keep serving aggressive to a target.', 'Set your most reliable hitter.', 'Talk on every play to keep the team loose.'],
+      avoid: ['Tipping or freeballing out of fear.', 'Unforced errors on serve.'] },
+    { cat: 'Between sets', title: 'Lost the first set',
+      when: 'You now know their lineup, their best hitter, and their weak passer.',
+      do: ['Re-align your starting rotation so your best blocker faces their best hitter.', 'Pick a serving target based on set 1.', 'Give each position one clear job.'],
+      avoid: ['Changing your whole system between sets.'] },
+  ];
+
+  const RULES = [
+    { t: 'Timeouts', items: ['After a 3-point run against you.', 'Before an opponent\'s best server serves at the end of a set.', 'To set up a specific play out of a sideout rotation.'] },
+    { t: 'Substitutions', items: ['Serving specialist late in sets.', 'Defensive specialist for a weak back-row passer.', 'Taller blocker in rotations facing their best hitter.', 'Know your league\'s substitution limits.'] },
+    { t: 'Communication', items: ['One message per timeout.', 'Name the target: "serve their #12."', 'Praise process ("great platform") over outcomes.'] },
+    { t: 'Stats to track live', items: ['Pass rating per passer (0–3).', 'Serve errors vs aces.', 'Kills and errors by attacker.', 'Points lost per rotation.'] },
+  ];
+
+  // ───────────────────────── Data: positions & planner ─────────────────────────
+  const POSITIONS = [
+    { id: 'S', name: 'Setter', short: 'S', note: 'Runs the offense · blocks right front' },
+    { id: 'OH1', name: 'Outside 1', short: 'OH1', note: 'Left-side attack · passes' },
+    { id: 'OH2', name: 'Outside 2', short: 'OH2', note: 'Left-side attack · passes' },
+    { id: 'MB1', name: 'Middle 1', short: 'MB1', note: 'Quick attack · main blocker' },
+    { id: 'MB2', name: 'Middle 2', short: 'MB2', note: 'Quick attack · main blocker' },
+    { id: 'OPP', name: 'Opposite', short: 'OPP', note: 'Right-side attack · blocks their OH' },
+    { id: 'L', name: 'Libero', short: 'L', note: 'Passing & defense' },
+  ];
+  const POS_NAME = Object.fromEntries(POSITIONS.map(p => [p.id, p.name]));
+  // Which drills help each position improve.
+  const POS_DRILLS = {
+    S: ['setter-move', 'oos-set', 'pepper'],
+    OH1: ['sr-ladder', 'line-cross', 'shots'],
+    OH2: ['sr-ladder', 'line-cross', 'shots'],
+    MB1: ['block-foot', 'read-block', 'free-trans'],
+    MB2: ['block-foot', 'read-block', 'free-trans'],
+    OPP: ['line-cross', 'block-foot', 'oos-set'],
+    L: ['sr-ladder', 'dig-box', 'pursuit'],
+  };
+
+  const blank = () => Object.fromEntries(POSITIONS.map(p => [p.id, 0]));
+  const SAMPLE = {
+    us:   { S: 1, OH1: 1, OH2: 0, MB1: 0, MB2: -1, OPP: 0, L: 1 },
+    them: { S: -1, OH1: 1, OH2: -1, MB1: 1, MB2: 0, OPP: 0, L: 0 },
+  };
+  const STORE_KEY = 'vb-coach-matchup-v1';
+  let state = { us: blank(), them: blank() };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (saved && saved.us && saved.them) state = { us: { ...blank(), ...saved.us }, them: { ...blank(), ...saved.them } };
+  } catch (e) { /* storage unavailable */ }
+  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ } };
+
+  // ───────────────────────── Helpers ─────────────────────────
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const avg = (team, ids) => ids.reduce((a, id) => a + team[id], 0) / ids.length;
+  const word = v => v >= 0.5 ? 'strong' : v <= -0.5 ? 'weak' : 'neutral';
+  function edgeLabel(e) {
+    if (e >= 1.5) return ['Big edge', 'pos'];
+    if (e >= 0.5) return ['Edge', 'pos'];
+    if (e > -0.5) return ['Even', 'even'];
+    if (e > -1.5) return ['Disadvantage', 'neg'];
+    return ['Big disadvantage', 'neg'];
+  }
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ───────────────────────── Tabs ─────────────────────────
+  const TABS = ['drills', 'strategies', 'coach'];
+  function showTab(name, push = true) {
+    if (!TABS.includes(name)) name = 'drills';
+    TABS.forEach(t => {
+      $('#tab-' + t).setAttribute('aria-selected', String(t === name));
+      $('#panel-' + t).hidden = t !== name;
+    });
+    if (push) history.replaceState(null, '', '#' + name);
+  }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  window.addEventListener('hashchange', () => showTab(location.hash.slice(1), false));
+
+  // ───────────────────────── Drills UI ─────────────────────────
+  let drillSkill = 'all';
+  $('#drill-chips').innerHTML = SKILLS.map(([k, l]) =>
+    `<button class="chip" type="button" data-skill="${k}" aria-pressed="${k === 'all'}">${l}</button>`).join('');
+  $('#drill-chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    drillSkill = b.dataset.skill;
+    document.querySelectorAll('#drill-chips .chip').forEach(c => c.setAttribute('aria-pressed', String(c === b)));
+    renderDrills();
+  });
+  $('#drill-search').addEventListener('input', renderDrills);
+  $('#drill-level').addEventListener('change', renderDrills);
+
+  function renderDrills() {
+    const q = $('#drill-search').value.trim().toLowerCase();
+    const lvl = $('#drill-level').value;
+    const list = DRILLS.filter(d =>
+      (drillSkill === 'all' || d.skills.includes(drillSkill)) &&
+      (!lvl || d.level === lvl) &&
+      (!q || (d.name + ' ' + d.summary + ' ' + d.skills.join(' ')).toLowerCase().includes(q)));
+    $('#drill-count').textContent = `${list.length} of ${DRILLS.length} drills`;
+    $('#drill-grid').innerHTML = list.length ? list.map(d => `
+      <article class="card" id="drill-${d.id}">
+        <h3>${esc(d.name)}</h3>
+        <div class="meta">
+          <span class="tag lvl">${d.level}</span>
+          ${d.skills.map(s => `<span class="tag">${SKILL_LABEL[s]}</span>`).join('')}
+          <span class="tag plain">👥 ${esc(d.players)}</span>
+          <span class="tag plain">⏱ ${esc(d.time)}</span>
+        </div>
+        <p>${esc(d.summary)}</p>
+        <details>
+          <summary>Setup, flow &amp; cues</summary>
+          <div class="detail">
+            <div><h4>Setup</h4><p>${esc(d.setup)}</p></div>
+            <div><h4>Flow</h4><ul>${d.flow.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div>
+            <div><h4>Coaching cues</h4><ul>${d.cues.map(f => `<li>${esc(f)}</li>`).join('')}</ul></div>
+            <div><h4>Make it harder</h4><p>${esc(d.harder)}</p></div>
+          </div>
+        </details>
+      </article>`).join('') : '<p class="empty">No drills match those filters.</p>';
+  }
+
+  function jumpToDrill(id) {
+    drillSkill = 'all';
+    $('#drill-search').value = '';
+    $('#drill-level').value = '';
+    document.querySelectorAll('#drill-chips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.skill === 'all')));
+    renderDrills();
+    showTab('drills');
+    const card = document.getElementById('drill-' + id);
+    if (!card) return;
+    card.querySelector('details').open = true;
+    card.classList.add('flash');
+    setTimeout(() => card.classList.remove('flash'), 1600);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ───────────────────────── Strategies UI ─────────────────────────
+  let stratGroup = STRATEGIES[0].id;
+  function renderStrategies() {
+    $('#strat-nav').innerHTML = STRATEGIES.map(g =>
+      `<button class="chip" type="button" data-g="${g.id}" aria-pressed="${g.id === stratGroup}">${g.name}</button>`).join('');
+    const g = STRATEGIES.find(x => x.id === stratGroup);
+    $('#strat-body').innerHTML = `<h3 class="sub-head" style="margin-top:1.25rem">${g.name}</h3><div class="grid">` +
+      g.items.map(s => `
+        <article class="card">
+          <h3>${esc(s.name)}</h3>
+          <p>${esc(s.desc)}</p>
+          <div class="use"><b>Use when:</b> ${esc(s.use)}</div>
+          <div class="pc">
+            <div class="pro"><h4>Strengths</h4><ul>${s.pros.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+            <div class="con"><h4>Watch out</h4><ul>${s.cons.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
+          </div>
+        </article>`).join('') + '</div>';
+  }
+  $('#strat-nav').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    stratGroup = b.dataset.g;
+    renderStrategies();
+  });
+
+  // ───────────────────────── Planner: ratings table ─────────────────────────
+  function seg(team, pos) {
+    const name = `${team}-${pos}`;
+    const opts = [[-1, 'W', 'Weak'], [0, 'N', 'Neutral'], [1, 'S', 'Strong']];
+    return `<div class="seg" role="radiogroup" aria-label="${team === 'us' ? 'Our' : 'Opponent'} ${POS_NAME[pos]}">` +
+      opts.map(([v, l, full]) => {
+        const id = `${name}-${v}`;
+        return `<input type="radio" id="${id}" name="${name}" value="${v}" ${state[team][pos] === v ? 'checked' : ''} data-team="${team}" data-pos="${pos}">` +
+          `<label for="${id}" title="${full}">${l}</label>`;
+      }).join('') + '</div>';
+  }
+  function renderRatings() {
+    $('#rate-body').innerHTML = POSITIONS.map(p => `
+      <tr>
+        <td><div class="pos-name">${p.name}<small>${p.note}</small></div></td>
+        <td>${seg('us', p.id)}</td>
+        <td>${seg('them', p.id)}</td>
+      </tr>`).join('');
+  }
+  $('#rate-body').addEventListener('change', e => {
+    const i = e.target;
+    if (!i.dataset.team) return;
+    state[i.dataset.team][i.dataset.pos] = Number(i.value);
+    save();
+    renderPlan();
+  });
+  $('#btn-reset').addEventListener('click', () => { state = { us: blank(), them: blank() }; save(); renderRatings(); renderPlan(); });
+  $('#btn-sample').addEventListener('click', () => { state = JSON.parse(JSON.stringify(SAMPLE)); save(); renderRatings(); renderPlan(); });
+
+  // ───────────────────────── Planner: engine ─────────────────────────
+  // Attack lanes: who swings vs who blocks across the net.
+  // Our outsides (zone 4) face their right-side block (OPP + front-row setter);
+  // middles face middles; our opposite (zone 2) faces their outsides.
+  function lanes(att, blk, a = 'Our', b = 'their') {
+    return [
+      { key: 'left',   label: 'Left side',  sub: `${a} OH vs ${b} OPP + S`, a: avg(att, ['OH1', 'OH2']), b: avg(blk, ['OPP', 'S']) },
+      { key: 'middle', label: 'Middle',     sub: `${a} MB vs ${b} MB`,      a: avg(att, ['MB1', 'MB2']), b: avg(blk, ['MB1', 'MB2']) },
+      { key: 'right',  label: 'Right side', sub: `${a} OPP vs ${b} OH`,     a: att.OPP,                  b: avg(blk, ['OH1', 'OH2']) },
+    ].map(l => ({ ...l, edge: l.a - l.b }));
+  }
+  const best = (team, ids) => ids.slice().sort((x, y) => team[y] - team[x])[0];
+  const worst = (team, ids) => ids.slice().sort((x, y) => team[x] - team[y])[0];
+
+  function buildPlan() {
+    const u = state.us, t = state.them;
+    const ours = lanes(u, t);       // when we attack
+    const theirs = lanes(t, u, 'Their', 'our');     // when they attack (edge > 0 = they're favored)
+    const passU = avg(u, ['OH1', 'OH2', 'L']), passT = avg(t, ['OH1', 'OH2', 'L']);
+    const ctrl = { label: 'Ball control', sub: 'OH + L passing, ours vs theirs', a: passU, b: passT, edge: passU - passT };
+    const setEdge = { label: 'Setter', sub: 'Our S vs their S', a: u.S, b: t.S, edge: u.S - t.S };
+
+    const total = ours.reduce((s, l) => s + l.edge, 0) - theirs.reduce((s, l) => s + l.edge, 0) + ctrl.edge + setEdge.edge;
+    const allZero = POSITIONS.every(p => u[p.id] === 0 && t[p.id] === 0);
+
+    const g = { offense: [], serve: [], defense: [], lineup: [], watch: [] };
+    const sideName = { left: 'your outsides (left side)', middle: 'your middles', right: 'your opposite (right side)' };
+
+    // ── Offense
+    const ranked = ours.slice().sort((x, y) => (y.edge - x.edge) || (y.a - x.a));
+    const top = ranked[0], low = ranked[ranked.length - 1];
+    if (top.edge > 0) {
+      g.offense.push(`<b>Primary option: ${sideName[top.key]}.</b> ${top.label} is your best matchup (${word(top.a)} attack vs ${word(top.b)} block).`);
+    } else if (ours.every(l => l.a <= 0)) {
+      g.offense.push(`<b>No clear attacking edge.</b> Win with ball control: high, hittable sets, smart shots to open court, and very few hitting errors.`);
+    } else {
+      g.offense.push(`<b>Lean on ${sideName[top.key]}</b> — even matchup, but it's your strongest attack.`);
+    }
+    const mbU = avg(u, ['MB1', 'MB2']), mbT = avg(t, ['MB1', 'MB2']);
+    if (low.edge < 0 && low.key !== top.key && !(low.key === 'middle' && mbU < 0)) {
+      g.offense.push(`Use ${sideName[low.key]} as a decoy to keep their block honest, not as a go-to (${low.label}: ${edgeLabel(low.edge)[0].toLowerCase()}).`);
+    }
+    if (t.S < 0) g.offense.push(`<b>Attack their setter's block.</b> In the three rotations their setter is front row (5-1), your outsides hit at their smallest blocker.`);
+    if (mbU >= 0 && mbT <= 0 && passU >= 0) g.offense.push(`Run quick sets to your middles early — make their middle blocker hesitate so your pins see single blocks.`);
+    if (mbU < 0) g.offense.push(`Your middles are a weak spot: still run their approach every play to hold the block, then set the pins.`);
+    if (u.S > 0) g.offense.push(`Your setter is a strength — use tempo and combination plays, and dump on two when front row vs a slow block.`);
+    if (u.S < 0) g.offense.push(`<b>Simplify the offense:</b> higher outside sets, fewer combinations; passers aim high to the middle to give the setter time.`);
+    if (avg(u, ['OH1', 'OH2']) > 0) g.offense.push(`Add the back-row pipe with your strong outside in rotations with only two front-row hitters.`);
+
+    // ── Serving
+    const passers = ['OH1', 'OH2', 'L'];
+    const wp = worst(t, passers), bp = best(t, passers);
+    if (t[wp] < t[bp]) {
+      const partner = wp === 'L' ? best(t, ['OH1', 'OH2']) : 'L';
+      g.serve.push(`<b>Serve their ${POS_NAME[wp]}</b> — their weakest passer. Also hit the seam between ${POS_NAME[wp]} and ${POS_NAME[partner]} to force a decision.`);
+    } else if (passT < 0) {
+      g.serve.push(`<b>Their ball control is shaky everywhere.</b> Keep serves in and to the deep corners — free points come from their passing, not your aces.`);
+    } else if (passT > 0) {
+      g.serve.push(`<b>Their passing is strong.</b> Serve seams, deep zone 1, and short in front of hitters; accept a few more errors for aggression.`);
+    } else {
+      g.serve.push(`Serve aggressive to the seams and deep corners; track pass ratings in set 1 to find a target.`);
+    }
+    const tAtt = ['OH1', 'OH2', 'OPP', 'MB1', 'MB2'];
+    const tBest = best(t, tAtt);
+    if (t[tBest] > 0 && (tBest === 'OH1' || tBest === 'OH2') && tBest !== wp) {
+      g.serve.push(`Serve short in front of their ${POS_NAME[tBest]} — make their best hitter pass and attack off a rushed approach.`);
+    }
+    if (t.L > 0 && wp !== 'L') g.serve.push(`Serve away from their libero; make their outsides take the ball.`);
+    if (t.S < 0) g.serve.push(`Serve deep zone 1 in rotations where their setter releases from right back — a weaker setter struggles setting on the move.`);
+
+    // ── Blocking & defense
+    const threat = theirs.slice().sort((x, y) => (y.edge - x.edge) || (y.a - x.a))[0];
+    const blkU = avg(u, ['MB1', 'MB2', 'OPP', 'S']);
+    if (threat.edge > 0 || threat.a > 0) {
+      const who = { left: 'outsides', middle: 'middles', right: 'opposite' }[threat.key];
+      const tip = {
+        left: 'Put your libero in zone 5 for their cross-court shot, and your better-blocking right side (opposite) on them; consider bunching toward zone 4 when they\'re front row.',
+        middle: 'Commit your middle on their quick when their strong MB is front row; outside blockers pinch in to help.',
+        right: 'Line up your better-blocking outside against them, and put your best digger in zone 1 for their cross-court angle.',
+      }[threat.key];
+      g.defense.push(`<b>Biggest threat: their ${who}</b> (${word(threat.a)} vs your ${word(threat.b)} block). ${tip}`);
+    }
+    if (blkU < 0) g.defense.push(`Your block is undersized: soft-block or channel the ball to your diggers and play perimeter defense deep.`);
+    if (avg(t, tAtt) < 0) g.defense.push(`Their attack is limited — play rotational or middle-up to take away tips and roll shots.`);
+    if (mbT < 0 && avg(t, ['OH1', 'OH2', 'OPP']) >= 0) g.defense.push(`Release your middle early: their middles aren't a threat, so read the setter and close on the pins.`);
+    if (mbT > 0 && threat.key !== 'middle') g.defense.push(`Their middles are dangerous — your MB stays home on quick sets before helping outside.`);
+    if (t.S > 0) g.defense.push(`Their setter is a playmaker: assign your left-side blocker to the dump when their setter is front row.`);
+    if (u.L > 0) g.defense.push(`Lean on your libero — widen their court in receive and place them on the opponent's favorite shot.`);
+
+    // ── Lineup & rotation
+    const uAtt = ['OH1', 'OH2', 'OPP', 'MB1', 'MB2'];
+    const uBest = best(u, uAtt);
+    if (u[uBest] > 0) g.lineup.push(`Start the set with your <b>${POS_NAME[uBest]}</b> front row and the setter back row — three front-row attackers in your opening rotations.`);
+    if (u.S < 0) g.lineup.push(`Your setter's front-row rotations are the most exposed. If you have a second capable setter, a 6-2 keeps three hitters up and removes the small block.`);
+    const weakPassers = passers.filter(p => u[p] < 0);
+    if (weakPassers.length) {
+      g.lineup.push(`Hide ${weakPassers.map(p => `<b>${POS_NAME[p]}</b>`).join(' and ')} in serve receive: shrink their area, let the libero and stronger passer cover more, or stack them out of the serving lane.`);
+    }
+    if (u.L < 0) g.lineup.push(`If you have a stronger defensive specialist, consider them in the libero role — ball control drives everything.`);
+    if (threat.edge > 0) {
+      const counter = { left: 'opposite', middle: 'best middle', right: 'best blocking outside' }[threat.key];
+      g.lineup.push(`Between sets, rotate your lineup so your ${counter} is front row when their ${({ left: 'best outside', middle: 'best middle', right: 'opposite' })[threat.key]} is front row.`);
+    }
+
+    // ── Watch-outs
+    if (ctrl.edge < 0) g.watch.push(`They control the ball better — expect more in-system attacks. Win the serving and blocking battles to close the gap.`);
+    if (ctrl.edge > 0) g.watch.push(`You out-pass them — stay patient; long rallies favor you.`);
+    if (total < -1) g.watch.push(`On paper you're the underdog: serve aggressive, keep unforced errors low, and use timeouts to break their runs.`);
+    if (total > 1) g.watch.push(`You're favored: play clean, keep serves in, and don't gift points in the 20s.`);
+
+    // Drills for our weakest position
+    const weakest = POSITIONS.map(p => p.id).filter(id => u[id] < 0);
+
+    return { ours, theirs, ctrl, setEdge, total, allZero, g, weakest };
+  }
+
+  // ───────────────────────── Planner: render ─────────────────────────
+  function laneRow(l, invert) {
+    // invert: for "they attack", show advantage from our point of view
+    const e = invert ? -l.edge : l.edge;
+    const pct = Math.min(Math.abs(e) / 2, 1) * 50;
+    const color = e > 0.01 ? 'var(--good)' : e < -0.01 ? 'var(--bad)' : 'var(--neutral)';
+    const style = e >= 0 ? `left:50%;width:${Math.max(pct, 1)}%` : `left:${50 - pct}%;width:${pct}%`;
+    const [lab, cls] = edgeLabel(e);
+    return `<div class="lane">
+      <div class="lane-label">${l.label}<small>${l.sub}</small></div>
+      <div class="bar" role="img" aria-label="${l.label}: ${lab}"><div class="bar-fill" style="${style};background:${color}"></div></div>
+      <div class="lane-val ${cls}">${lab}</div>
+    </div>`;
+  }
+
+  function renderPlan() {
+    const p = buildPlan();
+    const [vl, vc] = edgeLabel(p.total / 3);
+    const headline = p.allZero
+      ? 'Rate both teams to build a plan'
+      : vc === 'pos' ? 'You have the edge' : vc === 'neg' ? 'You\'re the underdog' : 'Evenly matched';
+    const groups = [
+      ['offense', '⚡ Offense — where to set'],
+      ['serve', '🎯 Serving — who to target'],
+      ['defense', '🛡️ Blocking & defense'],
+      ['lineup', '🔄 Lineup & rotation'],
+      ['watch', '⚠️ Watch-outs'],
+    ];
+    const drillHtml = p.weakest.length
+      ? `<div class="plan-group"><h5>🏋️ Practice focus</h5><ul>${p.weakest.map(id =>
+          `<li><b>${POS_NAME[id]}</b><div class="drill-links">${POS_DRILLS[id].map(d =>
+            `<button class="drill-link" type="button" data-drill="${d}">${esc(DRILLS.find(x => x.id === d).name)}</button>`).join('')}</div></li>`).join('')}</ul></div>`
+      : '';
+
+    $('#plan-out').innerHTML = `
+      <div class="verdict ${vc}">${headline}</div>
+      <div class="verdict-sub">${p.allZero
+        ? 'Everything is neutral right now. Mark positions Strong or Weak and the plan updates instantly — or press "Try a sample."'
+        : `Overall matchup: <b class="${vc}">${vl.toLowerCase()}</b>. Bars show your advantage (green) or disadvantage (red) in each matchup.`}</div>
+      <div class="lanes">
+        <div><h5>When we attack</h5>${p.ours.map(l => laneRow(l, false)).join('')}</div>
+        <div><h5>When they attack</h5>${p.theirs.map(l => laneRow(l, true)).join('')}</div>
+        <div><h5>Ball control &amp; setting</h5>${laneRow(p.ctrl, false)}${laneRow(p.setEdge, false)}</div>
+      </div>
+      ${groups.filter(([k]) => p.g[k].length).map(([k, title]) =>
+        `<div class="plan-group"><h5>${title}</h5><ul>${p.g[k].map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}
+      ${drillHtml}
+      <p class="note">The planner is a starting point: confirm it against what you see in the first few rotations, then adjust.</p>`;
+  }
+  $('#plan-out').addEventListener('click', e => {
+    const b = e.target.closest('.drill-link');
+    if (b) jumpToDrill(b.dataset.drill);
+  });
+
+  $('#btn-copy').addEventListener('click', async () => {
+    const p = buildPlan();
+    const strip = s => s.replace(/<[^>]+>/g, '');
+    const lines = ['GAME PLAN', ''];
+    lines.push('Ratings (Us / Opponent):');
+    POSITIONS.forEach(pos => lines.push(`  ${pos.name}: ${word(state.us[pos.id])} / ${word(state.them[pos.id])}`));
+    [['offense', 'OFFENSE'], ['serve', 'SERVING'], ['defense', 'BLOCKING & DEFENSE'], ['lineup', 'LINEUP & ROTATION'], ['watch', 'WATCH-OUTS']]
+      .forEach(([k, t]) => { if (p.g[k].length) { lines.push('', t); p.g[k].forEach(x => lines.push('- ' + strip(x))); } });
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      toast('Game plan copied');
+    } catch (e) {
+      toast('Copy not available in this browser');
+    }
+  });
+  $('#btn-print').addEventListener('click', () => window.print());
+
+  // ───────────────────────── Situations ─────────────────────────
+  let sitCat = 'All';
+  const CATS = ['All', ...new Set(SITUATIONS.map(s => s.cat))];
+  function renderSituations() {
+    $('#sit-chips').innerHTML = CATS.map(c =>
+      `<button class="chip" type="button" data-c="${c}" aria-pressed="${c === sitCat}">${c}</button>`).join('');
+    $('#sit-grid').innerHTML = SITUATIONS.filter(s => sitCat === 'All' || s.cat === sitCat).map(s => `
+      <article class="card sit-card">
+        <div class="meta"><span class="tag lvl">${s.cat}</span></div>
+        <h3>${esc(s.title)}</h3>
+        <p class="when">${esc(s.when)}</p>
+        <div class="detail">
+          <div class="do"><h4>Do this</h4><ul>${s.do.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+          <div class="avoid"><h4>Avoid</h4><ul>${s.avoid.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+        </div>
+      </article>`).join('');
+  }
+  $('#sit-chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    sitCat = b.dataset.c;
+    renderSituations();
+  });
+  $('#rules').innerHTML = RULES.map(r => `
+    <div class="card"><h3>${r.t}</h3><ul>${r.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('');
+
+  // ───────────────────────── Init ─────────────────────────
+  renderDrills();
+  renderStrategies();
+  renderRatings();
+  renderPlan();
+  renderSituations();
+  showTab(location.hash.slice(1) || 'drills', false);
+  </script>
+</body>
+</html>
