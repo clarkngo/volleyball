@@ -276,6 +276,8 @@
     .viz .ball-shadow { fill: rgba(0,0,0,0.55); }
     .viz .legend { fill: var(--muted); font-size: 6.5px; font-weight: 600; }
     .viz .hole { fill: rgba(248,113,113,0.12); stroke: var(--bad); stroke-width: 0.8; stroke-dasharray: 2 2; }
+    .viz .lane { stroke: var(--amber); stroke-width: 1.2; stroke-dasharray: 3 2; opacity: 0.7; }
+    .viz .count-label { fill: var(--amber); font-size: 7.5px; font-weight: 800; }
     .viz .hole-label { fill: var(--bad); font-size: 6.5px; font-weight: 700; }
     .viz .joint { fill: var(--amber); }
     .viz .floor { stroke: rgba(255,255,255,0.18); stroke-width: 1.5; }
@@ -1151,15 +1153,15 @@
   // ───────────────────────── Data: strategies ─────────────────────────
   const STRATEGIES = [
     { id: 'offense', name: 'Offensive systems', items: [
-      { name: '5-1', desc: 'One setter in all six rotations. Three front-row attackers when the setter is back row, two when front row.',
+      { name: '5-1', viz: 'off-51', desc: 'One setter in all six rotations. Three front-row attackers when the setter is back row, two when front row.',
         use: 'You have one clearly best setter and want consistent tempo and decision-making.',
         pros: ['One voice running the offense', 'Setter–hitter timing builds fast', 'Setter can dump or attack on two when front row'],
         cons: ['Only two front-row hitters in three rotations', 'Setter is a smaller blocker in those rotations', 'Heavily dependent on one player'] },
-      { name: '6-2', desc: 'Two setters, each setting only from the back row. The front-row "setter" becomes a hitter.',
+      { name: '6-2', viz: 'off-62', desc: 'Two setters, each setting only from the back row. The front-row "setter" becomes a hitter.',
         use: 'You have two capable setters who can also attack, or your setter is a weak blocker.',
         pros: ['Three front-row attackers every rotation', 'No small setter block', 'More players get setting reps'],
         cons: ['Two setters with different tempos', 'Uses substitutions', 'Harder to build timing'] },
-      { name: '4-2', desc: 'Two setters who set from the front row. Two hitters front row at all times.',
+      { name: '4-2', viz: 'off-42', desc: 'Two setters who set from the front row. Two hitters front row at all times.',
         use: 'Youth and developmental teams; simplest setter movement.',
         pros: ['Short setter path (front row)', 'Easy to learn', 'Two setters share the load'],
         cons: ['Only two attackers', 'Easy for the opponent to read', 'Setter-attack options limited'] },
@@ -1819,7 +1821,83 @@
       hole: { cx: 82, cy: 78, rx: 14, ry: 10, label: 'open: short middle', lx: 82, ly: 64 },
       dig: [44, 60],
     }),
+
+    // ── Strategies: offense ──
+    'off-51': offenseViz({
+      alt: 'Top-down court, two rotations. First, the setter starts in the back row, releases to the target after the serve, and has three front-row hitters (left, middle, right) approaching; the set goes to the left side. Second, the setter is in the front row, already at the net, with only two front-row hitters (left and middle); the set goes to the middle, and the setter could also dump the second ball.',
+      reps: [
+        { setter: 'back', hitters: ['4', '3', '2'], setTo: '4', note: 'Setter back row → 3 front-row hitters' },
+        { setter: 'front', hitters: ['4', '3'], setTo: '3', note: 'Setter front row → 2 hitters, but the setter can dump' },
+      ],
+    }),
+    'off-62': offenseViz({
+      alt: 'Top-down court: the setting setter always comes from the back row and releases to the target after the serve. Three front-row hitters approach (left, middle, and the other setter, S2, hitting from the right side); the set goes to S2 on the right.',
+      reps: [
+        { setter: 'back', hitters: ['4', '3', '2'], labels: { 2: 'S2' }, setTo: '2', note: 'Always a back-row setter → 3 hitters; S2 hits right side' },
+      ],
+    }),
+    'off-42': offenseViz({
+      alt: 'Top-down court: the setter is always in the front row, already at the net, so there is no release. Only two front-row hitters approach (left and middle); the set goes to the left side.',
+      reps: [
+        { setter: 'front', hitters: ['4', '3'], setTo: '4', note: 'Setter always front row → 2 hitters, simplest to run' },
+      ],
+    }),
   };
+
+  // Shared play for offense diagrams. Each rep (one rotation, 4 s) runs serve → pass →
+  // setter to target → every available front-row hitter approaches → set → attack.
+  // Dashed approach lanes show how many hitters the setter can choose from.
+  // Labels: S = setting setter, 4/3/2 = front-row hitters by zone, 5/6/1 = back-row passers.
+  function offenseViz({ alt, reps }) {
+    const REP = 4, TARGET = [108, 84];
+    const HIT = { 4: { rec: [64, 30], start: [82, 20], hit: [113, 28] },
+                  3: { rec: [102, 60], start: [96, 62], hit: [114, 72] },
+                  2: { rec: [96, 114], start: [84, 120], hit: [113, 112] } };
+    const PASS = { 5: [40, 36], 6: [30, 72], 1: [40, 106] };
+    const actors = {}, ball = [], phases = [], reveals = [], cuts = [];
+    let props = '';
+    reps.forEach((r, ri) => {
+      const T = ri * REP, end = T + REP - 0.001, lab = z => (r.labels && r.labels[z]) || z;
+      if (ri) cuts.push(T);
+      const list = [];
+      // Setter: back row hides at zone 1 and releases; front row is already at the net (zone 2).
+      list.push(r.setter === 'back'
+        ? [[T, 70, 110, 'S'], [T + 0.15, 70, 110], [T + 1.1, ...TARGET], [end, ...TARGET]]
+        : [[T, 112, 102, 'S'], [T + 0.3, 112, 102], [T + 1.0, ...TARGET], [end, ...TARGET]]);
+      for (const z of r.hitters) {
+        const h = HIT[z];
+        list.push([[T, ...h.rec, lab(z)], [T + 0.9, ...h.rec], [T + 1.5, ...h.start], [T + 1.75, ...h.start], [T + 2.4, ...h.hit], [end, ...h.hit]]);
+      }
+      const passers = r.setter === 'back' ? ['5', '6'] : ['5', '6', '1'];
+      for (const z of passers) list.push([[T, ...PASS[z], z], [end, ...PASS[z]]]);
+      list.forEach((keys, i) => { (actors['a' + i] = actors['a' + i] || []).push(...keys); });
+
+      const [hx, hy] = HIT[r.setTo].hit;
+      ball.push([T, 238, 40, 0.2], [T + 0.9, 32, 70, 0.15, 1.0], [T + 1.6, 104, 80, 0.5, 1.0],
+                [T + 2.4, hx + 1, hy - 1, 1.0, 0.7], [T + 2.7, 196, hy + (hy < 70 ? 18 : -18), 0.05], [end, 196, hy + (hy < 70 ? 18 : -18), 0.05]);
+      const n = r.hitters.length;
+      phases.push([T, T + 0.9, 'Serve'],
+                  [T + 0.9, T + 1.6, r.setter === 'back' ? 'Pass — setter releases from the back row' : 'Pass — setter is already at the net'],
+                  [T + 1.6, T + 2.4, `Set — ${n} front-row hitters to choose from`],
+                  [T + 2.4, T + 2.7, 'Attack'],
+                  [T + 2.7, T + REP, r.note]);
+      reveals.push([T + 1.4, T + REP - 0.2]);
+      props += `<g class="reveal" opacity="0">${r.hitters.map(z => { const h = HIT[z];
+          return `<line class="lane" x1="${h.start[0]}" y1="${h.start[1]}" x2="${h.hit[0]}" y2="${h.hit[1]}"/>`; }).join('')}
+        <text class="count-label" x="60" y="10" text-anchor="middle">${n} front-row hitters</text></g>`;
+    });
+    // Each rep lists six players (setter + hitters + passers), so every actor has keys in every rep.
+    const dur = reps.length * REP;
+    for (const keys of Object.values(actors)) keys.sort((a, b) => a[0] - b[0]);
+    return {
+      type: 'court', alt, dur, cuts, reveals,
+      colors: { S: 'var(--good)', 4: 'var(--amber)', 3: 'var(--amber)', 2: 'var(--amber)', S2: 'var(--amber)', 5: 'var(--sky)', 6: 'var(--sky)', 1: 'var(--sky)' },
+      props: props + `<text class="legend" x="-4" y="141">S setter · amber = front-row hitters · blue = passers</text>`,
+      actors,
+      ball, phases,
+      still: 2.2,
+    };
+  }
 
   // Shared play for defense diagrams: their outside (H) attacks from their zone 4 against
   // our right side. Our players (1–6 = our court zones) start at base, read the set, and
@@ -1846,7 +1924,7 @@
              [hit[0] + 0.9, dig[0], dig[1], 0.5, 1.0], [5.0, dig[0], dig[1], 0.5], [6.0, 206, 60, 0.2, 0.9]],
       phases: [[0, 0.7, 'Their pass'], [0.7, 2.6, 'Set to their outside — read and move'], [2.6, hit[0], attackLabel],
                [hit[0], hit[0] + 0.9, 'Dig'], [hit[0] + 0.9, 5.0, 'Covered vs open — see the red zone'], [5.0, 6.0, 'Reset to base']],
-      reveal: [2.2, 5.0],
+      reveals: [[2.2, 5.0]],
       still: 2.5,
     };
   }
@@ -1943,9 +2021,11 @@
         <line class="net" x1="120" y1="10" x2="120" y2="130"/>
         <circle class="post" cx="120" cy="10" r="2"/><circle class="post" cx="120" cy="130" r="2"/>
         ${v.props || ''}
-        ${Object.keys(v.actors).map(a => `<g class="actor" data-actor="${a}"><circle r="6.5"/><text text-anchor="middle" dy="2.6"></text></g>`).join('')}
-        <ellipse class="ball-shadow" rx="3" ry="1.5"/>
-        <circle class="ball" r="3"/>
+        <g class="layer">
+          ${Object.keys(v.actors).map(a => `<g class="actor" data-actor="${a}"><circle r="6.5"/><text text-anchor="middle" dy="2.6"></text></g>`).join('')}
+          <ellipse class="ball-shadow" rx="3" ry="1.5"/>
+          <circle class="ball" r="3"/>
+        </g>
       </svg>
       ${captionHtml(v)}
     </figure>`;
@@ -1975,9 +2055,15 @@
         g.querySelector('circle').style.fill = (v.colors && v.colors[p.label]) || ROLE_COLOR[p.label] || 'var(--text)';
       }
     }
-    if (el.reveal && v.reveal) {
-      const [r0, r1] = v.reveal, fade = 0.25;
-      el.reveal.setAttribute('opacity', Math.min(1, Math.max(0, Math.min((t - r0) / fade, (r1 - t) / fade))).toFixed(2));
+    // reveals[i] = [from, to]: the i-th .reveal group fades in/out over that window.
+    (v.reveals || []).forEach(([r0, r1], i) => {
+      const g = el.reveals[i], fade = 0.25;
+      if (g) g.setAttribute('opacity', Math.min(1, Math.max(0, Math.min((t - r0) / fade, (r1 - t) / fade))).toFixed(2));
+    });
+    // cuts: scene changes (e.g. a new rotation); players and ball fade out and back in around each.
+    if (v.cuts) {
+      const fade = 0.25, d = Math.min(...[0, ...v.cuts, v.dur].map(c => Math.abs(t - c)));
+      el.layer.setAttribute('opacity', Math.min(1, d / fade).toFixed(2));
     }
     let bx, by, bh;
     const carry = (v.carry || []).find(([s, e]) => t >= s && t <= e);
@@ -2044,7 +2130,7 @@
       const q = s => fig.querySelector(s);
       const el = v.type === 'court'
         ? { actors: Object.fromEntries([...fig.querySelectorAll('.actor')].map(g => [g.dataset.actor, g])),
-            ball: q('.ball'), shadow: q('.ball-shadow'), reveal: q('.reveal'), phase: q('.viz-phase') }
+            ball: q('.ball'), shadow: q('.ball-shadow'), reveals: [...fig.querySelectorAll('.reveal')], layer: q('.layer'), phase: q('.viz-phase') }
         : { path: q('.limb.near'), far: q('.limb.far'), fig: q('.fig'), head: q('.head'), kn: q('.kn-dot'),
             hip: q('.hip-dot'), guide: q('.guide-g'), phase: q('.viz-phase') };
       el.segs = [...fig.querySelectorAll('.viz-seg')];
