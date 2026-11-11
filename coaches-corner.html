@@ -276,6 +276,7 @@
     .viz .ball-shadow { fill: rgba(0,0,0,0.55); }
     .viz .legend { fill: var(--muted); font-size: 6.5px; font-weight: 600; }
     .viz .hole { fill: rgba(248,113,113,0.12); stroke: var(--bad); stroke-width: 0.8; stroke-dasharray: 2 2; }
+    .viz .area { fill: rgba(125,211,252,0.07); stroke: var(--sky); stroke-width: 0.7; stroke-dasharray: 2 2; opacity: 0.8; }
     .viz .lane { stroke: var(--amber); stroke-width: 1.2; stroke-dasharray: 3 2; opacity: 0.7; }
     .viz .count-label { fill: var(--amber); font-size: 7.5px; font-weight: 800; }
     .viz .hole-label { fill: var(--bad); font-size: 6.5px; font-weight: 700; }
@@ -1167,15 +1168,15 @@
         cons: ['Only two attackers', 'Easy for the opponent to read', 'Setter-attack options limited'] },
     ]},
     { id: 'receive', name: 'Serve receive', items: [
-      { name: '3-person receive', desc: 'Libero plus the two outsides split the court. The standard at most levels.',
+      { name: '3-person receive', viz: 'rec-3', desc: 'Libero plus the two outsides split the court. The standard at most levels.',
         use: 'Your outsides pass reliably and you want middles and opposite free to attack.',
         pros: ['Clear seams and responsibilities', 'Hitters not passing can focus on approach', 'Libero takes the most court'],
         cons: ['A weak outside passer gets targeted', 'Seams must be clearly owned'] },
-      { name: '2-person receive', desc: 'Libero and one outside cover the whole court.',
+      { name: '2-person receive', viz: 'rec-2', desc: 'Libero and one outside cover the whole court.',
         use: 'Two elite passers, or hiding a weak passer in the opposing rotation.',
         pros: ['Best passers touch most balls', 'Frees an extra attacker'],
         cons: ['Large areas per passer', 'Short serves and deep corners get exposed'] },
-      { name: '4-person / W formation', desc: 'Four or five players in a W or U shape spread across the court.',
+      { name: '4-person / W formation', viz: 'rec-w', desc: 'Four or five players in a W or U shape spread across the court.',
         use: 'Beginner teams or opponents with tough serves you can\'t handle with three.',
         pros: ['Small area per passer', 'Easy to teach'],
         cons: ['Many seams', 'Hitters passing late into approaches', 'Confusion on who takes it'] },
@@ -1842,7 +1843,91 @@
         { setter: 'front', hitters: ['4', '3'], setTo: '4', note: 'Setter always front row → 2 hitters, simplest to run' },
       ],
     }),
+
+    // ── Strategies: serve receive ──
+    'rec-3': receiveViz({
+      alt: 'Top-down court: three passers (outside, libero, outside) split the court, each with a shaded area of responsibility; the middle and right side stand at the net and the setter releases to target. Three serves: one straight at the libero, one into the seam between the top outside and the libero (the outside, moving toward the target, takes it), and one to the deep corner, where the bottom outside drops back.',
+      r: 24,
+      passers: [['O', 56, 32], ['L', 48, 70], ['O', 56, 108]],
+      others: [['M', 112, 66], ['R', 112, 112]],
+      setterFrom: [98, 120],
+      serves: [
+        { to: [48, 72], by: 1, label: 'Serve at the libero — in their area' },
+        { to: [58, 52], by: 0, label: 'Seam — the passer moving toward the target takes it' },
+        { to: [24, 118], by: 2, label: 'Deep corner — the outside drops back' },
+      ],
+      note: '3 passers: balanced areas, two seams to talk through',
+    }),
+    'rec-2': receiveViz({
+      alt: 'Top-down court: only two passers (libero and one outside) split the court in half, each with a large shaded area; the other outside, middle, and right side stand at the net and the setter releases to target. Three serves: one into the middle seam (the libero, moving toward the target, takes it), one to the deep corner on the libero side, and a short serve the outside has to charge forward for.',
+      r: 34,
+      passers: [['L', 50, 46], ['O', 54, 98]],
+      others: [['O', 112, 22], ['M', 112, 66], ['R', 112, 112]],
+      setterFrom: [98, 120],
+      serves: [
+        { to: [58, 72], by: 0, label: 'Seam — the passer moving toward the target takes it' },
+        { to: [22, 22], by: 0, label: 'Deep corner — a lot of court for one passer' },
+        { to: [90, 100], by: 1, label: 'Short serve — charge forward, stay low' },
+      ],
+      note: '2 passers: your best passers take everything, but each covers half the court',
+    }),
+    'rec-w': receiveViz({
+      alt: 'Top-down court: five passers in a W shape (three forward, two back), each with a small shaded area, and the setter at the net. Three serves: one into the middle of the W where four players are close (the libero, moving toward the target, takes it), a short serve the front outside takes, and a deep serve the back outside takes.',
+      r: 19,
+      passers: [['O', 82, 26], ['M', 82, 70], ['R', 82, 114], ['L', 40, 48], ['O', 40, 92]],
+      others: [],
+      setterFrom: [112, 98],
+      serves: [
+        { to: [60, 66], by: 3, label: 'Middle of the W — four players close; someone must call it' },
+        { to: [92, 46], by: 0, label: 'Short serve — front passer takes it' },
+        { to: [22, 110], by: 4, label: 'Deep serve — back passer takes it' },
+      ],
+      note: '5 passers: small areas, easy for beginners, but more seams and hitters must pass',
+    }),
   };
+
+  // Shared play for serve-receive diagrams. Each passer's area of responsibility is a shaded
+  // circle (fewer passers → bigger areas; seams are where circles meet). Three serves test the
+  // formation: the responsible passer moves to the ball and passes to target; the setter
+  // throws the ball back to the next server.
+  function receiveViz({ alt, r, passers, others, setterFrom, serves, note }) {
+    const REP = 2.6, TARGET = [108, 84], SERVERS = [[238, 40], [238, 100], [238, 70]];
+    const dur = serves.length * REP + 1.4;
+    const actors = {}, actorColors = {}, ball = [], phases = [];
+    passers.forEach(([label, x, y], i) => {
+      const keys = [[0, x, y, label]];
+      serves.forEach((sv, k) => {
+        if (sv.by !== i) return;
+        const T = k * REP, [bx, by] = sv.to;
+        keys.push([T + 0.1, x, y], [T + 0.85, bx - 3, by], [T + 1.5, bx - 3, by], [T + 2.3, x, y]);
+      });
+      keys.push([dur, x, y]);
+      actors['p' + i] = keys;
+      actorColors['p' + i] = 'var(--sky)';
+    });
+    others.forEach(([label, x, y], i) => {
+      actors['o' + i] = [[0, x, y, label], [dur, x, y]];
+      actorColors['o' + i] = 'var(--amber)';
+    });
+    actors.S = [[0, ...setterFrom, 'S'], [0.2, ...setterFrom], [0.9, ...TARGET], [dur, ...TARGET]];
+    actorColors.S = 'var(--good)';
+    serves.forEach((sv, k) => {
+      const T = k * REP, [sx, sy] = SERVERS[k % 3], [bx, by] = sv.to;
+      ball.push([T, sx, sy, 0.2], [T + 0.9, bx, by, 0.15, 1.0], [T + 1.6, TARGET[0] - 4, TARGET[1] - 4, 0.5, 1.0]);
+      const last = k === serves.length - 1, [nx, ny] = SERVERS[last ? 0 : k + 1];
+      // Setter throws the ball back to the next server (after the closing note on the last rep).
+      const throwAt = last ? dur - 0.8 : T + 1.8;
+      ball.push([throwAt, TARGET[0] - 4, TARGET[1] - 4, 0.5], [last ? dur : T + REP, nx, ny, 0.2, 0.9]);
+      phases.push([T, T + REP, sv.label]);
+    });
+    phases.push([serves.length * REP, dur, note]);
+    const areas = passers.map(([, x, y]) => `<circle class="area" cx="${x}" cy="${y}" r="${r}"/>`).join('');
+    return {
+      type: 'court', alt, dur, cuts: [], actors, actorColors, ball, phases,
+      props: areas + `<text class="legend" x="-4" y="141">blue = passers (shaded = their area) · amber = non-passers · S setter</text>`,
+      still: 0.9,
+    };
+  }
 
   // Shared play for offense diagrams. Each rep (one rotation, 4 s) runs serve → pass →
   // setter to target → every available front-row hitter approaches → set → attack.
@@ -2052,7 +2137,7 @@
       if (g.dataset.label !== p.label) {
         g.dataset.label = p.label;
         g.querySelector('text').textContent = p.label;
-        g.querySelector('circle').style.fill = (v.colors && v.colors[p.label]) || ROLE_COLOR[p.label] || 'var(--text)';
+        g.querySelector('circle').style.fill = (v.actorColors && v.actorColors[id]) || (v.colors && v.colors[p.label]) || ROLE_COLOR[p.label] || 'var(--text)';
       }
     }
     // reveals[i] = [from, to]: the i-th .reveal group fades in/out over that window.
