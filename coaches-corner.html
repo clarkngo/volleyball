@@ -255,6 +255,25 @@
     .plyo-rest, .plyo-ct { color: var(--muted); }
     .plyo-ct { text-align: right; }
 
+    /* Exercise visuals (animated SVG demos) */
+    .viz { margin: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      background: radial-gradient(ellipse at 50% 100%, rgba(255,140,0,0.1), transparent 65%), rgba(0,0,0,0.25); }
+    .viz svg { display: block; width: 100%; height: 170px; cursor: pointer; }
+    .viz .limb { stroke: var(--text); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .viz .limb.far { stroke: var(--muted); stroke-width: 4.5; }
+    .viz .head { fill: var(--text); }
+    .viz .prop { fill: rgba(255,255,255,0.05); stroke: var(--muted); stroke-width: 1.2; }
+    .viz .prop-label { fill: var(--muted); font-size: 7px; font-weight: 600; }
+    .viz .joint { fill: var(--amber); }
+    .viz .floor { stroke: rgba(255,255,255,0.18); stroke-width: 1.5; }
+    .viz .guide { stroke: var(--sky); stroke-width: 1.2; stroke-dasharray: 3 3; }
+    .viz .guide-label { fill: var(--sky); font-size: 7px; font-weight: 600; }
+    .viz figcaption { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.6rem; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .viz-phase { color: var(--amber); font-weight: 700; }
+    .viz-btn { font: inherit; font-size: 0.72rem; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 100px; padding: 0.1rem 0.55rem; cursor: pointer; }
+    .viz-btn:hover { color: var(--text); border-color: var(--border-hover); }
+
     .sit-card .when { font-size: 0.8rem; color: var(--muted); font-style: italic; }
     .sit-card .do h4 { color: var(--good); }
     .sit-card .avoid h4 { color: var(--bad); }
@@ -1672,6 +1691,159 @@
   $('#rules').innerHTML = RULES.map(r => `
     <div class="card"><h3>${r.t}</h3><ul>${r.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('');
 
+  // ───────────────────────── Exercise visuals ─────────────────────────
+  // Side-view stick-figure demos, keyed by exercise id. Each pose is a set of
+  // joint positions (x, y) in a 120×140 box, floor at y = 130, facing right.
+  // To add a visual: define poses, keyframes [time s, pose], phase labels
+  // [start, end, label], and an optional guide window [start, end].
+  const VISUALS = {
+    'snap-down': {
+      alt: 'Side view: the athlete rises onto the toes with arms overhead, snaps the arms down and drops into a quarter-squat landing with knees over toes, holds for two seconds, then resets.',
+      dur: 4.6,
+      poses: {
+        stand: { head: [60, 34], sh: [60, 47], el: [61, 65], ha: [62, 82], hip: [60, 80], kn: [61, 104], an: [60, 126], toe: [69, 130] },
+        tall:  { head: [60, 30], sh: [60, 43], el: [62, 25], ha: [63, 8],  hip: [60, 76], kn: [61, 100], an: [62, 121], toe: [69, 130] },
+        land:  { head: [68.5, 50], sh: [63, 62], el: [55, 78], ha: [47, 92], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130] },
+      },
+      keys: [[0, 'stand'], [0.7, 'tall'], [1.2, 'tall'], [1.42, 'land'], [3.42, 'land'], [4.2, 'stand'], [4.6, 'stand']],
+      phases: [[0, 0.7, 'Rise tall'], [0.7, 1.2, 'Arms overhead'], [1.2, 1.42, 'Snap down!'], [1.42, 3.42, 'Stick — hold 2 s'], [3.42, 4.6, 'Reset']],
+      guide: { from: 1.42, to: 3.42, x: 70, y1: 130, y2: 100, label: 'knee over toes' },
+      still: 2.4, // time shown when motion is reduced
+    },
+    'drop-stick': {
+      alt: 'Side view: the athlete stands on a box, steps off (no jump), drops and lands on both feet at the same time in a quarter squat with knees over toes and arms forward, holds for two seconds, then stands up.',
+      view: '0 -12 240 152',
+      dur: 4.6,
+      props: `<rect class="prop" x="6" y="98.5" width="49" height="34" rx="2"/><text class="prop-label" x="30.5" y="119" text-anchor="middle">30–45 cm</text>`,
+      poses: {
+        onbox: { head: [43, 2], sh: [43, 15], el: [44, 33], ha: [45, 50], hip: [43, 48], kn: [44, 72], an: [43, 94], toe: [52, 98], kn2: [44, 72], an2: [43, 94], toe2: [52, 98] },
+        step:  { head: [47.5, 4], sh: [47, 17], el: [50, 34], ha: [55, 49], hip: [46, 50], kn: [58, 68], an: [62, 90], toe: [70, 92], kn2: [45, 74], an2: [43, 94], toe2: [52, 98] },
+        drop:  { head: [61.5, 26], sh: [61, 39], el: [72, 52], ha: [86, 48], hip: [60, 72], kn: [64, 95], an: [64, 117], toe: [72, 119], kn2: [61, 96], an2: [60, 117], toe2: [68, 120] },
+        land:  { head: [78.5, 50], sh: [73, 62], el: [84, 76], ha: [100, 74], hip: [59, 92], kn: [80, 108], an: [69, 126], toe: [79, 130], kn2: [78, 108], an2: [67, 126], toe2: [77, 130] },
+        up:    { head: [70, 34], sh: [70, 47], el: [71, 65], ha: [72, 82], hip: [70, 80], kn: [71, 104], an: [70, 126], toe: [79, 130], kn2: [71, 104], an2: [70, 126], toe2: [79, 130] },
+      },
+      keys: [[0, 'onbox'], [0.5, 'onbox'], [0.95, 'step'], [1.2, 'drop', 'lin'], [1.4, 'land', 'lin'], [3.4, 'land'], [4.0, 'up'], [4.6, 'up']],
+      phases: [[0, 0.5, 'On the box'], [0.5, 0.95, 'Step off — don\'t jump'], [0.95, 1.4, 'Drop'], [1.4, 3.4, 'Both feet — stick 2 s'], [3.4, 4.6, 'Reset']],
+      guide: { from: 1.4, to: 3.4, x: 80, y1: 130, y2: 100, label: 'knee over toes' },
+      fade: { in: [0, 0.2], out: [4.3, 4.6] },
+      still: 2.4,
+    },
+    'pogo': {
+      alt: 'Side view: the athlete bounces continuously on the balls of the feet with nearly straight legs, tall posture, and a small arm rhythm, spending very little time on the floor.',
+      view: '0 -4 240 144',
+      dur: 2.0,
+      poses: {
+        contact: { head: [60, 32], sh: [60, 45], el: [63, 62], ha: [70, 74], hip: [60, 78], kn: [62, 101], an: [61, 122], toe: [69, 130], kn2: [60, 101], an2: [59, 122], toe2: [67, 130] },
+        air:     { head: [60, 20], sh: [60, 33], el: [63, 49], ha: [71, 60], hip: [60, 66], kn: [61, 90], an: [62, 112], toe: [67, 120], kn2: [59, 90], an2: [60, 112], toe2: [65, 120] },
+      },
+      keys: [[0, 'contact'], [0.25, 'air', 'out'], [0.5, 'contact', 'in'], [0.75, 'air', 'out'], [1.0, 'contact', 'in'],
+             [1.25, 'air', 'out'], [1.5, 'contact', 'in'], [1.75, 'air', 'out'], [2.0, 'contact', 'in']],
+      phases: [[0, 1.0, 'Bounce off the balls of the feet'], [1.0, 2.0, 'Stiff ankles — the floor is hot']],
+      still: 0.25,
+    },
+  };
+  const BONES = [['hip', 'sh'], ['sh', 'el'], ['el', 'ha'], ['hip', 'kn'], ['kn', 'an'], ['an', 'toe']];
+  // Optional far-side leg (kn2/an2/toe2), drawn dimmer behind the body.
+  const FAR_BONES = [['hip', 'kn2'], ['kn2', 'an2'], ['an2', 'toe2']];
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function vizHtml(id) {
+    const v = VISUALS[id];
+    return `<figure class="viz" data-viz="${id}">
+      <svg viewBox="${v.view || '0 0 240 140'}" role="img" aria-label="${esc(v.alt)}">
+        <line class="floor" x1="10" y1="132.5" x2="230" y2="132.5"/>
+        <g transform="translate(60 0)">
+          ${v.props || ''}
+          ${v.guide ? `<g class="guide-g" opacity="0"><line class="guide" x1="${v.guide.x}" y1="${v.guide.y1}" x2="${v.guide.x}" y2="${v.guide.y2 - 6}"/>
+            <text class="guide-label" x="${v.guide.x + 5}" y="${v.guide.y2 - 2}">${esc(v.guide.label)}</text></g>` : ''}
+          <g class="fig">
+            <path class="limb far"/>
+            <path class="limb near"/>
+            <circle class="head" r="7"/>
+            <circle class="joint kn-dot" r="2.2"/>
+            <circle class="joint hip-dot" r="2.2"/>
+          </g>
+        </g>
+      </svg>
+      <figcaption><span class="viz-phase"></span><button class="viz-btn" type="button">${reduceMotion ? '▶ Play' : '❚❚ Pause'}</button></figcaption>
+    </figure>`;
+  }
+
+  const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function poseAt(v, t) {
+    const k = v.keys;
+    let i = 0;
+    while (i < k.length - 2 && t >= k[i + 1][0]) i++;
+    const [t0, a] = k[i], [t1, b] = k[i + 1];
+    const lin = Math.min(1, Math.max(0, (t - t0) / (t1 - t0 || 1)));
+    // Segment easing, set on the key it moves to: 'lin', 'out' (rising, slows at the top),
+    // 'in' (falling, speeds up), default ease-in-out.
+    const mode = k[i + 1][2];
+    const f = mode === 'lin' ? lin : mode === 'out' ? 1 - (1 - lin) ** 2 : mode === 'in' ? lin * lin : ease(lin);
+    const A = v.poses[a], B = v.poses[b], out = {};
+    for (const j in A) out[j] = [A[j][0] + (B[j][0] - A[j][0]) * f, A[j][1] + (B[j][1] - A[j][1]) * f];
+    return out;
+  }
+
+  function drawViz(inst) {
+    const { v, el } = inst, t = inst.t % v.dur, p = poseAt(v, t);
+    const seg = ([a, b]) => `M${p[a][0].toFixed(1)} ${p[a][1].toFixed(1)}L${p[b][0].toFixed(1)} ${p[b][1].toFixed(1)}`;
+    el.path.setAttribute('d', BONES.map(seg).join(''));
+    if (p.kn2) el.far.setAttribute('d', FAR_BONES.map(seg).join(''));
+    if (v.fade) {
+      const { in: [i0, i1], out: [o0, o1] } = v.fade;
+      const o = t < i1 ? (t - i0) / (i1 - i0) : t > o0 ? (o1 - t) / (o1 - o0) : 1;
+      el.fig.setAttribute('opacity', Math.min(1, Math.max(0, o)).toFixed(2));
+    }
+    el.head.setAttribute('cx', p.head[0].toFixed(1)); el.head.setAttribute('cy', p.head[1].toFixed(1));
+    el.kn.setAttribute('cx', p.kn[0].toFixed(1)); el.kn.setAttribute('cy', p.kn[1].toFixed(1));
+    el.hip.setAttribute('cx', p.hip[0].toFixed(1)); el.hip.setAttribute('cy', p.hip[1].toFixed(1));
+    if (el.guide) {
+      const g = v.guide, fade = 0.15;
+      const o = Math.min(1, Math.max(0, Math.min((t - g.from) / fade, (g.to - t) / fade)));
+      el.guide.setAttribute('opacity', o.toFixed(2));
+    }
+    const ph = v.phases.find(([s, e]) => t >= s && t < e);
+    const label = ph ? ph[2] : '';
+    if (el.phase.textContent !== label) el.phase.textContent = label;
+  }
+
+  let vizList = [], vizRaf = 0, vizLast = 0;
+  const vizObserver = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+    for (const e of entries) { const inst = vizList.find(i => i.root === e.target); if (inst) inst.visible = e.isIntersecting; }
+    kickViz();
+  }) : null;
+
+  function vizTick(now) {
+    const dt = Math.min(0.1, (now - vizLast) / 1000); vizLast = now;
+    let any = false;
+    for (const inst of vizList) if (inst.playing && inst.visible) { inst.t += dt; drawViz(inst); any = true; }
+    vizRaf = any ? requestAnimationFrame(vizTick) : 0;
+  }
+  function kickViz() {
+    if (!vizRaf && vizList.some(i => i.playing && i.visible)) { vizLast = performance.now(); vizRaf = requestAnimationFrame(vizTick); }
+  }
+
+  function mountVisuals(root) {
+    if (vizObserver) vizList.forEach(i => vizObserver.unobserve(i.root));
+    vizList = [...root.querySelectorAll('.viz')].map(fig => {
+      const v = VISUALS[fig.dataset.viz];
+      const inst = {
+        root: fig, v, t: reduceMotion ? v.still : 0, playing: !reduceMotion, visible: !vizObserver,
+        el: { path: fig.querySelector('.limb.near'), far: fig.querySelector('.limb.far'), fig: fig.querySelector('.fig'), head: fig.querySelector('.head'), kn: fig.querySelector('.kn-dot'),
+              hip: fig.querySelector('.hip-dot'), guide: fig.querySelector('.guide-g'), phase: fig.querySelector('.viz-phase') },
+      };
+      const btn = fig.querySelector('.viz-btn');
+      const toggle = () => { inst.playing = !inst.playing; btn.textContent = inst.playing ? '❚❚ Pause' : '▶ Play'; kickViz(); };
+      btn.addEventListener('click', toggle);
+      fig.querySelector('svg').addEventListener('click', toggle);
+      drawViz(inst);
+      if (vizObserver) vizObserver.observe(fig);
+      return inst;
+    });
+    kickViz();
+  }
+
   // ───────────────────────── Plyometrics: library ─────────────────────────
   let plyoCat = 'all';
   const intTag = i => `<span class="tag int-${i.toLowerCase()}">${i}</span>`;
@@ -1703,6 +1875,7 @@
           <span class="tag lvl">${LEVEL_NAME[p.lvl]}+</span>
           <span class="tag plain">🧰 ${esc(p.eq)}</span>
         </div>
+        ${VISUALS[p.id] ? vizHtml(p.id) : ''}
         <p><strong>Volleyball transfer:</strong> ${esc(p.transfer)}</p>
         <p class="dose">${p.sets} × ${esc(p.reps)} · rest ${REST[p.int]}${p.contacts ? ` · ${p.contacts} foot contacts / set` : ' · throws (no foot contacts)'}</p>
         <details>
@@ -1717,6 +1890,7 @@
           </div>
         </details>
       </article>`).join('') : '<p class="empty">No exercises match those filters.</p>';
+    mountVisuals($('#plyo-grid'));
   }
 
   function jumpToPlyo(id) {
