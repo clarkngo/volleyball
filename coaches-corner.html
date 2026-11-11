@@ -282,6 +282,12 @@
     .viz .shot { stroke: var(--good); stroke-width: 1; stroke-dasharray: 3 2; fill: none; opacity: 0.85; }
     .viz .shot-end { fill: var(--good); }
     .viz .shot-label { fill: var(--good); font-size: 6.5px; font-weight: 700; }
+    .viz-top .limb.far { stroke: var(--amber); stroke-width: 3; }
+    .viz .clock { fill: none; stroke: rgba(255,255,255,0.18); stroke-width: 0.8; stroke-dasharray: 2 2; }
+    .viz .clock-label { fill: var(--muted); font-size: 7px; font-weight: 700; }
+    .viz .blocker { stroke: var(--bad); stroke-width: 4; stroke-linecap: round; fill: none; opacity: 0.85; }
+    .viz .blocker-head { fill: var(--bad); opacity: 0.85; }
+    .viz .net-side { stroke: var(--text); stroke-width: 1.5; opacity: 0.6; }
     .viz .lane { stroke: var(--amber); stroke-width: 1.2; stroke-dasharray: 3 2; opacity: 0.7; }
     .viz .count-label { fill: var(--amber); font-size: 7.5px; font-weight: 800; }
     .viz .hole-label { fill: var(--bad); font-size: 6.5px; font-weight: 700; }
@@ -1367,37 +1373,37 @@
         cues: ['Guide arm high, pointing at the ball.', 'Hitting elbow at or above shoulder height, hand by the ear.', 'Guide arm pulls down and in; hitting arm goes up and through on the same side.'],
         mistakes: ['Hitting arm drifts across the midline, taking the guide arm\'s place.', 'Dropping the hitting elbow below the shoulder.'],
         drills: ['hit-lines'] },
-      { name: 'Twist before the jump', tags: ['Rotation'],
+      { name: 'Twist before the jump', viz: 'tech-twist-before', tags: ['Rotation'],
         desc: 'Open the shoulders toward the shot during the last two approach steps, so you take off already aimed.',
         when: 'Learning to hit angles, or for a reliable cross-court shot. Easier to control.',
         cues: ['Turn the last two steps (right-left) toward where you want to hit.', 'Hips and shoulders face the shot at takeoff.', 'Keep the turn small so the approach still looks the same.'],
         mistakes: ['Turning too much — the block and defense read it.', 'Drifting sideways along the net.'],
         drills: ['line-cross'] },
-      { name: 'Twist after the jump', tags: ['Rotation'],
+      { name: 'Twist after the jump', viz: 'tech-twist-after', tags: ['Rotation'],
         desc: 'Approach and take off square, then rotate the shoulders and torso in the air to change direction.',
         when: 'Advanced hitters disguising line vs cross, or adjusting to a late block.',
         cues: ['Same approach and takeoff every time — that\'s the disguise.', 'Rotate from the core, not just the arm.', 'Decide by reading the block at the top of the jump.'],
         mistakes: ['Rotating only the arm — weak, and hits go wide.', 'Starting the twist too late to finish it.'],
         drills: ['line-cross'] },
-      { name: 'Torso twist (coil and uncoil)', tags: ['Power'],
+      { name: 'Torso twist (coil and uncoil)', viz: 'tech-torso', tags: ['Power'],
         desc: 'Power comes from the chain: hips, torso, shoulder, then arm. Coil the shoulders back as you load, then uncoil hips first.',
         when: 'Hitters who "arm" the ball and lack power.',
         cues: ['Hitting shoulder pulls back as the elbow loads.', 'Uncoil in order: hips → torso → shoulder → arm → wrist.', 'Finish with the hitting shoulder forward.'],
         mistakes: ['Square shoulders the whole time — all arm, no power.', 'Uncoiling the shoulders before the hips.'],
         drills: ['hit-lines'] },
-      { name: 'Wrist angle', tags: ['Contact'],
+      { name: 'Wrist angle', viz: 'tech-wrist', tags: ['Contact'],
         desc: 'The wrist adds topspin and fine direction. Snap over the top so the ball drops; turn the wrist at contact to steer line or cut.',
         when: 'Every hard swing (topspin keeps it in), and for cut shots and line shots near the block.',
         cues: ['Open hand; contact with the whole palm.', 'Snap the wrist over the top of the ball for topspin.', 'Turn the thumb down and out to cut sharp cross; turn in to steer line.'],
         mistakes: ['Stiff wrist — flat hits sail long.', 'Flicking the wrist without a full arm swing.'],
         drills: ['line-cross'] },
-      { name: 'Arm angle', tags: ['Contact'],
+      { name: 'Arm angle', viz: 'tech-arm-angle', tags: ['Contact'],
         desc: 'Where the arm meets the ball sets the shot\'s height and angle. A high elbow and contact near 1 o\'clock gives the best angle down.',
         when: 'Hitting over a block, or fixing hits into the net or long.',
         cues: ['Contact between 12 and 1 o\'clock above the hitting shoulder.', 'Swing across the body for cross; straight through for line.', 'Save a lower arm angle for wipes and sharp cuts, not power.'],
         mistakes: ['Low arm (3 o\'clock) — hits go into the block or net.', 'Same arm path every time — easy to read.'],
         drills: ['line-cross'] },
-      { name: 'Roll shot', tags: ['Off-speed'],
+      { name: 'Roll shot', viz: 'tech-roll', tags: ['Off-speed'],
         desc: 'Same approach and arm swing, then slow down and roll the ball with an open hand, up over the block and down into open court.',
         when: 'Big or well-timed blocks, deep defense, or after a few hard swings to change the rhythm.',
         cues: ['Disguise it: full approach and arm swing until the last moment.', 'Contact the back-bottom of the ball; roll the wrist up and over for topspin.', 'Aim for the short middle behind the block or the deep middle.'],
@@ -2141,7 +2147,145 @@
                [2.3, 3.0, 'Hitting arm drives up in its own lane'], [3.0, 4.4, 'Follow through on the hitting side'], [4.4, 5.0, 'Reset']],
       still: 1.6,
     },
+
+    // ── Attacking: technique (top-down torso) ──
+    'tech-twist-before': twistViz({
+      alt: 'View from above: a right-handed hitter approaches the net. On the last two steps the hips and shoulders turn toward the cross-court shot, the hitter takes off already aimed, and the ball goes cross where the shoulders face. A blocker on the other side covers the line.',
+      keys: [[0, 20, 34, 0, 0, 'back'], [0.6, 64, 34, 0, 0, 'down'], [1.0, 100, 34, 20, 22, 'back'], [1.3, 128, 34, 35, 35, 'back'],
+             [1.6, 134, 34, 35, 35, 'load'], [1.85, 136, 34, 35, 35, 'contact'], [2.2, 138, 34, 35, 42, 'follow']],
+      contactT: 1.85, shotDeg: 35,
+      phases: [[0, 1.0, 'Approach'], [1.0, 1.3, 'Last two steps turn toward the shot'], [1.3, 1.6, 'Take off already aimed'],
+               [1.6, 2.2, 'Swing — the ball goes where the shoulders face'], [2.2, 4.2, 'Easy to control, but the block can read it']],
+    }),
+    'tech-twist-after': twistViz({
+      alt: 'View from above: a right-handed hitter approaches the net square, as if hitting line, and takes off square. In the air the shoulders rotate toward cross-court while the hips lag behind, and the ball goes cross. A blocker on the other side covers the line.',
+      keys: [[0, 20, 34, 0, 0, 'back'], [0.6, 64, 34, 0, 0, 'down'], [1.0, 100, 34, 0, 0, 'back'], [1.3, 128, 34, 0, 0, 'back'],
+             [1.6, 134, 34, 0, 0, 'load'], [1.78, 135, 34, 12, 30, 'load'], [1.92, 136, 34, 15, 35, 'contact'], [2.2, 138, 34, 18, 42, 'follow']],
+      contactT: 1.92, shotDeg: 35,
+      phases: [[0, 1.3, 'Square approach — looks like line'], [1.3, 1.6, 'Take off square'], [1.6, 1.92, 'Rotate the shoulders in the air (hips lag)'],
+               [1.92, 2.2, 'Contact — the ball goes cross'], [2.2, 4.2, 'Late change: harder to read, harder to do']],
+    }),
+    'tech-torso': twistViz({
+      alt: 'View from above, hitter in the air: starting square, the hitting shoulder pulls back while the hips stay (coil). Then the hips turn first, the torso and shoulders follow, the arm comes through last to contact the ball, and the hitting shoulder finishes forward.',
+      keys: [[0, 100, 62, 0, 0, 'down'], [0.6, 100, 62, -10, -45, 'load'], [1.4, 100, 62, -10, -45, 'load'], [1.7, 100, 62, 15, -32, 'load'],
+             [1.95, 100, 62, 20, 12, 'contact'], [2.25, 100, 62, 22, 35, 'follow']],
+      contactT: 1.95, shotDeg: 12, net: false, setFrom: null,
+      phases: [[0, 0.6, 'Square'], [0.6, 1.4, 'Coil: hitting shoulder pulls back, hips stay'], [1.4, 1.7, 'Uncoil: hips first'],
+               [1.7, 1.95, 'Then torso and shoulder; arm last'], [1.95, 2.25, 'Contact'], [2.25, 4.2, 'Finish with the hitting shoulder forward']],
+    }),
+
+    // ── Attacking: technique (from behind / close-ups) ──
+    'tech-arm-angle': (() => {
+      const sh = [60, 40];
+      const at = deg => {
+        const r = deg * Math.PI / 180, d = [Math.sin(r), -Math.cos(r)];
+        return { el: [sh[0] + d[0] * 15, sh[1] + d[1] * 15], ha: [sh[0] + d[0] * 30, sh[1] + d[1] * 30], ball: [sh[0] + d[0] * 36, sh[1] + d[1] * 36] };
+      };
+      const body = { head: [60, 27], sh, hip: [60, 74], kn: [55, 94], an: [53, 114], toe: [49, 117], kn2: [65, 94], an2: [67, 114], toe2: [71, 117], el2: [48, 54], ha2: [44, 67] };
+      const clock = [[0, '12'], [30, '1'], [60, '2'], [90, '3']].map(([d, l]) => {
+        const r = d * Math.PI / 180;
+        return `<text class="clock-label" x="${(60 + Math.sin(r) * 46).toFixed(1)}" y="${(42 - Math.cos(r) * 46).toFixed(1)}" text-anchor="middle">${l}</text>`;
+      }).join('');
+      return {
+        alt: 'View from behind a right-handed hitter in the air, with a clock face around the hitting shoulder. Contact at 1 o\'clock (slightly out from straight up) is shown first as the best angle down over the block; 12 o\'clock is the highest reach; 3 o\'clock is a low arm that hits into the block or net.',
+        view: '0 -12 240 136', height: 230, dur: 6.4, floor: false, dots: [], balls: { ball: 4 },
+        props: `<circle class="clock" cx="60" cy="40" r="38"/>${clock}<text class="legend" x="-56" y="120">view from behind the hitter</text>`,
+        poses: { a1: { ...body, ...at(30) }, a12: { ...body, ...at(0) }, a3: { ...body, ...at(90) } },
+        keys: [[0, 'a1'], [1.6, 'a1'], [2.0, 'a12'], [3.4, 'a12'], [3.8, 'a3'], [5.2, 'a3'], [5.6, 'a1'], [6.4, 'a1']],
+        phases: [[0, 1.6, '1 o\'clock: best angle down, over the block'], [1.6, 3.4, '12 o\'clock: highest reach, harder to angle'],
+                 [3.4, 5.2, '3 o\'clock: low arm — into the block or net'], [5.2, 6.4, 'Back to 1 o\'clock']],
+        still: 1.0,
+      };
+    })(),
+    'tech-wrist': {
+      alt: 'Close-up side view of the forearm, hand, and ball: the open hand meets the upper back of the ball with the whole palm, the wrist snaps over the top, and the ball leaves with topspin, diving down into the court.',
+      view: '0 4 240 104', height: 200, dur: 3.8, floor: false, dots: ['wr'], balls: { ball: 12 },
+      bones: [['el', 'wr'], ['wr', 'fi']], farBones: [],
+      props: `<path class="guide" d="M78 22 A22 22 0 0 1 106 40" fill="none"/><polygon points="106,40 100,36 108,34" fill="var(--sky)"/>
+        <text class="guide-label" x="110" y="30">topspin</text><text class="legend" x="-56" y="104">close-up: forearm, hand, ball</text>`,
+      poses: {
+        reach:   { el: [20, 92], wr: [52, 64], fi: [62, 46], ball: [84, 44] },
+        contact: { el: [30, 82], wr: [62, 54], fi: [74, 36], ball: [84, 44] },
+        snap:    { el: [36, 80], wr: [68, 50], fi: [88, 40], ball: [92, 48] },
+        follow:  { el: [40, 82], wr: [72, 62], fi: [80, 80], ball: [170, 96] },
+      },
+      keys: [[0, 'reach'], [0.6, 'reach'], [1.0, 'contact'], [1.5, 'contact'], [1.75, 'snap', 'lin'], [2.1, 'follow', 'out'], [3.3, 'follow'], [3.8, 'reach']],
+      fade: { in: [0, 0.25], out: [3.5, 3.8] },
+      phases: [[0, 1.0, 'Hand reaches the ball'], [1.0, 1.5, 'Open hand: whole palm on the upper back of the ball'],
+               [1.5, 1.75, 'Snap the wrist over the top'], [1.75, 3.8, 'Topspin: the ball dives down into the court']],
+      still: 1.6,
+    },
+    'tech-roll': {
+      alt: 'Side view: the hitter uses the same approach and full arm swing as a hard hit, then slows the arm and contacts the back-bottom of the ball with an open hand, rolling the wrist up and over. The ball lobs over the blocker\'s hands and drops into the open court behind the block.',
+      view: '0 -48 250 182', height: 250, dur: 4.2, balls: { ball: 4 },
+      props: `<line class="net-side" x1="100" y1="132" x2="100" y2="22"/>
+        <circle class="blocker-head" cx="116" cy="6" r="6"/>
+        <path class="blocker" d="M116 13L116 58M116 58L111 88M116 58L121 88M116 18L110 -8M116 18L120 -10"/>`,
+      poses: {
+        load:  { head: [68.5, 50], sh: [63, 62], el: [52, 70], ha: [42, 80], el2: [53, 72], ha2: [44, 83], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+        rise:  { head: [61, 14], sh: [60, 27], el: [66, 12], ha: [70, -4], el2: [67, 13], ha2: [72, -3], hip: [59, 60], kn: [61, 84], an: [60, 104], toe: [66, 110], kn2: [60, 84], an2: [59, 104], toe2: [65, 110] },
+        bow:   { head: [61, 4], sh: [60, 17], el: [47, 12], ha: [57, 4], el2: [68, 2], ha2: [74, -12], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        roll:  { head: [61, 4], sh: [60, 17], el: [64, 3], ha: [70, -9], el2: [64, 32], ha2: [60, 46], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        rollf: { head: [61, 4], sh: [60, 17], el: [66, 2], ha: [74, -12], el2: [64, 32], ha2: [60, 46], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        land:  { head: [68.5, 50], sh: [63, 62], el: [70, 78], ha: [76, 92], el2: [68, 79], ha2: [73, 93], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+      },
+      keys: [[0, 'load'], [0.5, 'load'], [0.8, 'rise', 'out'], [1.05, 'bow', 'out'], [1.4, 'roll'], [1.65, 'rollf'], [2.15, 'land', 'in'], [3.6, 'land'], [4.2, 'load']],
+      ballKeys: [[0, 72, -14], [1.4, 72, -14], [2.7, 178, 118, 70], [4.2, 178, 118]],
+      fade: { in: [0, 0.2], out: [3.9, 4.2] },
+      phases: [[0, 0.8, 'Same approach — looks like a hard swing'], [0.8, 1.05, 'Full arm swing'], [1.05, 1.4, 'Slow the arm: open hand under the back of the ball'],
+               [1.4, 1.65, 'Roll the wrist up and over'], [1.65, 2.7, 'Over the block…'], [2.7, 4.2, '…and down into the open court']],
+      still: 1.5,
+    },
   };
+
+  // Top-down torso figure for rotation technique. Each key is [t, x, y, hipDeg, shoulderDeg, arm];
+  // 0° faces the net (+x), positive turns toward cross-court (+y) for a left-side hitter.
+  // Hips are drawn amber on top (far path), shoulders + hitting arm white underneath. The set arrives at the hand at
+  // contactT and the ball leaves along shotDeg.
+  function topPose(x, y, hipDeg, shDeg, arm) {
+    const rad = d => d * Math.PI / 180, add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k];
+    const fs = [Math.cos(rad(shDeg)), Math.sin(rad(shDeg))], rs = [-fs[1], fs[0]];
+    const fh = [Math.cos(rad(hipDeg)), Math.sin(rad(hipDeg))], rh = [-fh[1], fh[0]];
+    const K = 1.8; // body drawn larger than court scale so the rotation is readable
+    const c = [x, y], shR = add(c, rs, 9 * K), shL = add(c, rs, -9 * K);
+    const ARMS = {
+      down:    [add(add(shR, rs, 1 * K), fs, 1 * K), add(add(shR, rs, 2 * K), fs, 3 * K)],
+      back:    [add(shR, fs, -6 * K), add(shR, fs, -12 * K)],
+      load:    [add(add(shR, fs, -7 * K), rs, 2 * K), add(add(c, rs, 4 * K), fs, -3 * K)],
+      contact: [add(shR, fs, 7 * K), add(shR, fs, 15 * K)],
+      follow:  [add(add(shR, fs, 6 * K), rs, -5 * K), add(add(shR, fs, 6 * K), rs, -14 * K)],
+    };
+    const [el, ha] = ARMS[arm];
+    return { hipL: add(c, rh, -6.5 * K), hipR: add(c, rh, 6.5 * K), shL, shR, el, ha, head: add(c, fs, 1.5 * K) };
+  }
+  function twistViz({ alt, keys, contactT, shotDeg, phases, net = true, setFrom = [112, 120] }) {
+    const dur = 4.2, poses = {}, vkeys = [];
+    keys.forEach(([t, x, y, hd, sd, arm], i) => { poses['k' + i] = topPose(x, y, hd, sd, arm); vkeys.push([t, 'k' + i]); });
+    vkeys.push([dur - 0.4, 'k' + (keys.length - 1)], [dur, 'k0']);
+    // Where the hand is at contact, and where the shot goes from there.
+    const ci = keys.findIndex(k => k[0] === contactT), hand = poses['k' + ci].ha;
+    const r = shotDeg * Math.PI / 180, end = [hand[0] + Math.cos(r) * 90, hand[1] + Math.sin(r) * 90];
+    const ballKeys = setFrom
+      ? [[0, ...setFrom], [contactT - 0.9, ...setFrom], [contactT, ...hand], [contactT + 0.3, ...end], [dur, ...end]]
+      : [[0, ...hand], [contactT, ...hand], [contactT + 0.3, ...end], [dur, ...end]];
+    const lanes = net ? [[0, 'line'], [shotDeg, 'cross']].map(([d, l]) => {
+      const rr = d * Math.PI / 180, e = [hand[0] + Math.cos(rr) * 60, hand[1] + Math.sin(rr) * 60];
+      return `<line class="shot" x1="${hand[0].toFixed(1)}" y1="${hand[1].toFixed(1)}" x2="${e[0].toFixed(1)}" y2="${e[1].toFixed(1)}"/>` +
+        `<text class="shot-label" x="${(e[0] + 2).toFixed(1)}" y="${(e[1] + 2.5).toFixed(1)}">${l}</text>`;
+    }).join('') : '';
+    return {
+      alt, view: net ? '60 -6 214 146' : '90 0 140 120', height: net ? 230 : 210, dur, floor: false, dots: [], headR: 5.5, balls: { ball: 4 }, farOnTop: true, cls: 'top',
+      bones: [['shL', 'shR'], ['shR', 'el'], ['el', 'ha']], farBones: [['hipL', 'hipR']],
+      poses, keys: vkeys, ballKeys, phases,
+      fade: { in: [0, 0.2], out: [dur - 0.3, dur] },
+      props: (net ? `<line class="net-side" x1="168" y1="-4" x2="168" y2="140"/><line class="court-line" x1="0" y1="8" x2="214" y2="8"/>
+          <circle class="blocker-head" cx="176" cy="24" r="6"/>` + lanes +
+          `<text class="legend" x="0" y="128">from above · amber = hips · white = shoulders + hitting arm</text>` +
+          `<text class="legend" x="0" y="137">red = their blocker · green = shot lanes</text>`
+        : `<text class="legend" x="34" y="108">from above · amber = hips</text><text class="legend" x="34" y="116">white = shoulders + hitting arm</text>`),
+      still: contactT,
+    };
+  }
 
   // Shared play for attack diagrams by position. After the pass, the setter sets `setDur`
   // seconds to the hitter's contact point while the hitter approaches along start → via →
@@ -2365,19 +2509,18 @@
   function vizHtml(id) {
     const v = VISUALS[id];
     if (v.type === 'court') return courtHtml(id);
-    return `<figure class="viz" data-viz="${id}">
+    return `<figure class="viz${v.cls ? ' viz-' + v.cls : ''}" data-viz="${id}">
       <svg viewBox="${v.view || '0 0 240 140'}" role="img" aria-label="${esc(v.alt)}"${v.height ? ` style="height:${v.height}px"` : ''}>
-        <line class="floor" x1="10" y1="132.5" x2="230" y2="132.5"/>
+        ${v.floor === false ? '' : '<line class="floor" x1="10" y1="132.5" x2="230" y2="132.5"/>'}
         <g transform="translate(60 0)">
           ${v.props || ''}
           ${v.guide ? `<g class="guide-g" opacity="0"><line class="guide" x1="${v.guide.x}" y1="${v.guide.y1}" x2="${v.guide.x}" y2="${v.guide.y2 - 6}"/>
             <text class="guide-label" x="${v.guide.x + 5}" y="${v.guide.y2 - 2}">${esc(v.guide.label)}</text></g>` : ''}
           <g class="fig">
-            <path class="limb far"/>
-            <path class="limb near"/>
-            <circle class="head" r="7"/>
-            <circle class="joint kn-dot" r="2.2"/>
-            <circle class="joint hip-dot" r="2.2"/>
+            ${v.farOnTop ? '<path class="limb near"/><path class="limb far"/>' : '<path class="limb far"/><path class="limb near"/>'}
+            ${Object.values(v.poses)[0].head ? `<circle class="head" r="${v.headR || 7}"/>` : ''}
+            ${(v.dots || ['kn', 'hip']).map(d => `<circle class="joint" data-j="${d}" r="2.2"/>`).join('')}
+            ${Object.entries(v.balls || {}).map(([j, r]) => `<circle class="ball" data-j="${j}" r="${r}"/>`).join('')}
           </g>
         </g>
       </svg>
@@ -2517,22 +2660,31 @@
     if (inst.v.type === 'court') return drawCourt(inst);
     const { v, el } = inst, t = inst.t % v.dur, p = poseAt(v, t);
     const seg = ([a, b]) => `M${p[a][0].toFixed(1)} ${p[a][1].toFixed(1)}L${p[b][0].toFixed(1)} ${p[b][1].toFixed(1)}`;
-    el.path.setAttribute('d', BONES.map(seg).join(''));
-    if (p.kn2 || p.el2) el.far.setAttribute('d', [...(p.kn2 ? FAR_BONES : []), ...(p.el2 ? FAR_ARM : [])].map(seg).join(''));
+    // A visual can bring its own skeleton (bones / farBones), e.g. a top-down torso or a close-up of the hand.
+    el.path.setAttribute('d', (v.bones || BONES).map(seg).join(''));
+    const far = v.farBones || [...(p.kn2 ? FAR_BONES : []), ...(p.el2 ? FAR_ARM : [])];
+    if (far.length) el.far.setAttribute('d', far.map(seg).join(''));
     if (v.fade) {
       const { in: [i0, i1], out: [o0, o1] } = v.fade;
       const o = t < i1 ? (t - i0) / (i1 - i0) : t > o0 ? (o1 - t) / (o1 - o0) : 1;
       el.fig.setAttribute('opacity', Math.min(1, Math.max(0, o)).toFixed(2));
     }
-    el.head.setAttribute('cx', p.head[0].toFixed(1)); el.head.setAttribute('cy', p.head[1].toFixed(1));
-    el.kn.setAttribute('cx', p.kn[0].toFixed(1)); el.kn.setAttribute('cy', p.kn[1].toFixed(1));
-    el.hip.setAttribute('cx', p.hip[0].toFixed(1)); el.hip.setAttribute('cy', p.hip[1].toFixed(1));
+    const put = (c, q) => { c.setAttribute('cx', q[0].toFixed(1)); c.setAttribute('cy', q[1].toFixed(1)); };
+    if (el.head) put(el.head, p.head);
+    el.dots.forEach(c => put(c, p[c.dataset.j]));
+    // Balls follow a joint in the pose, or their own flight path (ballKeys: [t, x, y, arc?]).
+    el.balls.forEach(c => put(c, c.dataset.j === 'ball' && v.ballKeys ? ballAt(v.ballKeys, t) : p[c.dataset.j]));
     if (el.guide) {
       const g = v.guide, fade = 0.15;
       const o = Math.min(1, Math.max(0, Math.min((t - g.from) / fade, (g.to - t) / fade)));
       el.guide.setAttribute('opacity', o.toFixed(2));
     }
     setPhase(inst, t);
+  }
+
+  function ballAt(keys, t) {
+    const { a, b, f } = segAt(keys, t);
+    return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f - (b[3] || 0) * 4 * f * (1 - f)];
   }
 
   let vizList = [], vizRaf = 0, vizLast = 0;
@@ -2565,8 +2717,9 @@
       const el = v.type === 'court'
         ? { actors: Object.fromEntries([...fig.querySelectorAll('.actor')].map(g => [g.dataset.actor, g])),
             ball: q('.ball'), shadow: q('.ball-shadow'), reveals: [...fig.querySelectorAll('.reveal')], layer: q('.layer'), phase: q('.viz-phase') }
-        : { path: q('.limb.near'), far: q('.limb.far'), fig: q('.fig'), head: q('.head'), kn: q('.kn-dot'),
-            hip: q('.hip-dot'), guide: q('.guide-g'), phase: q('.viz-phase') };
+        : { path: q('.limb.near'), far: q('.limb.far'), fig: q('.fig'), head: q('.head'),
+            dots: [...fig.querySelectorAll('.joint[data-j]')], balls: [...fig.querySelectorAll('.ball[data-j]')],
+            guide: q('.guide-g'), phase: q('.viz-phase') };
       el.segs = [...fig.querySelectorAll('.viz-seg')];
       const inst = { root: fig, v, t: reduceMotion ? v.still : 0, playing: !reduceMotion, visible: !vizObserver, el };
       const btn = q('.viz-play');
