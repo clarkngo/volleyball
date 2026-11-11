@@ -277,6 +277,11 @@
     .viz .legend { fill: var(--muted); font-size: 6.5px; font-weight: 600; }
     .viz .hole { fill: rgba(248,113,113,0.12); stroke: var(--bad); stroke-width: 0.8; stroke-dasharray: 2 2; }
     .viz .area { fill: rgba(125,211,252,0.07); stroke: var(--sky); stroke-width: 0.7; stroke-dasharray: 2 2; opacity: 0.8; }
+    .viz .approach { fill: none; stroke: var(--amber); stroke-width: 1.1; stroke-dasharray: 3 2; opacity: 0.7; }
+    .viz .shadow { fill: rgba(248,113,113,0.16); }
+    .viz .shot { stroke: var(--good); stroke-width: 1; stroke-dasharray: 3 2; fill: none; opacity: 0.85; }
+    .viz .shot-end { fill: var(--good); }
+    .viz .shot-label { fill: var(--good); font-size: 6.5px; font-weight: 700; }
     .viz .lane { stroke: var(--amber); stroke-width: 1.2; stroke-dasharray: 3 2; opacity: 0.7; }
     .viz .count-label { fill: var(--amber); font-size: 7.5px; font-weight: 800; }
     .viz .hole-label { fill: var(--bad); font-size: 6.5px; font-weight: 700; }
@@ -363,13 +368,14 @@
     <section class="hero">
       <div class="hero-badge">📋 Coaching hub</div>
       <h1>Coach's <span>Corner</span></h1>
-      <p>Drills to build skills, plyometrics to jump higher, systems to organize your team, what to say in the huddle, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
+      <p>Drills to build skills, plyometrics to jump higher, systems to organize your team, how to attack from every position and against any block, what to say in the huddle, and a matchup planner that turns "who's strong, who's weak" — yours and theirs — into a game plan.</p>
     </section>
 
     <div class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" role="tab" id="tab-drills" aria-controls="panel-drills" data-tab="drills">🏐 Drills</button>
       <button class="tab" role="tab" id="tab-plyo" aria-controls="panel-plyo" data-tab="plyo">🦘 Plyometrics</button>
       <button class="tab" role="tab" id="tab-strategies" aria-controls="panel-strategies" data-tab="strategies">🧠 Strategies</button>
+      <button class="tab" role="tab" id="tab-attack" aria-controls="panel-attack" data-tab="attack">💥 Attacking</button>
       <button class="tab" role="tab" id="tab-talks" aria-controls="panel-talks" data-tab="talks">🗣️ Team Talks</button>
       <button class="tab" role="tab" id="tab-coach" aria-controls="panel-coach" data-tab="coach">📋 Coach's Corner</button>
     </div>
@@ -488,6 +494,16 @@
       </div>
       <div class="strat-nav" id="strat-nav"></div>
       <div id="strat-body"></div>
+    </section>
+
+    <!-- ───────────── Attacking ───────────── -->
+    <section class="panel" id="panel-attack" role="tabpanel" aria-labelledby="tab-attack" hidden>
+      <div class="section-head">
+        <h2>Attacking</h2>
+        <p>Ways to spike by position, how to beat zero to three blockers, and the technique details that make a swing work.</p>
+      </div>
+      <div class="strat-nav" id="atk-nav"></div>
+      <div id="atk-body"></div>
     </section>
 
     <!-- ───────────── Team talks ───────────── -->
@@ -1260,6 +1276,136 @@
   ];
 
   // ───────────────────────── Data: situations ─────────────────────────
+  // ───────────────────────── Data: attacking ─────────────────────────
+  const ATTACK = [
+    { id: 'position', name: 'By position', intro: 'The main sets each position attacks. The diagram shows the approach, the set, and whether their middle blocker gets there in time.', items: [
+      { name: 'High ball (4)', tags: ['Outside'], viz: 'atk-oh-high',
+        desc: 'The out-of-system ball: a high set to the left pin. The hitter has time to see the block and choose a shot.',
+        when: 'Bad pass, transition, or the end of a long rally — any time the setter can\'t run a faster set.',
+        cues: ['Start your approach outside the court so you come in on an angle.', 'Wait — start when the ball peaks, not when it leaves the setter.', 'Go up looking at the block: line, cross, or off the hands.'],
+        mistakes: ['Starting too early and running under the ball.', 'Swinging hard into a set, closed block — use a shot.'],
+        drills: ['hit-lines', 'shots'] },
+      { name: 'Go / shoot to the pin', tags: ['Outside'], viz: 'atk-oh-go',
+        desc: 'A faster, flatter set to the left pin (second tempo) that beats the middle blocker before they close.',
+        when: 'In-system passes, especially when their middle reads well or is slow to the pins.',
+        cues: ['Start your approach as the setter touches the ball.', 'Approach on a wider angle so you meet the ball instead of chasing it.', 'Quick arm — contact at the top, don\'t wait for it to drop.'],
+        mistakes: ['Late start — the set beats you to the antenna.', 'Waiting for a perfect set; a go needs you to adjust in the air.'],
+        drills: ['hit-lines', 'line-cross'] },
+      { name: 'Pipe (back row)', tags: ['Outside'], viz: 'atk-oh-pipe',
+        desc: 'A back-row outside attacks from behind the 3 m line in the middle of the court.',
+        when: 'Your outside is back row and you want a fourth attacker — best paired with a middle\'s quick to hold their middle blocker.',
+        cues: ['Take off behind the 3 m line; you can land in front of it.', 'Broad jump forward into the ball; contact in front of your hitting shoulder.', 'Hit deep, into their zone 6 seams.'],
+        mistakes: ['Stepping on or over the 3 m line at takeoff (fault).', 'Jumping straight up and hitting short into the net.'],
+        drills: ['free-trans'] },
+      { name: 'Quick (1)', tags: ['Middle'], viz: 'atk-mb-1',
+        desc: 'A first-tempo set just in front of the setter. The middle is already in the air as the setter touches the ball.',
+        when: 'Good passes. Running it early forces their middle to stay home, which opens the pins.',
+        cues: ['Be in the air before the set — the setter puts the ball on your hand.', 'Short, fast approach; land on two feet off the net.', 'Quick arm and wrist snap into the seam past their middle.'],
+        mistakes: ['Waiting to see the set — you\'ll be late every time.', 'Drifting into the setter or the net.'],
+        drills: ['setter-move'] },
+      { name: 'Slide', tags: ['Middle'], viz: 'atk-mb-slide',
+        desc: 'The middle runs behind the setter along the net and takes off from one foot near zone 2.',
+        when: 'To move your middle away from their middle blocker, or to attack their weaker right-side blocker.',
+        cues: ['Approach toward the setter, then turn and run along the net.', 'One-foot takeoff (left foot for a right-hander); drive the opposite knee up.', 'Hit while still moving: cross, or line past the outside blocker.'],
+        mistakes: ['Taking off from both feet — it kills the momentum.', 'Running into the antenna; take off a step inside it.'],
+        drills: ['setter-move'] },
+      { name: '31 (quick in front)', tags: ['Middle'], viz: 'atk-mb-31',
+        desc: 'A quick set between the setter and the left pin.',
+        when: 'To split their middle and outside blockers, or when their left-side blocker cheats out to the pin.',
+        cues: ['Start like a quick, then angle out toward zone 4.', 'Attack the seam between their two blockers.'],
+        mistakes: ['Approaching straight in and ending up too close to the setter.'],
+        drills: ['setter-move'] },
+      { name: 'Right-side high ball', tags: ['Opposite'], viz: 'atk-opp-high',
+        desc: 'A back set to the right pin; the opposite hits against their outside blocker.',
+        when: 'Out of system, or when your opposite is your best hitter. Left-handers get the ball on their hitting side.',
+        cues: ['Start outside the right sideline so you come in on an angle.', 'Watch the setter\'s back — back sets travel, so adjust late.', 'Cross-court is open against a block set on the line.'],
+        mistakes: ['Lining up too far inside and getting jammed.', 'Right-handers letting the ball get behind their head.'],
+        drills: ['hit-lines', 'line-cross'] },
+      { name: 'Back-row D', tags: ['Opposite'], viz: 'atk-opp-d',
+        desc: 'The opposite attacks from behind the 3 m line in zone 1 while back row.',
+        when: 'Your opposite is back row and you want three attackers on every in-system ball.',
+        cues: ['Take off behind the 3 m line and broad jump forward.', 'Hit high and deep: down the line or cross to zone 5.'],
+        mistakes: ['Attacking from on or in front of the 3 m line.', 'Approaching late — back-row sets arrive fast.'],
+        drills: ['free-trans'] },
+    ] },
+    { id: 'block', name: 'Vs the block', intro: 'Your outside hits a high ball against zero to three blockers. Red shading is the block\'s shadow (where a hard swing can\'t go); green lanes are the shots it leaves open.', items: [
+      { name: 'No block', tags: ['Free swing'], viz: 'atk-block-0',
+        desc: 'The block is late or not there. This is a free swing.',
+        when: 'Their middle is late on a quick, a fast pin set beats the block, or they\'re out of system.',
+        cues: ['Swing hard, high-percentage: deep corners, not the lines.', 'Deep line or deep cross, away from their best digger.', 'A sharp cross works if their defense plays deep.'],
+        mistakes: ['Tipping or hitting soft when you have a free swing.', 'Aiming at the lines for no reason — keep it in.'],
+        drills: ['line-cross'] },
+      { name: 'One blocker', tags: ['Single block'], viz: 'atk-block-1',
+        desc: 'A single blocker set on one side, usually the line.',
+        when: 'Fast sets, slides, or their middle didn\'t close.',
+        cues: ['See the block and hit away from it: they take line, you hit cross.', 'Tool it: wipe off the outside hand toward the antenna.', 'Roll over a short or late blocker.'],
+        mistakes: ['Hitting straight into the hands.', 'Turning early and showing your shot.'],
+        drills: ['line-cross', 'shots'] },
+      { name: 'Two blockers', tags: ['Double block'], viz: 'atk-block-2',
+        desc: 'A closed double block. Power alone won\'t beat it.',
+        when: 'High balls, out of system, or a read block that\'s working.',
+        cues: ['High hands: hit off the top of the outside blocker toward the antenna.', 'Roll or tip into the short middle behind the block.', 'If their middle is late, hit through the seam between them.'],
+        mistakes: ['Swinging hard into the middle of the block.', 'Using the same shot every time — mix power and off-speed.'],
+        drills: ['shots'] },
+      { name: 'Three blockers', tags: ['Triple block'], viz: 'atk-block-3',
+        desc: 'A triple block takes away most hard swings, but leaves the court behind it thin.',
+        when: 'They commit everyone to your best hitter, usually late in a set.',
+        cues: ['Off-speed: roll to the deep middle or tip short.', 'Wipe off the hands toward the antenna.', 'Keep it in play off the block so your team can cover and attack again.'],
+        mistakes: ['Trying to hit through three blockers.', 'Forgetting coverage — the ball is coming back.'],
+        drills: ['shots', 'coverage'] },
+    ] },
+    { id: 'technique', name: 'Technique', intro: 'The details inside one swing. Cues are for a right-handed hitter; mirror them for left-handers.', items: [
+      { name: 'Reach to hit', tags: ['Contact'], viz: 'tech-reach',
+        desc: 'Contact the ball at the highest point you can reach, arm straight, ball slightly in front of your hitting shoulder.',
+        when: 'Every swing. Contact height is free: it adds angle over the block and makes hard hits land in.',
+        cues: ['Time the jump so the ball meets you at the top, not on the way down.', 'Elbow fully extended at contact.', 'Ball in front of the hitting shoulder, not over your head.'],
+        mistakes: ['Bent-elbow contact — loses height and power.', 'Ball behind the head — hits go long.'],
+        drills: ['hit-lines'] },
+      { name: 'Neutral hitting arm (don\'t swap arms)', tags: ['Arm swing'], viz: 'tech-arm',
+        desc: 'Bow and arrow: the guide arm points up at the ball while the hitting arm loads elbow-high, hand by the ear. On the swing the guide arm pulls down to the side and the hitting arm drives up through its own lane — it doesn\'t swing across into the guide arm\'s space.',
+        when: 'Building a repeatable, powerful arm swing; fixing hitters who swing across their body.',
+        cues: ['Guide arm high, pointing at the ball.', 'Hitting elbow at or above shoulder height, hand by the ear.', 'Guide arm pulls down and in; hitting arm goes up and through on the same side.'],
+        mistakes: ['Hitting arm drifts across the midline, taking the guide arm\'s place.', 'Dropping the hitting elbow below the shoulder.'],
+        drills: ['hit-lines'] },
+      { name: 'Twist before the jump', tags: ['Rotation'],
+        desc: 'Open the shoulders toward the shot during the last two approach steps, so you take off already aimed.',
+        when: 'Learning to hit angles, or for a reliable cross-court shot. Easier to control.',
+        cues: ['Turn the last two steps (right-left) toward where you want to hit.', 'Hips and shoulders face the shot at takeoff.', 'Keep the turn small so the approach still looks the same.'],
+        mistakes: ['Turning too much — the block and defense read it.', 'Drifting sideways along the net.'],
+        drills: ['line-cross'] },
+      { name: 'Twist after the jump', tags: ['Rotation'],
+        desc: 'Approach and take off square, then rotate the shoulders and torso in the air to change direction.',
+        when: 'Advanced hitters disguising line vs cross, or adjusting to a late block.',
+        cues: ['Same approach and takeoff every time — that\'s the disguise.', 'Rotate from the core, not just the arm.', 'Decide by reading the block at the top of the jump.'],
+        mistakes: ['Rotating only the arm — weak, and hits go wide.', 'Starting the twist too late to finish it.'],
+        drills: ['line-cross'] },
+      { name: 'Torso twist (coil and uncoil)', tags: ['Power'],
+        desc: 'Power comes from the chain: hips, torso, shoulder, then arm. Coil the shoulders back as you load, then uncoil hips first.',
+        when: 'Hitters who "arm" the ball and lack power.',
+        cues: ['Hitting shoulder pulls back as the elbow loads.', 'Uncoil in order: hips → torso → shoulder → arm → wrist.', 'Finish with the hitting shoulder forward.'],
+        mistakes: ['Square shoulders the whole time — all arm, no power.', 'Uncoiling the shoulders before the hips.'],
+        drills: ['hit-lines'] },
+      { name: 'Wrist angle', tags: ['Contact'],
+        desc: 'The wrist adds topspin and fine direction. Snap over the top so the ball drops; turn the wrist at contact to steer line or cut.',
+        when: 'Every hard swing (topspin keeps it in), and for cut shots and line shots near the block.',
+        cues: ['Open hand; contact with the whole palm.', 'Snap the wrist over the top of the ball for topspin.', 'Turn the thumb down and out to cut sharp cross; turn in to steer line.'],
+        mistakes: ['Stiff wrist — flat hits sail long.', 'Flicking the wrist without a full arm swing.'],
+        drills: ['line-cross'] },
+      { name: 'Arm angle', tags: ['Contact'],
+        desc: 'Where the arm meets the ball sets the shot\'s height and angle. A high elbow and contact near 1 o\'clock gives the best angle down.',
+        when: 'Hitting over a block, or fixing hits into the net or long.',
+        cues: ['Contact between 12 and 1 o\'clock above the hitting shoulder.', 'Swing across the body for cross; straight through for line.', 'Save a lower arm angle for wipes and sharp cuts, not power.'],
+        mistakes: ['Low arm (3 o\'clock) — hits go into the block or net.', 'Same arm path every time — easy to read.'],
+        drills: ['line-cross'] },
+      { name: 'Roll shot', tags: ['Off-speed'],
+        desc: 'Same approach and arm swing, then slow down and roll the ball with an open hand, up over the block and down into open court.',
+        when: 'Big or well-timed blocks, deep defense, or after a few hard swings to change the rhythm.',
+        cues: ['Disguise it: full approach and arm swing until the last moment.', 'Contact the back-bottom of the ball; roll the wrist up and over for topspin.', 'Aim for the short middle behind the block or the deep middle.'],
+        mistakes: ['Slowing the approach so the defense reads it early.', 'Rolling it flat into the block, or too high and long.'],
+        drills: ['shots'] },
+    ] },
+  ];
+
   const SITUATIONS = [
     { cat: 'Momentum', title: 'Opponent goes on a 3–4 point run',
       when: 'Two or three points in a row on the same server, frustration showing.',
@@ -1382,7 +1528,7 @@
   }
 
   // ───────────────────────── Tabs ─────────────────────────
-  const TABS = ['drills', 'plyo', 'strategies', 'talks', 'coach'];
+  const TABS = ['drills', 'plyo', 'strategies', 'attack', 'talks', 'coach'];
   function showTab(name, push = true) {
     if (!TABS.includes(name)) name = 'drills';
     TABS.forEach(t => {
@@ -1478,6 +1624,39 @@
     const b = e.target.closest('.chip'); if (!b) return;
     stratGroup = b.dataset.g;
     renderStrategies();
+  });
+
+  // ───────────────────────── Attacking UI ─────────────────────────
+  let atkGroup = ATTACK[0].id;
+  function renderAttack() {
+    $('#atk-nav').innerHTML = ATTACK.map(g =>
+      `<button class="chip" type="button" data-g="${g.id}" aria-pressed="${g.id === atkGroup}">${g.name}</button>`).join('');
+    const g = ATTACK.find(x => x.id === atkGroup);
+    $('#atk-body').innerHTML = `<h3 class="sub-head" style="margin-top:1.25rem">${g.name} <small>${esc(g.intro)}</small></h3><div class="grid">` +
+      g.items.map(a => `
+        <article class="card">
+          <h3>${esc(a.name)}</h3>
+          <div class="meta">${a.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
+          ${a.viz && VISUALS[a.viz] ? vizHtml(a.viz) : ''}
+          <p>${esc(a.desc)}</p>
+          <div class="use"><b>Use when:</b> ${esc(a.when)}</div>
+          <div class="pc">
+            <div class="pro"><h4>Cues</h4><ul>${a.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+            <div class="con"><h4>Common mistakes</h4><ul>${a.mistakes.map(c => `<li>${esc(c)}</li>`).join('')}</ul></div>
+          </div>
+          ${a.drills && a.drills.length ? `<div class="drill-links"><span class="tag plain">Practice</span>${a.drills.map(d =>
+            `<button class="drill-link" type="button" data-drill="${d}">${esc(DRILLS.find(x => x.id === d).name)}</button>`).join('')}</div>` : ''}
+        </article>`).join('') + '</div>';
+    mountVisuals($('#atk-body'));
+  }
+  $('#atk-nav').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    atkGroup = b.dataset.g;
+    renderAttack();
+  });
+  $('#atk-body').addEventListener('click', e => {
+    const b = e.target.closest('.drill-link');
+    if (b) jumpToDrill(b.dataset.drill);
   });
 
   // ───────────────────────── Planner: ratings table ─────────────────────────
@@ -1884,7 +2063,170 @@
       ],
       note: '5 passers: small areas, easy for beginners, but more seams and hitters must pass',
     }),
+
+    // ── Attacking: by position ──
+    'atk-oh-high': attackViz({ label: 'O', start: [68, 8], contact: [113, 26], setDur: 1.4, setArc: 1.4, to: [200, 104],
+      tempo: 'High ball (3rd tempo)', note: 'Lots of time — see the block, pick a shot',
+      alt: 'Top-down court: after the pass, the setter sends a high set to the left pin. The outside hitter waits outside the court, then approaches on an angle and attacks cross-court. Their middle blocker has time to get across and block.' }),
+    'atk-oh-go': attackViz({ label: 'O', start: [76, 10], contact: [113, 22], setDur: 0.8, setArc: 0.5, to: [204, 24],
+      tempo: 'Go (2nd tempo)', note: 'Faster set to the pin beats their middle',
+      alt: 'Top-down court: the setter sends a fast, flat set to the left pin. The outside hitter starts the approach as the setter touches the ball and hits down the line. Their middle blocker is still moving when the ball is hit.' }),
+    'atk-oh-pipe': attackViz({ label: 'O', start: [38, 72], contact: [80, 68], setDur: 0.9, setArc: 0.7, to: [196, 84], back: true,
+      tempo: 'Pipe (back row)', note: 'Takeoff behind the 3 m line — pair it with a quick',
+      alt: 'Top-down court: a back-row outside approaches through the middle of the court and takes off behind the 3 m line; the setter sets a pipe and the hitter attacks deep. Their middle blocker, standing in the middle, can get there unless a quick holds them.' }),
+    'atk-mb-1': attackViz({ label: 'M', start: [92, 78], contact: [113, 76], setDur: 0.35, setArc: 0.15, to: [176, 50], approach: 0.6,
+      tempo: 'Quick (1st tempo)', note: 'In the air before the set — their middle can\'t react',
+      alt: 'Top-down court: the middle starts the approach during the pass and is in the air in front of the setter as the set is made; the quick set goes straight to the middle\'s hand and is hit before their middle blocker can jump.' }),
+    'atk-mb-slide': attackViz({ label: 'M', start: [96, 64], via: [[104, 92]], contact: [113, 108], setDur: 0.65, setArc: 0.3, to: [200, 122], approach: 1.0,
+      tempo: 'Slide', note: 'One-foot takeoff behind the setter, away from their middle',
+      alt: 'Top-down court: the middle approaches toward the setter, then runs behind the setter along the net and takes off from one foot near the right pin; the slide set meets them there. Their middle blocker is late getting across.' }),
+    'atk-mb-31': attackViz({ label: 'M', start: [90, 54], contact: [113, 52], setDur: 0.5, setArc: 0.25, to: [204, 34],
+      tempo: '31 (quick in front)', note: 'Splits their middle and outside blockers',
+      alt: 'Top-down court: the middle approaches toward the space between the setter and the left pin and hits a quick set there, in the seam between their middle and outside blockers. Their middle is late.' }),
+    'atk-opp-high': attackViz({ label: 'R', start: [80, 136], contact: [112, 114], setDur: 1.3, setArc: 1.2, to: [192, 30],
+      tempo: 'Right-side high ball (back set)', note: 'Back set to the right pin — cross is open vs a line block',
+      alt: 'Top-down court: the setter back-sets high to the right pin. The opposite starts outside the right sideline, approaches on an angle, and hits cross-court. Their middle blocker has time to get across.' }),
+    'atk-opp-d': attackViz({ label: 'R', start: [40, 118], contact: [80, 110], setDur: 0.95, setArc: 0.8, to: [194, 112], back: true,
+      tempo: 'Back-row D', note: 'Takeoff behind the 3 m line in zone 1',
+      alt: 'Top-down court: the back-row opposite approaches from zone 1, takes off behind the 3 m line, and hits a back set deep down the line. Their middle blocker is late.' }),
+
+    // ── Attacking: vs the block ──
+    'atk-block-0': blockViz({ id: 'b0', blockers: [], note: 'No block: swing hard, but keep it in',
+      shots: [{ to: [222, 20], name: 'Deep line', lab: 'line', kind: 'hard' }, { to: [220, 116], name: 'Deep cross', lab: 'cross', kind: 'hard' }, { to: [150, 118], name: 'Sharp cross (if they play deep)', lab: 'sharp', kind: 'hard' }],
+      alt: 'Top-down court: the outside hitter attacks a high ball with no blockers. Three open shots are shown in turn: deep line, deep cross, and a sharp cross.' }),
+    'atk-block-1': blockViz({ id: 'b1', blockers: [22], note: 'One blocker on the line: go around, off, or over it',
+      shots: [{ to: [214, 104], name: 'Cross, away from the block', lab: 'cross', kind: 'hard' }, { to: [150, 2], name: 'Tool: wipe off the outside hand', lab: 'tool', kind: 'tool' }, { to: [168, 46], name: 'Roll over a short blocker', lab: 'roll', kind: 'roll' }],
+      alt: 'Top-down court: the outside hitter attacks against one blocker set on the line; its shadow covers the line. Three shots are shown in turn: hard cross away from the block, a tool off the outside hand out of bounds, and a roll shot over the blocker.' }),
+    'atk-block-2': blockViz({ id: 'b2', blockers: [22, 34], note: 'Double block: use the hands or the space behind it',
+      shots: [{ to: [150, 2], name: 'High hands: off the outside blocker', lab: 'tool', kind: 'tool' }, { to: [152, 72], name: 'Roll into the short middle', lab: 'roll', kind: 'roll' }, { to: [140, 54], name: 'Tip behind the block', lab: 'tip', kind: 'tip' }],
+      alt: 'Top-down court: the outside hitter attacks against a closed double block whose shadow covers the line and much of the middle. Three shots are shown in turn: off the outside blocker\'s hands, a roll shot into the short middle, and a tip just behind the block.' }),
+    'atk-block-3': blockViz({ id: 'b3', blockers: [22, 34, 46], note: 'Triple block: off-speed and off the hands; cover!',
+      shots: [{ to: [206, 74], name: 'Roll to the deep middle', lab: 'roll', kind: 'roll' }, { to: [138, 66], name: 'Tip short behind the block', lab: 'tip', kind: 'tip' }, { to: [148, 2], name: 'Wipe off the hands toward the antenna', lab: 'wipe', kind: 'tool' }],
+      alt: 'Top-down court: the outside hitter faces a triple block whose shadow covers most of the court except the deep cross corner and the short area just behind the block. Three shots are shown in turn: a roll to the deep middle over the block, a tip short behind the block, and a wipe off the hands toward the antenna.' }),
+
+    // ── Attacking: technique (side view) ──
+    'tech-reach': {
+      alt: 'Side view of a spike: the hitter loads with both arms back, jumps swinging both arms up, draws the hitting arm back elbow-high in a bow-and-arrow position, then contacts the ball at the top of the jump with the hitting arm fully straight and slightly in front of the shoulder, and lands on two feet.',
+      view: '0 -34 240 172',
+      height: 250,
+      dur: 3.8,
+      props: `<circle class="ball" cx="73" cy="-19" r="4"/>`,
+      poses: {
+        load:    { head: [68.5, 50], sh: [63, 62], el: [52, 70], ha: [42, 80], el2: [53, 72], ha2: [44, 83], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+        rise:    { head: [61, 14], sh: [60, 27], el: [66, 12], ha: [70, -4], el2: [67, 13], ha2: [72, -3], hip: [59, 60], kn: [61, 84], an: [60, 104], toe: [66, 110], kn2: [60, 84], an2: [59, 104], toe2: [65, 110] },
+        bow:     { head: [61, 4], sh: [60, 17], el: [47, 12], ha: [57, 4], el2: [68, 2], ha2: [74, -12], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        contact: { head: [61, 4], sh: [60, 17], el: [65, 1], ha: [70, -15], el2: [64, 32], ha2: [60, 46], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        land:    { head: [68.5, 50], sh: [63, 62], el: [70, 78], ha: [76, 92], el2: [68, 79], ha2: [73, 93], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+      },
+      keys: [[0, 'load'], [0.5, 'load'], [0.8, 'rise', 'out'], [1.05, 'bow', 'out'], [1.25, 'contact', 'lin'], [1.5, 'contact'], [2.0, 'land', 'in'], [3.2, 'land'], [3.8, 'load']],
+      phases: [[0, 0.5, 'Load — arms back'], [0.5, 0.8, 'Jump — both arms swing up'], [0.8, 1.05, 'Bow and arrow'], [1.05, 1.5, 'Contact at full reach'], [1.5, 3.8, 'Land on two feet']],
+      guide: { from: 1.15, to: 1.6, x: 79, y1: 40, y2: -8, label: 'arm straight' },
+      still: 1.4,
+    },
+    'tech-arm': {
+      alt: 'Side view of the arm swing in the air: both arms swing up, then the guide arm points up at the ball while the hitting arm draws back elbow-high with the hand by the ear. The guide arm pulls down as the hitting arm drives up to contact the ball in front of the hitting shoulder, then follows through down on the hitting side.',
+      view: '0 -30 240 136',
+      height: 230,
+      dur: 5.0,
+      props: `<circle class="ball" cx="73" cy="-19" r="4"/>`,
+      poses: {
+        up:      { head: [61, 4], sh: [60, 17], el: [66, 2], ha: [70, -13], el2: [68, 3], ha2: [73, -12], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        bow:     { head: [61, 4], sh: [60, 17], el: [47, 12], ha: [57, 4], el2: [68, 2], ha2: [74, -12], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        swing:   { head: [61, 4], sh: [60, 17], el: [57, 1], ha: [62, -14], el2: [70, 20], ha2: [70, 35], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        contact: { head: [61, 4], sh: [60, 17], el: [65, 1], ha: [70, -15], el2: [64, 32], ha2: [60, 46], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+        follow:  { head: [61, 4], sh: [60, 17], el: [71, 30], ha: [75, 46], el2: [64, 32], ha2: [60, 46], hip: [59, 50], kn: [61, 74], an: [60, 96], toe: [66, 102], kn2: [60, 74], an2: [59, 96], toe2: [65, 102] },
+      },
+      keys: [[0, 'up'], [0.6, 'up'], [1.2, 'bow'], [2.0, 'bow'], [2.3, 'swing', 'lin'], [2.45, 'contact', 'lin'], [3.0, 'contact'], [3.5, 'follow'], [4.4, 'follow'], [5.0, 'up']],
+      phases: [[0, 0.6, 'Both arms swing up'], [0.6, 2.0, 'Bow and arrow: guide arm on the ball, hitting elbow high'], [2.0, 2.3, 'Guide arm pulls down'],
+               [2.3, 3.0, 'Hitting arm drives up in its own lane'], [3.0, 4.4, 'Follow through on the hitting side'], [4.4, 5.0, 'Reset']],
+      still: 1.6,
+    },
   };
+
+  // Shared play for attack diagrams by position. After the pass, the setter sets `setDur`
+  // seconds to the hitter's contact point while the hitter approaches along start → via →
+  // contact. Their middle blocker (B) reads the set (0.35 s) then moves at ~4 m/s; the caption
+  // says whether B arrives before contact, so tempo vs. the block is visible.
+  function attackViz({ alt, label, start, via = [], contact, setDur, setArc, to, tempo, note, approach = 0.75, back = false }) {
+    const TARGET = [108, 84], Ts = 0.9, Tc = Ts + setDur, dur = Tc + 2.4;
+    const path = [start, ...via, contact];
+    const lens = path.slice(1).map((q, i) => Math.hypot(q[0] - path[i][0], q[1] - path[i][1]));
+    const total = lens.reduce((a, b) => a + b, 0);
+    const hitter = [[0, ...start, label], [Tc - approach, ...start]];
+    let acc = 0;
+    path.slice(1).forEach((q, i) => { acc += lens[i]; hitter.push([Tc - approach + approach * acc / total, ...q]); });
+    hitter.push([Tc + 1.4, ...contact], [dur - 0.1, ...start], [dur, ...start]);
+    const cy = contact[1], Ta = Ts + 0.35 + Math.abs(cy - 70) / 50, late = Ta > Tc + 0.02;
+    const actors = {
+      H: hitter,
+      S: [[0, ...TARGET, 'S'], [dur, ...TARGET]],
+      L: [[0, 30, 70, 'L'], [dur, 30, 70]],
+      B: [[0, 128, 70, 'B'], [Ts + 0.35, 128, 70], [Ta, 128, cy], [Tc + 1.4, 128, cy], [dur - 0.1, 128, 70], [dur, 128, 70]],
+    };
+    return {
+      type: 'court', alt, dur, cuts: [], actors,
+      actorColors: { H: 'var(--amber)', S: 'var(--good)', L: 'var(--sky)', B: 'var(--bad)' },
+      ball: [[0, 30, 70, 0.2], [0.7, TARGET[0] - 4, TARGET[1] - 4, 0.5, 0.9], [Ts, TARGET[0] - 4, TARGET[1] - 4, 0.5],
+             [Tc, contact[0] + 1, contact[1] - 1, 1.0, setArc], [Tc + 0.3, ...to, 0.05], [dur, ...to, 0.05]],
+      phases: [[0, Ts, 'Pass to the setter'], [Ts, Tc, `${tempo} — ${setDur.toFixed(2).replace(/0$/, '')} s from setter to hand`],
+               [Tc, Tc + 0.7, late ? 'Their middle is late — attack' : 'Their middle gets there — hit around or off the block'], [Tc + 0.7, dur, note]],
+      props: `<polyline class="approach" points="${path.map(q => q.join(',')).join(' ')}"/>` +
+        (back ? `<line class="approach" x1="84" y1="16" x2="84" y2="124" style="stroke-dasharray:none;opacity:0.45"/>` +
+          `<text class="legend" x="${contact[0] + 2}" y="${contact[1] - 11}" text-anchor="middle">take off behind the 3 m line</text>` : '') +
+        `<text class="legend" x="-4" y="141">${label} hitter · S setter · B their middle blocker · dashed = approach</text>`,
+      still: Tc - 0.05,
+    };
+  }
+
+  // Shared play for attacking against 0–3 blockers. The outside (O) hits a high ball at the
+  // left pin; each blocker's shadow (where a hard swing can't go) is shaded red, and each open
+  // shot is drawn as a green lane and then played in turn. Shadows are projected from a point
+  // behind the hitter, since a real ball travels over the block in 3D.
+  function blockViz({ alt, id, blockers, shots, note }) {
+    const TARGET = [108, 84], C = [113, 26], Ts = 0.9, Tc = 2.3, REP = 1.6;
+    const dur = Tc + shots.length * REP + 1.0, SRC = [70, 26], HW = 6;
+    const KIND = { hard: [0.35, 0], tool: [0.45, 0.25], roll: [0.9, 0.8], tip: [0.6, 0.45] };
+    const ball = [[0, 30, 70, 0.2], [0.7, TARGET[0] - 4, TARGET[1] - 4, 0.5, 0.9], [Ts, TARGET[0] - 4, TARGET[1] - 4, 0.5], [Tc, C[0] + 1, C[1] - 1, 1.0, 1.4]];
+    const phases = [[0, Ts, 'Pass to the setter'], [Ts, Tc, `High set to the outside — read the block${blockers.length ? '' : ' (none)'}`]];
+    const ballCuts = [];
+    shots.forEach((sh, k) => {
+      const Tk = Tc + k * REP, [d, arc] = KIND[sh.kind];
+      if (k) { ballCuts.push(Tk); ball.push([Tk, C[0] + 1, C[1] - 1, 1.0]); }
+      if (sh.kind === 'tool') {
+        // Off the outside blocker's hands, then out of bounds.
+        const by = (blockers[0] || 22) - 5;
+        ball.push([Tk + 0.15, 129, by, 0.95], [Tk + 0.15 + d, ...sh.to, 0.05, arc]);
+      } else ball.push([Tk + d, ...sh.to, 0.05, arc]);
+      ball.push([Tk + REP - 0.001, ...sh.to, 0.05]);
+      phases.push([Tk, Tk + REP, `Option ${k + 1}: ${sh.name}`]);
+    });
+    phases.push([Tc + shots.length * REP, dur, note]);
+    const actors = {
+      O: [[0, 68, 8, 'O'], [Tc - 0.75, 68, 8], [Tc, ...C], [dur - 0.9, ...C], [dur - 0.1, 68, 8], [dur, 68, 8]],
+      S: [[0, ...TARGET, 'S'], [dur, ...TARGET]],
+      L: [[0, 30, 70, 'L'], [dur, 30, 70]],
+    };
+    const actorColors = { O: 'var(--amber)', S: 'var(--good)', L: 'var(--sky)' };
+    blockers.forEach((y, i) => { actors['B' + i] = [[0, 128, y, 'B'], [dur, 128, y]]; actorColors['B' + i] = 'var(--bad)'; });
+    const at = (y, x) => SRC[1] + (y - SRC[1]) * (x - SRC[0]) / (128 - SRC[0]);
+    const shadows = blockers.map(y => {
+      const y1 = y - HW, y2 = y + HW;
+      return `<polygon class="shadow" points="128,${y1} 128,${y2} 228,${at(y2, 228).toFixed(1)} 228,${at(y1, 228).toFixed(1)}"/>`;
+    }).join('');
+    const lanes = shots.map(sh => {
+      const from = sh.kind === 'tool' ? `M${C[0]} ${C[1]}L129 ${(blockers[0] || 22) - 5}L${sh.to[0]} ${sh.to[1]}` : `M${C[0]} ${C[1]}L${sh.to[0]} ${sh.to[1]}`;
+      const lx = sh.to[0] + (sh.to[0] > 215 ? -4 : 5), anchor = sh.to[0] > 215 ? 'end' : 'start';
+      return `<path class="shot" d="${from}"/><circle class="shot-end" cx="${sh.to[0]}" cy="${sh.to[1]}" r="1.8"/>` +
+        `<text class="shot-label" x="${lx}" y="${sh.to[1] + (sh.to[1] < 10 ? 7 : 2.5)}" text-anchor="${anchor}">${sh.lab}</text>`;
+    }).join('');
+    return {
+      type: 'court', alt, dur, cuts: [], ballCuts, actors, actorColors, ball, phases,
+      props: `<clipPath id="opp-court-${id}"><rect x="120" y="16" width="108" height="108"/></clipPath>` +
+        `<g clip-path="url(#opp-court-${id})">${shadows}</g>` + lanes +
+        `<text class="legend" x="-4" y="141">red = block shadow (no hard swing) · green = open shots · B blocker</text>`,
+      still: Tc + 0.3,
+    };
+  }
 
   // Shared play for serve-receive diagrams. Each passer's area of responsibility is a shaded
   // circle (fewer passers → bigger areas; seams are where circles meet). Three serves test the
@@ -2016,13 +2358,15 @@
   const BONES = [['hip', 'sh'], ['sh', 'el'], ['el', 'ha'], ['hip', 'kn'], ['kn', 'an'], ['an', 'toe']];
   // Optional far-side leg (kn2/an2/toe2), drawn dimmer behind the body.
   const FAR_BONES = [['hip', 'kn2'], ['kn2', 'an2'], ['an2', 'toe2']];
+  // Optional far-side arm (el2/ha2), e.g. the guide arm in an arm swing.
+  const FAR_ARM = [['sh', 'el2'], ['el2', 'ha2']];
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function vizHtml(id) {
     const v = VISUALS[id];
     if (v.type === 'court') return courtHtml(id);
     return `<figure class="viz" data-viz="${id}">
-      <svg viewBox="${v.view || '0 0 240 140'}" role="img" aria-label="${esc(v.alt)}">
+      <svg viewBox="${v.view || '0 0 240 140'}" role="img" aria-label="${esc(v.alt)}"${v.height ? ` style="height:${v.height}px"` : ''}>
         <line class="floor" x1="10" y1="132.5" x2="230" y2="132.5"/>
         <g transform="translate(60 0)">
           ${v.props || ''}
@@ -2146,6 +2490,11 @@
       if (g) g.setAttribute('opacity', Math.min(1, Math.max(0, Math.min((t - r0) / fade, (r1 - t) / fade))).toFixed(2));
     });
     // cuts: scene changes (e.g. a new rotation); players and ball fade out and back in around each.
+    if (v.ballCuts) {
+      const fade = 0.2, d = Math.min(...v.ballCuts.map(c => Math.abs(t - c)));
+      const o = Math.min(1, d / fade).toFixed(2);
+      el.ball.setAttribute('opacity', o); el.shadow.setAttribute('opacity', o);
+    }
     if (v.cuts) {
       const fade = 0.25, d = Math.min(...[0, ...v.cuts, v.dur].map(c => Math.abs(t - c)));
       el.layer.setAttribute('opacity', Math.min(1, d / fade).toFixed(2));
@@ -2169,7 +2518,7 @@
     const { v, el } = inst, t = inst.t % v.dur, p = poseAt(v, t);
     const seg = ([a, b]) => `M${p[a][0].toFixed(1)} ${p[a][1].toFixed(1)}L${p[b][0].toFixed(1)} ${p[b][1].toFixed(1)}`;
     el.path.setAttribute('d', BONES.map(seg).join(''));
-    if (p.kn2) el.far.setAttribute('d', FAR_BONES.map(seg).join(''));
+    if (p.kn2 || p.el2) el.far.setAttribute('d', [...(p.kn2 ? FAR_BONES : []), ...(p.el2 ? FAR_ARM : [])].map(seg).join(''));
     if (v.fade) {
       const { in: [i0, i1], out: [o0, o1] } = v.fade;
       const o = t < i1 ? (t - i0) / (i1 - i0) : t > o0 ? (o1 - t) / (o1 - o0) : 1;
@@ -2612,6 +2961,7 @@
   renderPlyoLibrary();
   renderSession();
   renderStrategies();
+  renderAttack();
   renderRatings();
   renderPlan();
   renderSituations();
