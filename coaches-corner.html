@@ -264,6 +264,19 @@
     .viz .head { fill: var(--text); }
     .viz .prop { fill: rgba(255,255,255,0.05); stroke: var(--muted); stroke-width: 1.2; }
     .viz .prop-label { fill: var(--muted); font-size: 7px; font-weight: 600; }
+    .viz .court { fill: rgba(59,130,246,0.06); stroke: rgba(255,255,255,0.35); stroke-width: 1; }
+    .viz .court-line { stroke: rgba(255,255,255,0.18); stroke-width: 0.8; stroke-dasharray: 3 2; }
+    .viz .net { stroke: var(--text); stroke-width: 2; }
+    .viz .post { fill: var(--muted); }
+    .viz .path { fill: none; stroke: var(--sky); stroke-width: 0.9; stroke-dasharray: 2.5 2.5; opacity: 0.45; }
+    .viz .spot { fill: none; stroke: rgba(255,255,255,0.25); stroke-width: 0.8; stroke-dasharray: 2 2; }
+    .viz .actor text { fill: #05070d; font-size: 7.5px; font-weight: 800; }
+    .viz .actor circle { stroke: rgba(0,0,0,0.5); stroke-width: 1; }
+    .viz .ball { fill: #fff; stroke: var(--amber); stroke-width: 1; }
+    .viz .ball-shadow { fill: rgba(0,0,0,0.55); }
+    .viz .legend { fill: var(--muted); font-size: 6.5px; font-weight: 600; }
+    .viz .hole { fill: rgba(248,113,113,0.12); stroke: var(--bad); stroke-width: 0.8; stroke-dasharray: 2 2; }
+    .viz .hole-label { fill: var(--bad); font-size: 6.5px; font-weight: 700; }
     .viz .joint { fill: var(--amber); }
     .viz .floor { stroke: rgba(255,255,255,0.18); stroke-width: 1.5; }
     .viz .guide { stroke: var(--sky); stroke-width: 1.2; stroke-dasharray: 3 3; }
@@ -1160,19 +1173,19 @@
         cons: ['Must respect overlap rules', 'Hitter may start out of their natural attack spot'] },
     ]},
     { id: 'defense', name: 'Defensive systems', items: [
-      { name: 'Perimeter (2-4 / middle-back)', desc: 'Two blockers, four defenders around the edges; the zone 6 player stays deep.',
+      { name: 'Perimeter (2-4 / middle-back)', viz: 'def-perimeter', desc: 'Two blockers, four defenders around the edges; the zone 6 player stays deep.',
         use: 'Opponents hit hard and deep; you have a good block to take away the middle.',
         pros: ['Covers hard-driven balls and deep corners', 'Simple reads', 'Good vs power hitters'],
         cons: ['Open in the middle of the court for tips and rolls', 'Relies on the block covering zone 6 short'] },
-      { name: 'Rotational', desc: 'Defense rotates toward the attack: the line digger pulls up to cover tips, zone 6 rotates to the line.',
+      { name: 'Rotational', viz: 'def-rotational', desc: 'Defense rotates toward the attack: the line digger pulls up to cover tips, zone 6 rotates to the line.',
         use: 'Opponent tips and rolls a lot, or their outside hits mostly cross.',
         pros: ['Takes away tips behind the block', 'Strong vs cross-court hitters'],
         cons: ['Deep line corner open', 'More movement, harder timing'] },
-      { name: 'Middle-up (6-up)', desc: 'Zone 6 player moves up behind the block to take tips and short shots.',
+      { name: 'Middle-up (6-up)', viz: 'def-middle-up', desc: 'Zone 6 player moves up behind the block to take tips and short shots.',
         use: 'Younger or smaller opponents who rarely hit deep with power.',
         pros: ['Nothing short falls', 'Simple for beginners'],
         cons: ['Deep middle and corners exposed', 'Bad vs strong hitters'] },
-      { name: 'Man-back / zone 6 deep', desc: 'Back-row middle sits on the end line, wings cover the angles.',
+      { name: 'Man-back / zone 6 deep', viz: 'def-man-back', desc: 'Back-row middle sits on the end line, wings cover the angles.',
         use: 'Opponent attacks deep seams; your libero is your best reader.',
         pros: ['Coverage on deep seams', 'Libero reads the whole court'],
         cons: ['Short middle is soft', 'Wings carry big areas'] },
@@ -1398,6 +1411,7 @@
           <span class="tag plain">👥 ${esc(d.players)}</span>
           <span class="tag plain">⏱ ${esc(d.time)}</span>
         </div>
+        ${VISUALS[d.id] ? vizHtml(d.id) : ''}
         <p>${esc(d.summary)}</p>
         <details>
           <summary>Setup, flow &amp; cues</summary>
@@ -1409,6 +1423,7 @@
           </div>
         </details>
       </article>`).join('') : '<p class="empty">No drills match those filters.</p>';
+    mountVisuals($('#drill-grid'));
   }
 
   function jumpToDrill(id) {
@@ -1436,6 +1451,7 @@
       g.items.map(s => `
         <article class="card">
           <h3>${esc(s.name)}</h3>
+          ${s.viz && VISUALS[s.viz] ? vizHtml(s.viz) : ''}
           <p>${esc(s.desc)}</p>
           <div class="use"><b>Use when:</b> ${esc(s.use)}</div>
           <div class="pc">
@@ -1443,6 +1459,7 @@
             <div class="con"><h4>Watch out</h4><ul>${s.cons.map(p => `<li>${esc(p)}</li>`).join('')}</ul></div>
           </div>
         </article>`).join('') + '</div>';
+    mountVisuals($('#strat-body'));
   }
   $('#strat-nav').addEventListener('click', e => {
     const b = e.target.closest('.chip'); if (!b) return;
@@ -1741,7 +1758,88 @@
       phases: [[0, 1.0, 'Bounce off the balls of the feet'], [1.0, 2.0, 'Stiff ankles — the floor is hot']],
       still: 0.25,
     },
+
+    // ── Drills (top-down court) ──
+    'butterfly': {
+      type: 'court',
+      alt: 'Top-down court: a server on the far end line serves cross-court to a passer in zone 5, who passes to a target at the setter spot. Then everyone follows their ball: the server walks around the net to become the passer, the passer moves up to target, and the target carries the ball around the net to become the next server.',
+      dur: 6.4,
+      props: `<path class="path" d="M232 100 Q130 30 30 38"/><path class="path" d="M30 38 Q70 40 104 76"/>
+        <circle class="spot" cx="30" cy="38" r="9"/><circle class="spot" cx="108" cy="80" r="9"/>
+        <text class="legend" x="-4" y="5">S server · P passer · T target</text>`,
+      actors: {
+        A: [[0, 236, 104, 'S'], [2.8, 236, 104], [3.6, 180, 137], [4.4, 60, 137], [5.6, 30, 38, 'P'], [6.4, 30, 38]],
+        B: [[0, 30, 38, 'P'], [2.8, 30, 38], [4.4, 108, 80, 'T'], [6.4, 108, 80]],
+        C: [[0, 108, 80, 'T'], [2.8, 108, 80], [3.4, 112, 4], [4.0, 140, 4], [5.6, 236, 104, 'S'], [6.4, 236, 104]],
+      },
+      ball: [[0, 232, 100, 0.2], [0.4, 232, 100, 0.8], [1.6, 30, 38, 0.15, 1.1], [2.4, 104, 76, 0.3, 1.3], [2.8, 104, 76, 0.3]],
+      carry: [[2.8, 6.4, 'C']],
+      phases: [[0, 0.4, 'Toss'], [0.4, 1.6, 'Serve to the passer'], [1.6, 2.4, 'Pass to target'], [2.4, 2.8, 'Target catches'],
+               [2.8, 5.6, 'Follow your ball: S → P → T → S'], [5.6, 6.4, 'Next rep']],
+      still: 1.9,
+    },
+
+    // ── Strategies: defense ──
+    'def-perimeter': defenseViz({
+      alt: 'Top-down court: the opponent sets their outside hitter against our right side. Our right-side and middle blockers form a two-person block, the off-blocker drops to the attack line, and the three back-row players stay deep around the edges, with zone 6 on the end line. The area right behind the block is left open for tips. The attack goes hard cross-court and the zone 5 defender digs it.',
+      def: { 4: [88, 30], 3: [113, 98], 2: [113, 112], 5: [40, 36], 6: [22, 82], 1: [48, 118] },
+      attack: [[2.9, 44, 42, 0.25]],
+      attackLabel: 'Attack: hard cross-court',
+      hole: { cx: 92, cy: 104, rx: 13, ry: 9, label: 'open: tips', lx: 92, ly: 92 },
+    }),
+    'def-rotational': defenseViz({
+      alt: 'Top-down court: the opponent sets their outside hitter against our right side. Our right-side and middle blockers form a two-person block, the off-blocker drops to the attack line, the zone 1 line digger rotates up behind the block to cover tips, zone 6 rotates to deep line, and zone 5 slides to deep middle. The deep cross-court corner is left open. The hitter tips over the block and the zone 1 player digs it.',
+      def: { 4: [88, 30], 3: [113, 98], 2: [113, 112], 5: [36, 60], 6: [26, 116], 1: [90, 108] },
+      attack: [[3.0, 94, 102, 0.2, 0.35]],
+      attackLabel: 'Attack: tip over the block',
+      hole: { cx: 26, cy: 28, rx: 13, ry: 9, label: 'open: deep cross', lx: 26, ly: 14 },
+    }),
+    'def-middle-up': defenseViz({
+      alt: 'Top-down court: the opponent sets their outside hitter against our right side. Our right-side and middle blockers form a two-person block, the off-blocker drops to the attack line, the zone 6 player moves up into the short middle behind the block, and zones 5 and 1 stay deep on the sidelines. The deep middle of the court is left open. The hitter rolls a soft shot into the short middle and the zone 6 player digs it.',
+      def: { 4: [88, 30], 3: [113, 98], 2: [113, 112], 5: [34, 36], 6: [86, 84], 1: [36, 116] },
+      attack: [[3.1, 88, 82, 0.2, 0.45]],
+      attackLabel: 'Attack: roll shot to short middle',
+      hole: { cx: 24, cy: 74, rx: 13, ry: 11, label: 'open: deep middle', lx: 32, ly: 58 },
+    }),
+    'def-man-back': defenseViz({
+      alt: 'Top-down court: the opponent sets their outside hitter against our right side. Our right-side and middle blockers form a two-person block, the off-blocker drops to the attack line, the zone 6 player sits deep on the end line in the middle, and zones 5 and 1 play up on the angles. The short middle behind the block is left open. The hitter hits high and deep down the middle and the zone 6 player digs it.',
+      def: { 4: [88, 30], 3: [113, 98], 2: [113, 112], 5: [54, 40], 6: [16, 72], 1: [58, 114] },
+      attack: [[2.95, 20, 72, 0.3, 0.2]],
+      attackLabel: 'Attack: deep down the middle',
+      hole: { cx: 82, cy: 78, rx: 14, ry: 10, label: 'open: short middle', lx: 82, ly: 64 },
+      dig: [44, 60],
+    }),
   };
+
+  // Shared play for defense diagrams: their outside (H) attacks from their zone 4 against
+  // our right side. Our players (1–6 = our court zones) start at base, read the set, and
+  // move to the system's positions; `def` gives each position's spot.
+  function defenseViz({ alt, def, attack, attackLabel, hole, dig = [80, 70] }) {
+    const base = { 4: [110, 34], 3: [110, 70], 2: [110, 106], 5: [44, 34], 6: [30, 70], 1: [44, 106] };
+    const actors = {};
+    for (const z of ['4', '3', '2', '5', '6', '1']) {
+      const [bx, by] = base[z], [dx, dy] = def[z];
+      actors['p' + z] = [[0, bx, by, z], [0.9, bx, by], [2.2, dx, dy], [5.0, dx, dy], [6.0, bx, by]];
+    }
+    actors.S = [[0, 128, 72, 'S'], [6, 128, 72]];
+    actors.H = [[0, 176, 120, 'H'], [1.6, 176, 120], [2.6, 136, 110], [5.0, 136, 110], [6.0, 176, 120]];
+    const hit = attack[attack.length - 1];
+    return {
+      type: 'court', alt, dur: 6.0,
+      colors: { 4: 'var(--amber)', 3: 'var(--amber)', 2: 'var(--amber)', 5: 'var(--sky)', 6: 'var(--sky)', 1: 'var(--sky)', S: 'var(--muted)', H: 'var(--orange)' },
+      props: `<g class="reveal" opacity="0"><ellipse class="hole" cx="${hole.cx}" cy="${hole.cy}" rx="${hole.rx}" ry="${hole.ry}"/>
+          <text class="hole-label" x="${hole.lx}" y="${hole.ly}" text-anchor="middle">${hole.label}</text></g>
+        <text class="legend" x="-4" y="5">Us: amber = blockers · blue = back-row diggers</text>
+        <text class="legend" x="244" y="5" text-anchor="end">Them: H hitter · S setter</text>`,
+      actors,
+      ball: [[0, 206, 60, 0.2], [0.7, 128, 72, 0.6, 0.8], [2.6, 134, 106, 1.0, 0.9], ...attack,
+             [hit[0] + 0.9, dig[0], dig[1], 0.5, 1.0], [5.0, dig[0], dig[1], 0.5], [6.0, 206, 60, 0.2, 0.9]],
+      phases: [[0, 0.7, 'Their pass'], [0.7, 2.6, 'Set to their outside — read and move'], [2.6, hit[0], attackLabel],
+               [hit[0], hit[0] + 0.9, 'Dig'], [hit[0] + 0.9, 5.0, 'Covered vs open — see the red zone'], [5.0, 6.0, 'Reset to base']],
+      reveal: [2.2, 5.0],
+      still: 2.5,
+    };
+  }
   const BONES = [['hip', 'sh'], ['sh', 'el'], ['el', 'ha'], ['hip', 'kn'], ['kn', 'an'], ['an', 'toe']];
   // Optional far-side leg (kn2/an2/toe2), drawn dimmer behind the body.
   const FAR_BONES = [['hip', 'kn2'], ['kn2', 'an2'], ['an2', 'toe2']];
@@ -1749,6 +1847,7 @@
 
   function vizHtml(id) {
     const v = VISUALS[id];
+    if (v.type === 'court') return courtHtml(id);
     return `<figure class="viz" data-viz="${id}">
       <svg viewBox="${v.view || '0 0 240 140'}" role="img" aria-label="${esc(v.alt)}">
         <line class="floor" x1="10" y1="132.5" x2="230" y2="132.5"/>
@@ -1785,7 +1884,82 @@
     return out;
   }
 
+  function setPhase(inst, t) {
+    const ph = inst.v.phases.find(([s, e]) => t >= s && t < e);
+    const label = ph ? ph[2] : '';
+    if (inst.el.phase.textContent !== label) inst.el.phase.textContent = label;
+  }
+
+  // ── Court mode: top-down drill diagrams ──
+  // Court is 18 m × 9 m at 12 units/m: x 12–228, y 16–124, net at x = 120.
+  // Our side is on the left, facing the net (so zone 5 = top-left, zone 1 = bottom-left).
+  // actors: { id: [[t, x, y, label?], ...] } — eased walking between keys; the label
+  //   shown is the most recent one set, so roles can change when a player arrives.
+  // ball: [[t, x, y, h, arc?], ...] — linear flight, h = height (0–1), arc adds a parabola.
+  // carry: [[t0, t1, actorId]] — ball rides with that player (offset -4, -4).
+  const ROLE_COLOR = { S: 'var(--amber)', P: 'var(--sky)', T: 'var(--good)', C: 'var(--bad)', H: 'var(--orange)' };
+  function courtHtml(id) {
+    const v = VISUALS[id];
+    return `<figure class="viz" data-viz="${id}">
+      <svg viewBox="-8 -2 256 144" role="img" aria-label="${esc(v.alt)}">
+        <rect class="court" x="12" y="16" width="216" height="108"/>
+        <line class="court-line" x1="84" y1="16" x2="84" y2="124"/>
+        <line class="court-line" x1="156" y1="16" x2="156" y2="124"/>
+        <line class="net" x1="120" y1="10" x2="120" y2="130"/>
+        <circle class="post" cx="120" cy="10" r="2"/><circle class="post" cx="120" cy="130" r="2"/>
+        ${v.props || ''}
+        ${Object.keys(v.actors).map(a => `<g class="actor" data-actor="${a}"><circle r="6.5"/><text text-anchor="middle" dy="2.6"></text></g>`).join('')}
+        <ellipse class="ball-shadow" rx="3" ry="1.5"/>
+        <circle class="ball" r="3"/>
+      </svg>
+      <figcaption><span class="viz-phase"></span><button class="viz-btn" type="button">${reduceMotion ? '▶ Play' : '❚❚ Pause'}</button></figcaption>
+    </figure>`;
+  }
+
+  function segAt(keys, t) {
+    let i = 0;
+    while (i < keys.length - 2 && t >= keys[i + 1][0]) i++;
+    const a = keys[i], b = keys[i + 1];
+    return { a, b, f: Math.min(1, Math.max(0, (t - a[0]) / ((b[0] - a[0]) || 1))) };
+  }
+  function actorAt(keys, t) {
+    const { a, b, f } = segAt(keys, t), e = ease(f);
+    let label = keys[0][3];
+    for (const k of keys) if (k[0] <= t && k[3]) label = k[3];
+    return { x: a[1] + (b[1] - a[1]) * e, y: a[2] + (b[2] - a[2]) * e, label };
+  }
+
+  function drawCourt(inst) {
+    const { v, el } = inst, t = inst.t % v.dur, pos = {};
+    for (const [id, keys] of Object.entries(v.actors)) {
+      const p = pos[id] = actorAt(keys, t), g = el.actors[id];
+      g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+      if (g.dataset.label !== p.label) {
+        g.dataset.label = p.label;
+        g.querySelector('text').textContent = p.label;
+        g.querySelector('circle').style.fill = (v.colors && v.colors[p.label]) || ROLE_COLOR[p.label] || 'var(--text)';
+      }
+    }
+    if (el.reveal && v.reveal) {
+      const [r0, r1] = v.reveal, fade = 0.25;
+      el.reveal.setAttribute('opacity', Math.min(1, Math.max(0, Math.min((t - r0) / fade, (r1 - t) / fade))).toFixed(2));
+    }
+    let bx, by, bh;
+    const carry = (v.carry || []).find(([s, e]) => t >= s && t <= e);
+    if (carry) { const p = pos[carry[2]]; bx = p.x - 4; by = p.y - 4; bh = 0.3; }
+    else {
+      const { a, b, f } = segAt(v.ball, t);
+      bx = a[1] + (b[1] - a[1]) * f; by = a[2] + (b[2] - a[2]) * f;
+      bh = a[3] + (b[3] - a[3]) * f + (b[4] || 0) * 4 * f * (1 - f);
+    }
+    el.shadow.setAttribute('cx', bx.toFixed(1)); el.shadow.setAttribute('cy', by.toFixed(1));
+    el.ball.setAttribute('cx', bx.toFixed(1)); el.ball.setAttribute('cy', (by - bh * 18).toFixed(1));
+    el.ball.setAttribute('r', (3 + bh * 0.8).toFixed(2));
+    setPhase(inst, t);
+  }
+
   function drawViz(inst) {
+    if (inst.v.type === 'court') return drawCourt(inst);
     const { v, el } = inst, t = inst.t % v.dur, p = poseAt(v, t);
     const seg = ([a, b]) => `M${p[a][0].toFixed(1)} ${p[a][1].toFixed(1)}L${p[b][0].toFixed(1)} ${p[b][1].toFixed(1)}`;
     el.path.setAttribute('d', BONES.map(seg).join(''));
@@ -1803,9 +1977,7 @@
       const o = Math.min(1, Math.max(0, Math.min((t - g.from) / fade, (g.to - t) / fade)));
       el.guide.setAttribute('opacity', o.toFixed(2));
     }
-    const ph = v.phases.find(([s, e]) => t >= s && t < e);
-    const label = ph ? ph[2] : '';
-    if (el.phase.textContent !== label) el.phase.textContent = label;
+    setPhase(inst, t);
   }
 
   let vizList = [], vizRaf = 0, vizLast = 0;
@@ -1824,15 +1996,23 @@
     if (!vizRaf && vizList.some(i => i.playing && i.visible)) { vizLast = performance.now(); vizRaf = requestAnimationFrame(vizTick); }
   }
 
+  // Mounts the visuals inside `root` (a re-rendered grid). Instances from other grids are kept;
+  // ones whose figure was removed by the re-render are dropped.
   function mountVisuals(root) {
-    if (vizObserver) vizList.forEach(i => vizObserver.unobserve(i.root));
-    vizList = [...root.querySelectorAll('.viz')].map(fig => {
+    vizList = vizList.filter(i => {
+      if (i.root.isConnected) return true;
+      if (vizObserver) vizObserver.unobserve(i.root);
+      return false;
+    });
+    vizList.push(...[...root.querySelectorAll('.viz')].map(fig => {
       const v = VISUALS[fig.dataset.viz];
-      const inst = {
-        root: fig, v, t: reduceMotion ? v.still : 0, playing: !reduceMotion, visible: !vizObserver,
-        el: { path: fig.querySelector('.limb.near'), far: fig.querySelector('.limb.far'), fig: fig.querySelector('.fig'), head: fig.querySelector('.head'), kn: fig.querySelector('.kn-dot'),
-              hip: fig.querySelector('.hip-dot'), guide: fig.querySelector('.guide-g'), phase: fig.querySelector('.viz-phase') },
-      };
+      const q = s => fig.querySelector(s);
+      const el = v.type === 'court'
+        ? { actors: Object.fromEntries([...fig.querySelectorAll('.actor')].map(g => [g.dataset.actor, g])),
+            ball: q('.ball'), shadow: q('.ball-shadow'), reveal: q('.reveal'), phase: q('.viz-phase') }
+        : { path: q('.limb.near'), far: q('.limb.far'), fig: q('.fig'), head: q('.head'), kn: q('.kn-dot'),
+            hip: q('.hip-dot'), guide: q('.guide-g'), phase: q('.viz-phase') };
+      const inst = { root: fig, v, t: reduceMotion ? v.still : 0, playing: !reduceMotion, visible: !vizObserver, el };
       const btn = fig.querySelector('.viz-btn');
       const toggle = () => { inst.playing = !inst.playing; btn.textContent = inst.playing ? '❚❚ Pause' : '▶ Play'; kickViz(); };
       btn.addEventListener('click', toggle);
@@ -1840,7 +2020,7 @@
       drawViz(inst);
       if (vizObserver) vizObserver.observe(fig);
       return inst;
-    });
+    }));
     kickViz();
   }
 
