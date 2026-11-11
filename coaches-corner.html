@@ -1202,7 +1202,7 @@
         use: 'Beginner teams or opponents with tough serves you can\'t handle with three.',
         pros: ['Small area per passer', 'Easy to teach'],
         cons: ['Many seams', 'Hitters passing late into approaches', 'Confusion on who takes it'] },
-      { name: 'Stacking (hiding a passer)', desc: 'Shift overlap-legal positions so a weak passer stands near the net or out of the serving lane.',
+      { name: 'Stacking (hiding a passer)', viz: 'st-stack', desc: 'Shift overlap-legal positions so a weak passer stands near the net or out of the serving lane.',
         use: 'One player is a reliable attacker but a liability in receive.',
         pros: ['Protects a key attacker', 'Puts your best passers in front of the serve'],
         cons: ['Must respect overlap rules', 'Hitter may start out of their natural attack spot'] },
@@ -1226,55 +1226,55 @@
         cons: ['Short middle is soft', 'Wings carry big areas'] },
     ]},
     { id: 'block', name: 'Blocking schemes', items: [
-      { name: 'Read block', desc: 'Blockers wait for the setter to release the ball, then move.',
+      { name: 'Read block', viz: 'st-read-block', desc: 'Blockers wait for the setter to release the ball, then move.',
         use: 'Default for most teams; vs setters who distribute well.',
         pros: ['Rarely fooled', 'Gets to every attacker eventually'],
         cons: ['Late vs fast tempo', 'Requires discipline and quick footwork'] },
-      { name: 'Commit block', desc: 'A blocker jumps with a specific attacker (usually the quick hitter) regardless of the set.',
+      { name: 'Commit block', viz: 'st-commit-block', desc: 'A blocker jumps with a specific attacker (usually the quick hitter) regardless of the set.',
         use: 'Their middle is their best option, or a hitter dominates in one rotation.',
         pros: ['Stops a fast first-tempo attack', 'Takes away their go-to'],
         cons: ['If wrong, the pin is single-blocked or open'] },
-      { name: 'Bunch / spread', desc: 'Bunch: blockers start close together in the middle. Spread: start at the pins.',
+      { name: 'Bunch / spread', viz: 'st-bunch-spread', desc: 'Bunch: blockers start close together in the middle. Spread: start at the pins.',
         use: 'Bunch vs strong middles and pipe; spread vs teams that live on pin sets.',
         pros: ['Positions the block where the threat is'],
         cons: ['Bunch leaves pins far; spread leaves middle thin'] },
-      { name: 'Swing block', desc: 'Blockers use an arm-swing approach along the net to cover distance and jump higher.',
+      { name: 'Swing block', viz: 'st-swing-block', desc: 'Blockers use an arm-swing approach along the net to cover distance and jump higher.',
         use: 'Advanced teams with athletic blockers vs high-ball offenses.',
         pros: ['More height and penetration', 'Covers more ground'],
         cons: ['Timing is hard', 'Risk of net and drift faults'] },
     ]},
     { id: 'serving', name: 'Serving strategy', items: [
-      { name: 'Target the weak passer', desc: 'Serve the player whose passing rating is lowest, especially early in a set.',
+      { name: 'Target the weak passer', viz: 'st-serve-weak', desc: 'Serve the player whose passing rating is lowest, especially early in a set.',
         use: 'Always — unless they\'re hiding that passer, then serve the seams around them.',
         pros: ['Forces out-of-system offense', 'Creates frustration and subs'],
         cons: ['They may adjust formation; keep watching'] },
-      { name: 'Serve the seams', desc: 'Aim between passers to create "who takes it" confusion.',
+      { name: 'Serve the seams', viz: 'st-serve-seam', desc: 'Aim between passers to create "who takes it" confusion.',
         use: 'Opponent passers are individually strong but communicate poorly.',
         pros: ['Exploits communication', 'Works vs strong passers'],
         cons: ['Narrow targets mean more errors'] },
-      { name: 'Serve zone 1 deep', desc: 'Serve deep to right back, where the setter releases from in some rotations.',
+      { name: 'Serve zone 1 deep', viz: 'st-serve-z1', desc: 'Serve deep to right back, where the setter releases from in some rotations.',
         use: 'Their setter penetrates from the back row and you want to slow the release.',
         pros: ['Makes the setter turn and run', 'Shorter look for the passer'],
         cons: ['Strong zone 1 passers handle it easily'] },
-      { name: 'Short serve at hitters', desc: 'Serve short in front of an attacker who is also passing.',
+      { name: 'Short serve at hitters', viz: 'st-serve-short', desc: 'Serve short in front of an attacker who is also passing.',
         use: 'Their best hitter passes; you want to rush their approach.',
         pros: ['Disrupts approach timing', 'Opponent rarely practices short serves'],
         cons: ['Hard to execute; easy to net'] },
     ]},
     { id: 'attack', name: 'Attack strategy', items: [
-      { name: 'Attack the setter', desc: 'When their setter is front row, set your outside to hit at the setter\'s block.',
+      { name: 'Attack the setter', viz: 'st-attack-setter', desc: 'When their setter is front row, set your outside to hit at the setter\'s block.',
         use: 'Their setter is shorter or a weak blocker.',
         pros: ['Favorable 1-on-1 or late-block matchup'],
         cons: ['Smart teams swing or commit the middle to help'] },
-      { name: 'Run the middle early', desc: 'Set first-tempo quick attacks early in the set to hold their middle.',
+      { name: 'Run the middle early', viz: 'atk-mb-1', desc: 'Set first-tempo quick attacks early in the set to hold their middle.',
         use: 'Your passing is good and you want to free up the pins.',
         pros: ['Middle blocker hesitates → one-on-one at pins'],
         cons: ['Requires in-system passes'] },
-      { name: 'High hands / tool the block', desc: 'Hit off the top or outside of the blocker\'s hands toward the antenna.',
+      { name: 'High hands / tool the block', viz: 'st-tool', desc: 'Hit off the top or outside of the blocker\'s hands toward the antenna.',
         use: 'Tall block with good hands; vs tight sets.',
         pros: ['Scores against bigger blocks'],
         cons: ['Precise contact needed'] },
-      { name: 'Back-row attack (pipe, D)', desc: 'Back-row hitters attack from behind the 3 m line.',
+      { name: 'Back-row attack (pipe, D)', viz: 'atk-oh-pipe', desc: 'Back-row hitters attack from behind the 3 m line.',
         use: 'Rotations with only two front-row attackers; strong outsides.',
         pros: ['Four attack options', 'Pulls the middle blocker back'],
         cons: ['Needs good passing and a confident back-row hitter'] },
@@ -2148,6 +2148,766 @@
       still: 1.6,
     },
 
+    // ── Plyometrics: batch 2 ──
+    'squat-jump': {
+      alt: 'Side view: the athlete squats to half depth with the arms back, holds still for two seconds, then drives straight up with the arms swinging high and no extra dip, and sticks the landing where they took off.',
+      view: '0 -28 240 168', height: 190, dur: 5.0,
+      poses: { stand: plyoPose('stand'), half: plyoPose('half'), up: plyoPose('reach', 0, -30), land: plyoPose('land') },
+      keys: [[0, 'stand'], [0.5, 'half'], [2.5, 'half'], [2.75, 'up', 'out'], [3.05, 'up'], [3.4, 'land', 'in'], [4.4, 'land'], [5.0, 'stand']],
+      phases: [[0, 0.5, 'Squat to half depth'], [0.5, 2.5, 'Pause 2 s — no extra dip'], [2.5, 2.75, 'Drive up, arms high'],
+               [2.75, 3.05, 'Full extension'], [3.05, 4.4, 'Stick where you took off'], [4.4, 5.0, 'Reset']],
+      still: 1.5,
+    },
+    'cmj': {
+      alt: 'Side view: from standing, the athlete makes a quick dip with the arms swinging back, drives up fast, finishes with both arms high to touch a target, lands soft, and resets.',
+      view: '0 -36 240 176', height: 200, dur: 3.0,
+      props: `<line class="guide" x1="56" y1="-27" x2="76" y2="-27"/><text class="guide-label" x="80" y="-25">target</text>`,
+      poses: { stand: plyoPose('stand'), dip: plyoPose('dip'), up: plyoPose('reach', 0, -34), land: plyoPose('land') },
+      keys: [[0, 'stand'], [0.4, 'dip'], [0.6, 'up', 'out'], [0.95, 'up'], [1.3, 'land', 'in'], [2.4, 'land'], [3.0, 'stand']],
+      phases: [[0, 0.4, 'Quick dip — arms swing back'], [0.4, 0.6, 'Fast drive'], [0.6, 0.95, 'Arms finish high — touch the target'],
+               [0.95, 2.4, 'Land soft'], [2.4, 3.0, 'Reset between reps']],
+      still: 0.8,
+    },
+    'tuck': {
+      alt: 'Side view: the athlete jumps, pulls both knees up toward the chest with the back tall, extends the legs to land, and rebounds straight into the next tuck jump with a short ground contact, three times in a row.',
+      view: '0 -40 240 180', height: 200, dur: 2.1,
+      poses: { land: plyoPose('land'), ext: plyoPose('reach', 0, -8), tuck: plyoPose('tuck', 0, -36), ext2: plyoPose('reach', 0, -14) },
+      keys: tuckKeys(3, 0.7),
+      phases: [[0, 0.36, 'Jump — pull the knees up to the chest'], [0.36, 0.7, 'Extend the legs to land'],
+               [0.7, 1.06, 'Rebound straight up — short ground time'], [1.06, 1.4, 'Back stays tall, no folding'],
+               [1.4, 2.1, 'Stop the set if landings get loud']],
+      still: 0.36,
+    },
+    'broad': {
+      alt: 'Side view: the athlete swings the arms back and sits the hips back, jumps out and up at about 45 degrees, pulls the feet forward in the air, and sticks the landing with no step.',
+      dur: 3.2,
+      props: `<line class="guide" x1="20" y1="130" x2="62" y2="88"/><text class="guide-label" x="64" y="90">~45°</text>`,
+      poses: { stand: plyoPose('stand', -50), dip: plyoPose('dip', -50), take: plyoPose('btake', -50), air: plyoPose('bair', -50), land: plyoPose('land', 40) },
+      keys: [[0, 'stand'], [0.5, 'dip'], [0.75, 'take', 'lin'], [1.05, 'air', 'out'], [1.35, 'land', 'in'], [3.2, 'land']],
+      fade: { in: [0, 0.2], out: [2.9, 3.2] },
+      phases: [[0, 0.5, 'Arms back, hips back'], [0.5, 0.75, 'Jump out and up at ~45°'], [0.75, 1.35, 'Pull the feet forward to land'], [1.35, 2.9, 'Stick it — no step']],
+      still: 1.0,
+    },
+    'box-jump': {
+      alt: 'Side view: the athlete dips and jumps onto a box, lands soft in a quarter squat in the same position they took off in, stands tall on top, and then steps down rather than jumping down.',
+      view: '0 -40 240 180', height: 200, dur: 4.7,
+      props: `<rect class="prop" x="82" y="90" width="42" height="42.5" rx="2"/><text class="prop-label" x="103" y="114" text-anchor="middle">45–75 cm</text>`,
+      poses: { stand: plyoPose('stand', -14), dip: plyoPose('dip', -14), up: plyoPose('reach', 6, -46), land: plyoPose('land', 42, -40), top: plyoPose('stand', 40, -40),
+               edge: plyoPose('stand', 56, -40), down: plyoPose('stand', 84) },
+      keys: [[0, 'stand'], [0.5, 'dip'], [0.75, 'up', 'out'], [1.25, 'land', 'in'], [2.0, 'land'], [2.5, 'top'], [3.0, 'top'],
+             [3.3, 'edge'], [3.7, 'down', 'in'], [4.7, 'down']],
+      fade: { in: [0, 0.2], out: [4.4, 4.7] },
+      phases: [[0, 0.5, 'Countermovement'], [0.5, 1.25, 'Jump onto the box'], [1.25, 2.0, 'Land soft, same position you took off in'],
+               [2.0, 3.0, 'Stand tall on top'], [3.0, 4.4, 'Step down — don\'t jump down']],
+      still: 1.6,
+    },
+    'approach-jump': {
+      alt: 'Side view: the athlete runs a slow-to-fast approach, plants with a big arm swing back, explodes up, reaches as high as possible to touch a target, and lands balanced on two feet.',
+      view: '0 -46 240 182', height: 210, dur: 3.4,
+      props: `<line class="guide" x1="58" y1="-33" x2="80" y2="-33"/><text class="guide-label" x="84" y="-31">touch</text>`,
+      poses: { r1: plyoPose('run1', -96), r2: plyoPose('run2', -62), plant: plyoPose('dip', -14), dip: plyoPose('dip', -8), up: plyoPose('reach', 2, -40), land: plyoPose('land', 8) },
+      keys: [[0, 'r1'], [0.38, 'r2', 'lin'], [0.6, 'plant', 'lin'], [0.75, 'dip'], [1.05, 'up', 'out'], [1.4, 'up'], [1.8, 'land', 'in'], [3.4, 'land']],
+      fade: { in: [0, 0.2], out: [3.1, 3.4] },
+      phases: [[0, 0.6, 'Slow to fast — last two steps quickest'], [0.6, 0.75, 'Plant — big arm swing back'], [0.75, 1.05, 'Explode up'],
+               [1.05, 1.4, 'Reach as high as you can'], [1.4, 3.1, 'Land on two feet, balanced']],
+      still: 1.2,
+    },
+
+    // ── Plyometrics: the rest of the library ──
+    'sl-stick': {
+      alt: 'Side view: standing on one leg, the athlete loads the hip, hops forward about a body length on the same leg, and sticks the one-leg landing for two seconds with the knee over the toes.',
+      dur: 4.0,
+      poses: plyoPoses([['st', 'slstand', -40], ['dip', 'sldip', -40], ['air', 'slair', -10, -14], ['land', 'slland', 30]]),
+      keys: [[0, 'st'], [0.5, 'dip'], [0.8, 'air', 'out'], [1.15, 'land', 'in'], [3.6, 'land'], [4.0, 'land']],
+      guide: { from: 1.2, to: 3.4, x: 99, y1: 130, y2: 100, label: 'knee over toes' },
+      fade: { in: [0, 0.2], out: [3.7, 4.0] },
+      phases: [[0, 0.5, 'Load the hip on one leg'], [0.5, 1.15, 'Hop forward ~ a body length'], [1.15, 3.7, 'Stick it 2 s — knee over toes, no wobble']],
+      still: 2.0,
+    },
+    'block-series': {
+      alt: 'Front view at the net: the athlete block jumps at base with hands pressing over the net, shuffle-steps one way and block jumps, then crossover-steps back the other way and block jumps again.',
+      view: '0 -34 240 174', height: 200, dur: 6.0,
+      props: `<line class="guide" x1="-40" y1="-8" x2="160" y2="-8"/><text class="guide-label" x="-38" y="-12">top of the net</text>`,
+      poses: plyoPoses([['r0', 'fready'], ['d0', 'fdip'], ['u0', 'fup', 0, -30], ['rL', 'fready', -40], ['dL', 'fdip', -40], ['uL', 'fup', -40, -30],
+                        ['x', 'fready~', -10], ['rR', 'fready', 40], ['dR', 'fdip', 40], ['uR', 'fup', 40, -30]]),
+      keys: [[0, 'r0'], [0.3, 'd0'], [0.55, 'u0', 'out'], [0.95, 'r0', 'in'], [1.4, 'rL'], [1.7, 'dL'], [1.95, 'uL', 'out'], [2.35, 'rL', 'in'],
+             [2.8, 'x'], [3.3, 'rR'], [3.6, 'dR'], [3.85, 'uR', 'out'], [4.25, 'rR', 'in'], [5.4, 'r0'], [6.0, 'r0']],
+      phases: [[0, 0.95, 'Block jump at base — hands over the net'], [0.95, 1.4, 'Shuffle step'], [1.4, 2.35, 'Block jump'],
+               [2.35, 3.3, 'Crossover step the other way'], [3.3, 4.25, 'Block jump — penetrate, then land on two feet'], [4.25, 6.0, 'Back to base']],
+      still: 0.6,
+    },
+    'rebound': {
+      alt: 'Side view: the athlete jumps for maximum height with the arms reaching high, lands, and rebounds straight into the next jump with as little time on the ground as possible, three times in a row.',
+      view: '0 -40 240 180', height: 200, dur: 2.4,
+      poses: plyoPoses([['land', 'dip'], ['up', 'reach', 0, -36]]),
+      keys: cycleKeys(3, 0.8, [[0, 'land'], [0.35, 'up', 'out'], [0.8 - 0.001, 'land', 'in']], 'land'),
+      phases: [[0, 0.35, 'Max height every rep'], [0.35, 0.8, 'Land …'], [0.8, 1.15, '… and go — no pause on the floor'], [1.15, 2.4, 'Stop when height drops']],
+      still: 0.35,
+    },
+    'multi-broad': {
+      alt: 'Side view: the athlete does three broad jumps in a row, rebounding quickly with an arm swing after each landing, and sticks the third landing.',
+      dur: 4.0,
+      poses: plyoPoses([['s', 'stand', -90], ['d0', 'dip', -90], ['a0', 'bair', -90], ['d1', 'dip', -30], ['a1', 'bair', -30], ['d2', 'dip', 30], ['a2', 'bair', 30], ['l', 'land', 90]]),
+      keys: [[0, 's'], [0.35, 'd0'], [0.65, 'a0', 'out'], [0.9, 'd1', 'in'], [1.2, 'a1', 'out'], [1.45, 'd2', 'in'], [1.75, 'a2', 'out'], [2.0, 'l', 'in'], [3.7, 'l'], [4.0, 'l']],
+      fade: { in: [0, 0.2], out: [3.7, 4.0] },
+      phases: [[0, 0.65, 'Jump 1'], [0.65, 1.2, 'Quick, controlled rebound — jump 2'], [1.2, 1.75, 'Jump 3'], [1.75, 3.7, 'Stick the last one']],
+      still: 1.0,
+    },
+    'bounds': {
+      alt: 'Side view: exaggerated running strides. The athlete pushes off one leg, drives the opposite knee up and forward, hangs in the air, lands on the other leg, and repeats.',
+      dur: 2.6,
+      poses: plyoPoses([['c1', 'run1', -100], ['a1', 'bound', -70, -10], ['c2', 'run2', -40], ['a2', 'bound2', -10, -10], ['c3', 'run1', 20], ['a3', 'bound', 50, -10], ['c4', 'run2', 80]]),
+      keys: [[0, 'c1'], [0.3, 'a1', 'out'], [0.6, 'c2', 'in'], [0.9, 'a2', 'out'], [1.2, 'c3', 'in'], [1.5, 'a3', 'out'], [1.8, 'c4', 'in'], [2.6, 'c4']],
+      fade: { in: [0, 0.2], out: [2.2, 2.6] },
+      phases: [[0, 0.6, 'Push off — drive the opposite knee'], [0.6, 1.2, 'Hang, land on the other leg'], [1.2, 2.2, 'Repeat: long, powerful strides']],
+      still: 0.3,
+    },
+    'line-hops': {
+      alt: 'Front view: the athlete hops side to side over a line on the floor with both feet together, as quickly as possible, staying low and light.',
+      dur: 2.0,
+      props: `<line class="guide" x1="60" y1="124" x2="60" y2="132"/><text class="guide-label" x="60" y="140" text-anchor="middle">line</text>`,
+      poses: plyoPoses([['L', 'fdip', -16], ['aR', 'ftuck', 0, -12], ['R', 'fdip', 16], ['aL', 'ftuck', 0, -12]]),
+      keys: cycleKeys(4, 0.5, [[0, 'L'], [0.12, 'aR', 'out'], [0.25, 'R', 'in'], [0.37, 'aL', 'out'], [0.5 - 0.001, 'L', 'in']], 'L'),
+      phases: [[0, 0.5, 'Two feet together over the line'], [0.5, 1.0, 'Quick, light contacts'], [1.0, 2.0, 'Stay low — speed over height']],
+      still: 0.12,
+    },
+    'skater': {
+      alt: 'Front view: the athlete bounds sideways from one leg to the other, landing on one foot with the other leg behind, and sticks each landing before bounding back.',
+      dur: 3.6,
+      poses: plyoPoses([['R', 'fsl', 50], ['air', 'fslair', 0, -18], ['L', 'fsl~', -50], ['air2', 'fslair~', 0, -18]]),
+      keys: [[0, 'R'], [0.9, 'R'], [1.15, 'air', 'out'], [1.4, 'L', 'in'], [2.7, 'L'], [2.95, 'air2', 'out'], [3.2, 'R', 'in'], [3.6, 'R']],
+      phases: [[0, 0.9, 'Stick on one leg'], [0.9, 1.4, 'Bound sideways'], [1.4, 2.7, 'Land on the other foot — stick, hip back'], [2.7, 3.6, 'Bound back']],
+      still: 1.8,
+    },
+    'lat-hurdle': {
+      alt: 'Front view: the athlete hops sideways with both feet over two mini hurdles in a row, then hops back over them without pausing.',
+      dur: 3.2,
+      props: `<path class="prop" d="M26 130V116H34V130M86 130V116H94V130" fill="none"/>`,
+      poses: plyoPoses([['p0', 'fdip', -60], ['h1', 'ftuck', -30, -22], ['p1', 'fdip', 0], ['h2', 'ftuck', 30, -22], ['p2', 'fdip', 60]]),
+      keys: [[0, 'p0'], [0.25, 'h1', 'out'], [0.5, 'p1', 'in'], [0.75, 'h2', 'out'], [1.0, 'p2', 'in'], [1.25, 'h2', 'out'], [1.5, 'p1', 'in'],
+             [1.75, 'h1', 'out'], [2.0, 'p0', 'in'], [3.2, 'p0']],
+      phases: [[0, 1.0, 'Over, over — feet together'], [1.0, 2.0, 'And back without pausing'], [2.0, 3.2, 'Short ground time; knees up, not out']],
+      still: 0.25,
+    },
+    'lat-to-vert': {
+      alt: 'Front view: the athlete bounds sideways onto two feet, then immediately jumps straight up with the hands high, like a blocker closing to the pin and jumping.',
+      view: '0 -34 240 174', height: 200, dur: 3.4,
+      poses: plyoPoses([['s', 'fdip', -60], ['a', 'ftuck', -25, -16], ['l', 'fdip', 10], ['u', 'fup', 10, -30], ['l2', 'fdip', 10], ['back', 'fdip', -60]]),
+      keys: [[0, 's'], [0.3, 'a', 'out'], [0.6, 'l', 'in'], [0.9, 'u', 'out'], [1.3, 'l2', 'in'], [2.4, 'l2'], [3.2, 'back'], [3.4, 'back']],
+      phases: [[0, 0.6, 'Bound sideways onto two feet'], [0.6, 0.9, 'Immediately jump — hands up'], [0.9, 2.4, 'Land balanced'], [2.4, 3.4, 'Reset']],
+      still: 0.9,
+    },
+    'sl-pogo': {
+      alt: 'Side view: the athlete bounces on one foot with a nearly straight knee and quick, stiff-ankle contacts, the other leg held up.',
+      dur: 1.6,
+      poses: plyoPoses([['c', 'slpogo'], ['a', 'slpogo', 0, -12]]),
+      keys: cycleKeys(4, 0.4, [[0, 'c'], [0.2, 'a', 'out'], [0.4 - 0.001, 'c', 'in']], 'c'),
+      phases: [[0, 0.4, 'Bounce off the ball of the foot'], [0.4, 0.8, 'Knee nearly straight, stiff ankle'], [0.8, 1.6, 'Quick contacts — then switch legs']],
+      still: 0.2,
+    },
+    'split-jump': {
+      alt: 'Side view: from a lunge, the athlete jumps, switches legs in the air, and lands softly in the opposite lunge, then repeats back.',
+      view: '0 -16 240 156', dur: 2.4,
+      poses: plyoPoses([['L', 'splitL'], ['Lu', 'splitL', 0, -26], ['Ru', 'splitR', 0, -26], ['R', 'splitR']]),
+      keys: [[0, 'L'], [0.25, 'Lu', 'out'], [0.5, 'Ru'], [0.7, 'R', 'in'], [1.2, 'R'], [1.45, 'Ru', 'out'], [1.7, 'Lu'], [1.9, 'L', 'in'], [2.4, 'L']],
+      phases: [[0, 0.5, 'Jump from the lunge'], [0.5, 1.2, 'Switch legs — land soft in the other lunge'], [1.2, 2.4, 'And back; torso tall']],
+      still: 0.5,
+    },
+    'sl-box': {
+      alt: 'Side view: the athlete takes off from one leg and jumps onto a box, lands soft on both feet, stands tall, and steps down instead of jumping down.',
+      view: '0 -40 240 180', height: 200, dur: 4.7,
+      props: `<rect class="prop" x="82" y="100" width="42" height="32.5" rx="2"/><text class="prop-label" x="103" y="119" text-anchor="middle">low box</text>`,
+      poses: plyoPoses([['s', 'slstand', -14], ['d', 'sldip', -14], ['u', 'slair', 6, -40], ['l', 'land', 42, -30], ['t', 'stand', 40, -30], ['e', 'stand', 56, -30], ['dn', 'stand', 84]]),
+      keys: [[0, 's'], [0.5, 'd'], [0.8, 'u', 'out'], [1.25, 'l', 'in'], [2.0, 'l'], [2.5, 't'], [3.0, 't'], [3.3, 'e'], [3.7, 'dn', 'in'], [4.7, 'dn']],
+      fade: { in: [0, 0.2], out: [4.4, 4.7] },
+      phases: [[0, 0.5, 'Load on one leg'], [0.5, 1.25, 'Jump onto the box'], [1.25, 2.0, 'Land soft on both feet'], [2.0, 3.0, 'Stand tall'], [3.0, 4.4, 'Step down — don\'t jump down']],
+      still: 1.6,
+    },
+    'zigzag': {
+      alt: 'Front view: the athlete hops on one leg diagonally left and right along a line, moving forward toward the viewer, sticking each landing briefly.',
+      dur: 3.2,
+      props: `<line class="guide" x1="60" y1="124" x2="60" y2="132"/><text class="guide-label" x="60" y="140" text-anchor="middle">line</text>`,
+      poses: plyoPoses([['R', 'fsl', 28], ['a', 'fslair', 0, -14], ['L', 'fsl', -28]]),
+      keys: [[0, 'R'], [0.2, 'R'], [0.4, 'a', 'out'], [0.6, 'L', 'in'], [1.0, 'L'], [1.2, 'a', 'out'], [1.4, 'R', 'in'], [1.8, 'R'],
+             [2.0, 'a', 'out'], [2.2, 'L', 'in'], [2.6, 'L'], [2.8, 'a', 'out'], [3.0, 'R', 'in'], [3.2, 'R']],
+      phases: [[0, 0.8, 'Hop diagonally across the line'], [0.8, 1.6, 'Same leg, other diagonal'], [1.6, 3.2, 'Control each landing, then go']],
+      still: 0.6,
+    },
+    'hurdle-hops': {
+      alt: 'Side view: the athlete hops on two feet over a row of three hurdles, pulling the knees up over each one and spending as little time on the ground as possible between them.',
+      view: '0 -12 240 152', dur: 3.2,
+      props: `<path class="prop" d="M-15 130V108H-7V130M45 130V108H53V130M105 130V108H113V130" fill="none"/>`,
+      poses: plyoPoses([['p0', 'dip', -105], ['h0', 'tuck', -75, -30], ['p1', 'dip', -45], ['h1', 'tuck', -15, -30], ['p2', 'dip', 15], ['h2', 'tuck', 45, -30], ['p3', 'land', 75]]),
+      keys: [[0, 'p0'], [0.3, 'h0', 'out'], [0.55, 'p1', 'in'], [0.8, 'h1', 'out'], [1.05, 'p2', 'in'], [1.3, 'h2', 'out'], [1.55, 'p3', 'in'], [2.9, 'p3'], [3.2, 'p3']],
+      fade: { in: [0, 0.2], out: [2.9, 3.2] },
+      phases: [[0, 0.55, 'Knees up over the hurdle'], [0.55, 1.05, 'Short contact — straight into the next'], [1.05, 1.55, 'Last hurdle'], [1.55, 2.9, 'Land balanced']],
+      still: 0.3,
+    },
+    'depth-jump': {
+      alt: 'Side view: the athlete steps off a box, lands on both feet, and immediately jumps as high as possible with a short ground contact, then lands soft.',
+      view: '0 -28 240 168', height: 190, dur: 4.4,
+      props: `<rect class="prop" x="6" y="98.5" width="49" height="34" rx="2"/><text class="prop-label" x="30.5" y="119" text-anchor="middle">30–45 cm</text>`,
+      poses: plyoPoses([['b', 'onbox'], ['st', 'offbox'], ['dr', 'drop'], ['c', 'dip', 10], ['u', 'reach', 10, -34], ['l', 'land', 10]]),
+      keys: [[0, 'b'], [0.6, 'b'], [0.95, 'st'], [1.25, 'dr', 'in'], [1.45, 'c', 'in'], [1.65, 'u', 'out'], [2.0, 'u'], [2.35, 'l', 'in'], [4.0, 'l'], [4.4, 'l']],
+      fade: { in: [0, 0.2], out: [4.1, 4.4] },
+      phases: [[0, 0.95, 'Step off — don\'t jump off'], [0.95, 1.45, 'Land on both feet'], [1.45, 2.0, 'Jump immediately — short contact'], [2.0, 4.1, 'Land soft']],
+      still: 1.45,
+    },
+    'depth-block': {
+      alt: 'Side view: the athlete steps off a low box near the net, lands, and immediately block jumps with both hands pressing over the top of the net.',
+      view: '0 -28 240 168', height: 190, dur: 4.4,
+      props: `<rect class="prop" x="6" y="98.5" width="49" height="34" rx="2"/><line class="net-side" x1="96" y1="-14" x2="96" y2="52"/><text class="prop-label" x="100" y="-16">net</text>`,
+      poses: plyoPoses([['b', 'onbox'], ['st', 'offbox'], ['dr', 'drop'], ['c', 'dip', 10], ['u', 'sblock', 14, -34], ['l', 'land', 10]]),
+      keys: [[0, 'b'], [0.6, 'b'], [0.95, 'st'], [1.25, 'dr', 'in'], [1.45, 'c', 'in'], [1.65, 'u', 'out'], [2.0, 'u'], [2.35, 'l', 'in'], [4.0, 'l'], [4.4, 'l']],
+      fade: { in: [0, 0.2], out: [4.1, 4.4] },
+      phases: [[0, 0.95, 'Step off the low box'], [0.95, 1.45, 'Land'], [1.45, 2.0, 'Block jump — hands over the net'], [2.0, 4.1, 'Land on two feet, away from the net']],
+      still: 1.9,
+    },
+    'mb-chest': {
+      alt: 'Side view: holding a medicine ball at the chest, the athlete pushes it explosively to a wall, extends the arms fully, and catches the rebound back at the chest.',
+      dur: 2.6,
+      props: `<rect class="prop" x="150" y="-10" width="6" height="142.5"/>`,
+      poses: plyoPoses([['c', 'chest'], ['p', 'push']]),
+      balls: { ball: 5 },
+      keys: [[0, 'c'], [0.6, 'c'], [0.85, 'p', 'out'], [1.4, 'p'], [1.9, 'c'], [2.6, 'c']],
+      ballKeys: [[0, 70, 55], [0.6, 70, 55], [0.85, 98, 49], [1.15, 144, 49], [1.5, 98, 49], [1.9, 70, 55], [2.6, 70, 55]],
+      phases: [[0, 0.6, 'Ball at the chest, athletic stance'], [0.6, 1.15, 'Explode — full arm extension'], [1.15, 1.9, 'Catch and bring it back'], [1.9, 2.6, 'Reset']],
+      still: 0.9,
+    },
+    'mb-slam': {
+      alt: 'Side view: the athlete reaches tall on the toes with a medicine ball overhead, then slams it into the floor in front as hard as possible, hinging at the hips, and picks it back up.',
+      view: '0 -12 240 152', dur: 3.0,
+      poses: plyoPoses([['t', 'reach', 0, -4], ['s', 'slam'], ['st', 'stand']]),
+      balls: { ball: 5.5 },
+      keys: [[0, 't'], [0.5, 't'], [0.8, 's', 'in'], [1.6, 's'], [2.4, 'st'], [3.0, 't']],
+      ballKeys: [[0, 64, 0], [0.5, 64, 0], [0.8, 92, 98], [0.95, 98, 125], [1.25, 104, 125, 18], [1.6, 92, 102], [2.4, 64, 78], [3.0, 64, 0]],
+      phases: [[0, 0.5, 'Tall on the toes, ball overhead'], [0.5, 0.95, 'Slam it into the floor'], [0.95, 1.6, 'Hips back, catch the bounce'], [1.6, 3.0, 'Back up tall']],
+      still: 0.85,
+    },
+    'mb-overhead': {
+      alt: 'Side view: in a staggered stance, the athlete brings a medicine ball behind the head, throws it soccer-style into a wall, and catches the rebound overhead.',
+      dur: 2.8,
+      props: `<rect class="prop" x="150" y="-10" width="6" height="142.5"/>`,
+      poses: plyoPoses([['l', 'oload'], ['r', 'orel']]),
+      balls: { ball: 5 },
+      keys: [[0, 'l'], [0.6, 'l'], [0.9, 'r', 'out'], [1.5, 'r'], [2.1, 'l'], [2.8, 'l']],
+      ballKeys: [[0, 50, 18], [0.6, 50, 18], [0.9, 88, 18], [1.2, 144, 34], [1.5, 88, 18], [2.1, 50, 18], [2.8, 50, 18]],
+      phases: [[0, 0.6, 'Ball behind the head, core tight'], [0.6, 1.2, 'Throw — like a soccer throw-in'], [1.2, 2.1, 'Catch overhead and reload'], [2.1, 2.8, 'Reset']],
+      still: 0.95,
+    },
+    'mb-spike': {
+      alt: 'Side view: holding a light ball in the hitting hand cocked behind the head, the athlete swings like a spike and throws the ball hard down into the floor, finishing with a full follow-through.',
+      dur: 2.8,
+      poses: plyoPoses([['l', 'sload'], ['w', 'sswing'], ['f', 'sfollow']]),
+      balls: { ball: 4 },
+      keys: [[0, 'l'], [0.6, 'l'], [0.8, 'w', 'out'], [1.0, 'f'], [2.2, 'f'], [2.8, 'l']],
+      ballKeys: [[0, 56, 21], [0.6, 56, 21], [0.8, 93, 38], [1.05, 132, 126], [1.4, 160, 126, 22], [2.2, 176, 126], [2.6, 176, 126], [2.8, 56, 21]],
+      phases: [[0, 0.6, 'Elbow high, ball cocked behind the head'], [0.6, 0.8, 'Fast arm swing'], [0.8, 1.4, 'Throw it hard into the floor'], [1.4, 2.8, 'Full follow-through']],
+      still: 0.75,
+    },
+    'mb-rotate': {
+      alt: 'Front view, side-on to a wall: the athlete loads the ball beside the back hip, then rotates hips first and throws the ball into the wall, catching the rebound.',
+      dur: 2.8,
+      props: `<rect class="prop" x="150" y="-10" width="6" height="142.5"/>`,
+      poses: plyoPoses([['l', 'fhold'], ['t', 'fthrow']]),
+      balls: { ball: 5 },
+      keys: [[0, 'l'], [0.6, 'l'], [0.85, 't', 'out'], [1.5, 't'], [2.1, 'l'], [2.8, 'l']],
+      ballKeys: [[0, 40, 90], [0.6, 40, 90], [0.85, 96, 58], [1.15, 144, 58], [1.5, 96, 58], [2.1, 40, 90], [2.8, 40, 90]],
+      phases: [[0, 0.6, 'Load the back hip'], [0.6, 1.15, 'Hips → torso → arms: throw into the wall'], [1.15, 2.1, 'Catch and reload'], [2.1, 2.8, 'Reset; switch sides each set']],
+      still: 0.85,
+    },
+    'mb-backward': {
+      alt: 'Side view: the athlete squats with a medicine ball between the legs, then explodes up onto the toes and throws the ball backward over the head.',
+      view: '0 -40 240 180', height: 200, dur: 3.2,
+      poses: plyoPoses([['s', 'stand'], ['l', 'bload'], ['t', 'bthrow']]),
+      balls: { ball: 5 },
+      keys: [[0, 's'], [0.5, 'l'], [0.9, 'l'], [1.15, 't', 'out'], [1.6, 't'], [2.4, 's'], [3.2, 's']],
+      ballKeys: [[0, 62, 86], [0.5, 63, 104], [0.9, 63, 104], [1.15, 43, 4], [2.0, -50, 126, 70], [2.6, -50, 126], [2.601, 62, 86], [3.2, 62, 86]],
+      phases: [[0, 0.9, 'Squat — ball between the legs'], [0.9, 1.15, 'Explode up through the toes'], [1.15, 2.0, 'Throw it back over the head'], [2.0, 3.2, 'Reset']],
+      still: 1.1,
+    },
+    'plyo-pushup': {
+      alt: 'Side view: from a plank, the athlete lowers into a push-up, pushes hard enough for the hands to leave the floor, and lands softly with bent elbows.',
+      dur: 2.4,
+      poses: plyoPoses([['p', 'plank', -20], ['d', 'pdown', -20], ['a', 'pair', -20]]),
+      keys: [[0, 'p'], [0.5, 'd'], [0.75, 'a', 'out'], [1.0, 'p', 'in'], [1.3, 'd'], [2.4, 'p']],
+      phases: [[0, 0.5, 'Lower under control'], [0.5, 0.75, 'Push — hands leave the floor'], [0.75, 1.3, 'Land soft with bent elbows'], [1.3, 2.4, 'Reset the plank']],
+      still: 0.75,
+    },
+
+    // ── Drills ──
+    'sr-ladder': serveStratViz({
+      alt: 'Top-down court: three passers in serve receive take serves from different spots. Each pass is rated: a perfect pass to the setter is a 3, a pass the setter has to move for is a 2, a pass that only allows a high set is a 1.',
+      passers: [['O', 196, 36], ['L', 212, 70], ['O', 196, 104]],
+      serves: [{ sy: 30, to: [200, 70], by: 1, pass: [132, 56], label: 'Pass to target — rated 3' },
+               { sy: 110, to: [196, 40], by: 0, pass: [150, 74], label: 'Setter moves a step — rated 2' },
+               { sy: 70, to: [204, 100], by: 2, pass: [176, 120], label: 'Only a high set possible — rated 1' }],
+      note: 'Average the ratings over 10 serves, then rotate passers',
+    }),
+    'serve-zones': {
+      type: 'court',
+      alt: 'Top-down court: hoops in all six zones of the receiving side. The server serves at zone 1 and makes it, moves on to zone 6 and misses, serves zone 6 again and makes it, then moves on to zone 5.',
+      dur: 6.6, cuts: [], ballCuts: [1.6, 3.2, 4.8],
+      props: [[36, 106, '1'], [30, 70, '6'], [36, 34, '5'], [100, 34, '4'], [100, 70, '3'], [100, 106, '2']]
+        .map(([x, y, z]) => `<circle class="spot" cx="${x}" cy="${y}" r="9"/><text class="legend" x="${x}" y="${y + 2.5}" text-anchor="middle">${z}</text>`).join('') +
+        `<text class="legend" x="-4" y="141">hoops = target zones · make one to move to the next</text>`,
+      actors: { S: [[0, 236, 100, 'S'], [6.6, 236, 100]], S2: [[0, 244, 118, 'S'], [6.6, 244, 118]] },
+      actorColors: { S: 'var(--amber)', S2: 'var(--muted)' },
+      ball: [[0, 232, 96, 0.2], [0.3, 232, 96, 0.7], [1.3, 36, 106, 0.05, 1.0], [1.599, 36, 106, 0.05],
+             [1.6, 232, 96, 0.2], [1.9, 232, 96, 0.7], [2.9, 4, 64, 0.05, 1.0], [3.199, 4, 64, 0.05],
+             [3.2, 232, 96, 0.2], [3.5, 232, 96, 0.7], [4.5, 30, 70, 0.05, 1.0], [4.799, 30, 70, 0.05],
+             [4.8, 232, 96, 0.2], [5.1, 232, 96, 0.7], [6.1, 36, 34, 0.05, 1.0], [6.6, 36, 34, 0.05]],
+      phases: [[0, 1.6, 'Zone 1 — made it, move on'], [1.6, 3.2, 'Zone 6 — missed, try again'], [3.2, 4.8, 'Zone 6 — made it'], [4.8, 6.6, 'Zone 5 … first through all six wins']],
+      still: 1.4,
+    },
+    'pressure-serve': {
+      type: 'court',
+      alt: 'Top-down court: the team lines up on the end line and serves one at a time at a called zone. Each make adds to the team count; a miss resets the count to zero.',
+      dur: 6.4, cuts: [], ballCuts: [1.6, 3.2, 4.8],
+      props: `<ellipse class="area" cx="40" cy="104" rx="22" ry="16"/><text class="legend" x="40" y="88" text-anchor="middle">called zone</text>` +
+        ['3 in a row', '4 in a row', '5 in a row', 'Miss → back to 0', '1 in a row'].map(t => `<g class="reveal" opacity="0"><text class="count-label" x="120" y="5" text-anchor="middle">${t}</text></g>`).join('') +
+        `<text class="legend" x="-4" y="141">team on the end line · need 12 straight makes</text>`,
+      reveals: [[-1, 1.3], [1.3, 2.9], [2.9, 4.6], [4.6, 6.1], [6.1, 7.4]],
+      actors: Object.fromEntries([30, 52, 74, 96].map((y, i) => [`P${i}`, [[0, 236, y, String(i + 1)], [6.4, 236, y]]])),
+      actorColors: { P0: 'var(--amber)', P1: 'var(--amber)', P2: 'var(--amber)', P3: 'var(--amber)' },
+      ball: [[0, 232, 30, 0.2], [0.3, 232, 30, 0.7], [1.3, 40, 104, 0.05, 1.0], [1.599, 40, 104, 0.05],
+             [1.6, 232, 52, 0.2], [1.9, 232, 52, 0.7], [2.9, 44, 100, 0.05, 1.0], [3.199, 44, 100, 0.05],
+             [3.2, 232, 74, 0.2], [3.5, 232, 74, 0.7], [4.3, 120, 90, 0.5, 0.6], [4.6, 116, 90, 0], [4.799, 116, 90, 0],
+             [4.8, 232, 96, 0.2], [5.1, 232, 96, 0.7], [6.1, 36, 108, 0.05, 1.0], [6.4, 36, 108, 0.05]],
+      phases: [[0, 1.6, 'Server 1 — make'], [1.6, 3.2, 'Server 2 — make'], [3.2, 4.8, 'Server 3 — into the net: count resets'], [4.8, 6.4, 'Start again from 1']],
+      still: 2.9,
+    },
+    'setter-move': {
+      type: 'court',
+      alt: 'Top-down court: the setter starts in right back. As the setter releases, the coach tosses to different spots near the target; the setter gets there, squares to the left pin, and sets the call — front to the left pin or back to the right pin — then returns.',
+      dur: 7.8, cuts: [], ballCuts: [2.6, 5.2],
+      props: `<circle class="spot" cx="108" cy="84" r="9"/><text class="legend" x="-4" y="141">S setter · C coach (tosses) · L / R catchers at the pins</text>`,
+      actors: {
+        S: [[0, 70, 112, 'S'], [0.1, 70, 112], [0.9, 98, 74], [1.8, 98, 74], [2.6, 70, 112], [2.7, 70, 112], [3.5, 92, 60], [4.4, 92, 60], [5.2, 70, 112],
+            [5.3, 70, 112], [6.1, 106, 92], [7.0, 106, 92], [7.8, 70, 112]],
+        C: [[0, 30, 70, 'C'], [7.8, 30, 70]],
+        L: [[0, 114, 22, 'L'], [7.8, 114, 22]],
+        R: [[0, 114, 118, 'R'], [7.8, 114, 118]],
+      },
+      actorColors: { S: 'var(--good)', C: 'var(--muted)', L: 'var(--amber)', R: 'var(--amber)' },
+      ball: [[0, 34, 70, 0.3], [0.9, 96, 72, 0.6, 1.1], [1.7, 114, 26, 0.5, 1.4], [2.599, 114, 26, 0.5],
+             [2.6, 34, 70, 0.3], [3.5, 90, 58, 0.6, 1.1], [4.3, 114, 114, 0.5, 1.3], [5.199, 114, 114, 0.5],
+             [5.2, 34, 70, 0.3], [6.1, 104, 90, 0.6, 1.1], [6.9, 114, 26, 0.5, 1.4], [7.8, 114, 26, 0.5]],
+      phases: [[0, 0.9, 'Release from right back — get there'], [0.9, 1.7, 'Square to the left pin — set a 4'], [1.7, 2.6, 'Back to base'],
+               [2.6, 3.5, 'Toss off the net'], [3.5, 4.3, 'Back set to the right pin'], [4.3, 5.2, 'Back to base'], [5.2, 6.1, 'Toss tight to the net'], [6.1, 7.8, 'Front set — rotate after 8 balls']],
+      still: 1.0,
+    },
+    'oos-set': {
+      type: 'court',
+      alt: 'Top-down court: the coach sends a bad pass deep into the court. The libero, not the setter, calls help, squares to the left pin, and sets a high ball; the outside hitter runs a full approach and attacks.',
+      dur: 4.6, cuts: [],
+      props: `<text class="legend" x="-4" y="141">L libero sets · O outside · C coach · S setter (out of play)</text>`,
+      actors: {
+        L: [[0, 40, 70, 'L'], [0.2, 40, 70], [1.0, 28, 98], [2.6, 28, 98], [3.6, 40, 70], [4.6, 40, 70]],
+        O: [[0, 66, 8, 'O'], [1.6, 66, 8], [2.2, 86, 18], [2.5, 112, 28], [3.6, 112, 28], [4.4, 66, 8], [4.6, 66, 8]],
+        S: [[0, 108, 84, 'S'], [4.6, 108, 84]],
+        C: [[0, 70, 134, 'C'], [4.6, 70, 134]],
+      },
+      actorColors: { L: 'var(--sky)', O: 'var(--amber)', S: 'var(--good)', C: 'var(--muted)' },
+      ball: [[0, 72, 130, 0.3], [1.0, 26, 102, 0.3, 1.2], [2.5, 114, 26, 1.0, 1.8], [2.8, 200, 44, 0.05], [4.6, 200, 44, 0.05]],
+      phases: [[0, 1.0, 'Bad pass deep — "help!"'], [1.0, 2.5, 'Square to the target, set high to the left pin'], [2.5, 2.8, 'Full approach, attack'], [2.8, 4.6, 'High and off the net beats perfect and tight']],
+      still: 1.5,
+    },
+    'hit-lines': {
+      type: 'court',
+      alt: 'Top-down court: hitters line up outside the left sideline at zone 4. The coach at the target tosses a high ball; the first hitter runs a full approach and attacks, then goes to the back of the line while the next hitter steps up.',
+      dur: 6.6, cuts: [], ballCuts: [2.2, 4.4],
+      props: `<text class="legend" x="-4" y="141">H hitters in line · C coach at target · shagger on the far side</text>`,
+      actors: (() => {
+        const Q = [[66, 6], [54, 6], [42, 6]], A = {};
+        for (let h = 0; h < 3; h++) {
+          const keys = [];
+          for (let k = 0; k < 3; k++) {
+            const T = k * 2.2, slot = (h - k + 3) % 3;
+            if (slot === 0) keys.push([T, ...Q[0]], [T + 0.7, ...Q[0]], [T + 1.0, 86, 18], [T + 1.3, 112, 28], [T + 1.7, 112, 28], [T + 2.2 - 0.001, ...Q[2]]);
+            else keys.push([T, ...Q[slot]], [T + 1.7, ...Q[slot]], [T + 2.2 - 0.001, ...Q[slot - 1]]);
+          }
+          keys[0].push('H'); keys.push([6.6, ...keys[keys.length - 1].slice(1, 3)]);
+          A['H' + h] = keys;
+        }
+        A.C = [[0, 108, 84, 'C'], [6.6, 108, 84]];
+        A.X = [[0, 204, 70, ''], [6.6, 204, 70]];
+        return A;
+      })(),
+      actorColors: { H0: 'var(--amber)', H1: 'var(--amber)', H2: 'var(--amber)', C: 'var(--muted)', X: 'var(--muted)' },
+      ball: [[0, 104, 80, 0.4], [1.3, 114, 26, 1.0, 1.6], [1.6, 196, 46, 0.05], [2.199, 196, 46, 0.05],
+             [2.2, 104, 80, 0.4], [3.5, 114, 26, 1.0, 1.6], [3.8, 200, 92, 0.05], [4.399, 200, 92, 0.05],
+             [4.4, 104, 80, 0.4], [5.7, 114, 26, 1.0, 1.6], [6.0, 190, 60, 0.05], [6.6, 190, 60, 0.05]],
+      phases: [[0, 1.3, 'High toss — full approach'], [1.3, 2.2, 'Attack, then to the back of the line'], [2.2, 4.4, 'Next hitter'], [4.4, 6.6, '5 reps each, then live sets']],
+      still: 1.3,
+    },
+    'line-cross': {
+      type: 'court',
+      alt: 'Top-down court: the outside hitter attacks from the left pin. The coach on the far side shows a cross-court block, so the hitter goes line to a target in the deep line corner; next rep the coach shows a line block and the hitter goes deep cross.',
+      dur: 6.0, cuts: [3.0], ballCuts: [],
+      props: `<rect class="spot" x="204" y="18" width="18" height="12"/><rect class="spot" x="204" y="106" width="18" height="12"/>` +
+        `<text class="legend" x="212" y="38" text-anchor="middle">line</text><text class="legend" x="212" y="102" text-anchor="middle">cross</text>` +
+        `<text class="legend" x="-4" y="141">O hitter · S setter · K coach showing the block</text>`,
+      actors: {
+        O: [[0, 66, 8, 'O'], [0.9, 66, 8], [1.5, 112, 28], [2.6, 112, 28], [3.0, 66, 8], [3.9, 66, 8], [4.5, 112, 28], [6.0, 112, 28]],
+        S: [[0, 108, 84, 'S'], [6.0, 108, 84]],
+        K: [[0, 128, 26, 'K'], [0.9, 128, 26], [1.3, 128, 36], [2.6, 128, 36], [3.0, 128, 26], [3.9, 128, 26], [4.3, 128, 20], [6.0, 128, 20]],
+      },
+      actorColors: { O: 'var(--amber)', S: 'var(--good)', K: 'var(--bad)' },
+      ball: [[0, 104, 80, 0.5], [1.5, 114, 26, 1.0, 1.4], [1.8, 212, 24, 0.05], [2.999, 212, 24, 0.05],
+             [3.0, 104, 80, 0.5], [4.5, 114, 26, 1.0, 1.4], [4.8, 212, 112, 0.05], [6.0, 212, 112, 0.05]],
+      phases: [[0, 1.5, 'Coach takes away cross'], [1.5, 3.0, 'Hit line — deep corner'], [3.0, 4.5, 'Coach takes away line'], [4.5, 6.0, 'Hit cross — see the block, hit the open lane']],
+      still: 1.6,
+    },
+    'shots': blockViz({
+      alt: 'Top-down court: the outside hitter attacks a two-person block from the left pin. Three smart options are drawn and played: wipe the ball off the outside hand out of bounds, roll it to the deep seam, and tip it just behind the block.',
+      id: 'dshots', blockers: [22, 34],
+      shots: [{ to: [176, 4], name: 'wipe off the outside hand', lab: 'wipe', kind: 'tool' },
+              { to: [196, 76], name: 'roll to the deep seam', lab: 'roll', kind: 'roll' },
+              { to: [146, 44], name: 'tip just behind the block', lab: 'tip', kind: 'tip' }],
+      note: 'Smart choices score — not just power',
+    }),
+    'block-foot': {
+      type: 'court',
+      alt: 'Top-down view of three blockers at the net. The coach points: the middle makes a short shuffle-step move and jumps, returns, then makes a long crossover move to the left pin and closes next to the outside blocker, returns, and goes long to the right.',
+      dur: 7.2, cuts: [],
+      props: `<text class="legend" x="-4" y="141">4 / 3 / 2 our blockers · C coach points the direction</text>`,
+      actors: {
+        M: [[0, 113, 70, '3'], [0.4, 113, 70], [1.0, 113, 86], [1.8, 113, 86], [2.4, 113, 70], [2.8, 113, 70], [3.5, 113, 40], [4.3, 113, 40], [5.0, 113, 70],
+            [5.4, 113, 70], [6.1, 113, 100], [7.2, 113, 100]],
+        L: [[0, 113, 30, '4'], [7.2, 113, 30]],
+        R: [[0, 113, 110, '2'], [7.2, 113, 110]],
+        C: [[0, 150, 70, 'C'], [7.2, 150, 70]],
+      },
+      actorColors: { M: 'var(--amber)', L: 'var(--amber)', R: 'var(--amber)', C: 'var(--muted)' },
+      phases: [[0, 1.0, 'Short move: shuffle-step'], [1.0, 1.8, 'Jump — hands over'], [1.8, 2.8, 'Back to base'], [2.8, 3.5, 'Long move: step–cross–plant'],
+               [3.5, 4.3, 'Close next to the outside blocker, jump'], [4.3, 5.4, 'Back to base'], [5.4, 7.2, 'Long move the other way']],
+      still: 3.6,
+    },
+    'dig-box': {
+      type: 'court',
+      alt: 'Top-down court: the coach stands on a box at the far left pin and hits line, cross, and a tip at diggers in base positions. Each defender digs the ball high to the middle of the court, toward the target.',
+      dur: 6.0, cuts: [], ballCuts: [2.0, 4.0],
+      props: `<circle class="spot" cx="108" cy="84" r="9"/><text class="legend" x="-4" y="141">K coach on box · blue diggers · T target</text>`,
+      actors: {
+        K: [[0, 132, 110, 'K'], [6.0, 132, 110]],
+        d1: [[0, 48, 116, '1'], [0.4, 48, 116], [0.7, 50, 112], [1.6, 50, 112], [2.0, 48, 116], [4.3, 48, 116], [4.8, 80, 104], [5.6, 80, 104], [6.0, 48, 116]],
+        d5: [[0, 40, 36, '5'], [2.4, 40, 36], [2.7, 42, 42], [3.6, 42, 42], [4.0, 40, 36], [6.0, 40, 36]],
+        d6: [[0, 22, 82, '6'], [6.0, 22, 82]],
+        d4: [[0, 88, 30, '4'], [6.0, 88, 30]],
+        T: [[0, 108, 84, 'T'], [6.0, 108, 84]],
+      },
+      actorColors: { K: 'var(--bad)', d1: 'var(--sky)', d5: 'var(--sky)', d6: 'var(--sky)', d4: 'var(--sky)', T: 'var(--good)' },
+      ball: [[0, 134, 108, 1.0], [0.4, 134, 108, 1.0], [0.75, 52, 112, 0.3], [1.5, 104, 82, 0.6, 1.4], [1.999, 104, 82, 0.6],
+             [2.0, 134, 108, 1.0], [2.4, 134, 108, 1.0], [2.75, 44, 42, 0.3], [3.5, 104, 82, 0.6, 1.4], [3.999, 104, 82, 0.6],
+             [4.0, 134, 108, 1.0], [4.4, 134, 108, 1.0], [4.9, 84, 102, 0.3, 0.5], [5.6, 104, 82, 0.6, 1.2], [6.0, 104, 82, 0.6]],
+      phases: [[0, 0.75, 'Coach hits line'], [0.75, 2.0, 'Dig high to the middle'], [2.0, 2.75, 'Cross'], [2.75, 4.0, 'Dig high to the middle'],
+               [4.0, 4.9, 'Tip'], [4.9, 6.0, 'Run it down — rotate every 6 balls']],
+      still: 0.9,
+    },
+    'pursuit': {
+      type: 'court',
+      alt: 'Top-down court: the coach sends balls off the court, off the net, and into a seam. The player chases each one down while a teammate calls the target, and plays it back into the court.',
+      dur: 6.6, cuts: [], ballCuts: [2.2, 4.4],
+      props: `<text class="legend" x="-4" y="141">P pursuing player · T teammate calls the target · C coach</text>`,
+      actors: {
+        P: [[0, 40, 70, 'P'], [0.2, 40, 70], [1.0, 0, 124], [1.6, 0, 124], [2.2, 40, 70], [2.4, 40, 70], [3.1, 104, 34], [3.8, 104, 34], [4.4, 40, 70],
+            [4.6, 40, 70], [5.2, 64, 92], [6.6, 64, 92]],
+        T: [[0, 96, 78, 'T'], [6.6, 96, 78]],
+        C: [[0, 70, 134, 'C'], [6.6, 70, 134]],
+      },
+      actorColors: { P: 'var(--sky)', T: 'var(--good)', C: 'var(--muted)' },
+      ball: [[0, 72, 130, 0.3], [1.0, 2, 126, 0.15, 1.0], [1.8, 92, 74, 0.6, 1.4], [2.199, 92, 74, 0.6],
+             [2.2, 72, 130, 0.3], [2.6, 116, 34, 0.7, 0.6], [3.1, 106, 36, 0.15], [3.9, 92, 74, 0.6, 1.0], [4.399, 92, 74, 0.6],
+             [4.4, 72, 130, 0.3], [5.2, 64, 96, 0.15, 0.9], [5.9, 92, 74, 0.6, 1.0], [6.6, 92, 74, 0.6]],
+      phases: [[0, 1.0, 'Off the court — chase it'], [1.0, 2.2, 'Run-through or one-arm back in'], [2.2, 3.1, 'Off the net — read the rebound'],
+               [3.1, 4.4, 'Play it up'], [4.4, 5.2, 'Into the seam'], [5.2, 6.6, 'Continuous for 30–45 s']],
+      still: 1.0,
+    },
+    'pepper': {
+      type: 'court',
+      alt: 'Top-down view of two players about 6 metres apart. Player A passes to B, B sets back, A hits down at B; B digs to A, A sets, B hits down at A, and the cycle repeats.',
+      dur: 3.8, cuts: [],
+      props: `<line class="approach" x1="36" y1="86" x2="96" y2="86"/><text class="legend" x="66" y="94" text-anchor="middle">~6 m</text><text class="legend" x="-4" y="141">A and B · pass → set → hit, then switch</text>`,
+      actors: { A: [[0, 30, 70, 'A'], [3.8, 30, 70]], B: [[0, 102, 70, 'B'], [3.8, 102, 70]] },
+      actorColors: { A: 'var(--sky)', B: 'var(--amber)' },
+      ball: [[0, 34, 70, 0.3], [0.8, 98, 70, 0.4, 1.0], [1.6, 34, 70, 0.8, 1.2], [1.9, 98, 72, 0.3], [2.7, 34, 70, 0.5, 1.0], [3.5, 98, 70, 0.8, 1.2], [3.8, 34, 70, 0.3]],
+      phases: [[0, 0.8, 'A passes'], [0.8, 1.6, 'B sets'], [1.6, 1.9, 'A hits down at B'], [1.9, 2.7, 'B digs'], [2.7, 3.5, 'A sets'], [3.5, 3.8, 'B hits — count contacts']],
+      still: 1.7,
+    },
+    'coverage': {
+      type: 'court',
+      alt: 'Top-down court: the setter sets the outside hitter; as the set goes up the teammates form a low cup around the hitter. The coach on a box blocks the ball straight back down, a coverage player digs it up to the setter, and the setter sets the hitter again.',
+      dur: 5.2, cuts: [],
+      props: `<path class="path" d="M86 22 Q84 46 102 50"/><text class="legend" x="-4" y="141">O hitter · blue = coverage cup · K coach blocks it back</text>`,
+      actors: {
+        O: [[0, 66, 8, 'O'], [0.6, 66, 8], [1.2, 112, 28], [5.2, 112, 28]],
+        S: [[0, 108, 84, 'S'], [5.2, 108, 84]],
+        c3: [[0, 110, 70, '3'], [0.6, 110, 70], [1.3, 100, 46], [4.4, 100, 46], [5.2, 110, 70]],
+        c5: [[0, 44, 34, '5'], [0.6, 44, 34], [1.3, 84, 22], [4.4, 84, 22], [5.2, 44, 34]],
+        c6: [[0, 30, 70, '6'], [0.6, 30, 70], [1.3, 74, 46], [4.4, 74, 46], [5.2, 30, 70]],
+        c1: [[0, 44, 106, '1'], [0.6, 44, 106], [1.3, 56, 70], [4.4, 56, 70], [5.2, 44, 106]],
+        K: [[0, 128, 26, 'K'], [5.2, 128, 26]],
+      },
+      actorColors: { O: 'var(--amber)', S: 'var(--good)', c3: 'var(--sky)', c5: 'var(--sky)', c6: 'var(--sky)', c1: 'var(--sky)', K: 'var(--bad)' },
+      ball: [[0, 104, 80, 0.5], [1.2, 114, 26, 1.0, 1.4], [1.35, 126, 27, 1.0], [1.6, 100, 42, 0.2], [2.4, 104, 80, 0.6, 1.2], [3.6, 114, 26, 1.0, 1.4], [3.9, 196, 50, 0.05], [5.2, 196, 50, 0.05]],
+      phases: [[0, 1.2, 'Set goes up — form the cup, low'], [1.2, 1.6, 'Blocked straight back down'], [1.6, 2.4, 'Cover: dig it up to the setter'], [2.4, 3.9, 'Re-set and attack again'], [3.9, 5.2, 'Back to base']],
+      still: 1.5,
+    },
+    'free-trans': {
+      type: 'court',
+      alt: 'Top-down court: the team starts in base defense. The coach slaps the ball and sends a free ball. The front row opens off the net to their approach spots, the back row passes, the setter releases to the target, and the setter runs the called play to the outside.',
+      dur: 4.8, cuts: [],
+      props: `<text class="legend" x="-4" y="141">S setter (from zone 1) · amber = front row · blue = back row · C coach</text>`,
+      actors: {
+        f4: [[0, 110, 34, '4'], [0.5, 110, 34], [1.2, 82, 18], [2.2, 82, 18], [2.7, 112, 28], [4.8, 112, 28]],
+        f3: [[0, 110, 70, '3'], [0.5, 110, 70], [1.2, 94, 64], [2.0, 94, 64], [2.4, 112, 72], [4.8, 112, 72]],
+        f2: [[0, 110, 106, '2'], [0.5, 110, 106], [1.2, 86, 120], [4.8, 86, 120]],
+        b5: [[0, 44, 34, '5'], [4.8, 44, 34]],
+        b6: [[0, 30, 70, '6'], [4.8, 30, 70]],
+        S: [[0, 44, 106, 'S'], [0.5, 44, 106], [1.6, 108, 84], [4.8, 108, 84]],
+        C: [[0, 180, 70, 'C'], [4.8, 180, 70]],
+      },
+      actorColors: { f4: 'var(--amber)', f3: 'var(--amber)', f2: 'var(--amber)', b5: 'var(--sky)', b6: 'var(--sky)', S: 'var(--good)', C: 'var(--muted)' },
+      ball: [[0, 176, 70, 0.4], [0.5, 176, 70, 0.4], [1.5, 34, 70, 0.2, 1.0], [2.1, 104, 80, 0.5, 1.0], [2.7, 114, 26, 1.0, 0.8], [3.0, 200, 46, 0.05], [4.8, 200, 46, 0.05]],
+      phases: [[0, 0.5, '"Free!" — coach slaps the ball'], [0.5, 1.5, 'Front row opens off the net; setter releases'], [1.5, 2.1, 'Back row passes to target'], [2.1, 3.0, 'Run the called play'], [3.0, 4.8, 'Reset to base']],
+      still: 1.4,
+    },
+    'kotc': {
+      type: 'court', cuts: [],
+      alt: 'Top-down court: the kings hold the right side; challengers receive a free ball on the left and win the rally. The challengers walk over to become the new kings, the old kings go to the back of the waiting line, and the next challengers step onto the court.',
+      dur: 6.4,
+      props: `<text class="legend" x="-4" y="141">K kings · C challengers · W waiting line · coach sends the free ball</text>`,
+      actors: {
+        k1: [[0, 160, 40, 'K'], [2.8, 160, 40], [4.6, 14, 134, 'W'], [6.4, 14, 134]],
+        k2: [[0, 204, 70, 'K'], [2.8, 204, 70], [4.6, 28, 134, 'W'], [6.4, 28, 134]],
+        k3: [[0, 160, 100, 'K'], [2.8, 160, 100], [4.6, 42, 134, 'W'], [6.4, 42, 134]],
+        c1: [[0, 70, 40, 'C'], [2.8, 70, 40], [4.6, 160, 40, 'K'], [6.4, 160, 40]],
+        c2: [[0, 40, 70, 'C'], [2.8, 40, 70], [4.6, 204, 70, 'K'], [6.4, 204, 70]],
+        c3: [[0, 70, 100, 'C'], [2.8, 70, 100], [4.6, 160, 100, 'K'], [6.4, 160, 100]],
+        w1: [[0, 14, 134, 'W'], [2.8, 14, 134], [4.6, 70, 40, 'C'], [6.4, 70, 40]],
+        w2: [[0, 28, 134, 'W'], [2.8, 28, 134], [4.6, 40, 70, 'C'], [6.4, 40, 70]],
+        w3: [[0, 42, 134, 'W'], [2.8, 42, 134], [4.6, 70, 100, 'C'], [6.4, 70, 100]],
+      },
+      colors: { K: 'var(--amber)', C: 'var(--sky)', W: 'var(--muted)' },
+      ball: [[0, 120, 136, 0.3], [0.8, 44, 70, 0.2, 0.9], [1.4, 74, 92, 0.5, 1.0], [2.0, 112, 40, 1.0, 0.8], [2.3, 200, 100, 0.05], [6.4, 200, 100, 0.05]],
+      phases: [[0, 0.8, 'Free ball to the challengers'], [0.8, 2.3, 'Pass, set, attack — challengers win the rally'], [2.3, 4.6, 'Challengers become kings; old kings to the back of the line'], [4.6, 6.4, 'Next challengers step on']],
+      still: 2.2,
+    },
+    'short-court': {
+      type: 'court', cuts: [],
+      alt: 'Top-down court shortened to the 3 metre lines, three players per side. The ball starts with a free ball; each side must pass, set, and send a controlled roll shot over, and the rally keeps going.',
+      dur: 6.2,
+      props: `<rect class="shadow" x="12" y="16" width="72" height="108"/><rect class="shadow" x="156" y="16" width="72" height="108"/>` +
+        ['1 side', '2 sides', '3 sides'].map(t => `<g class="reveal" opacity="0"><text class="count-label" x="120" y="5" text-anchor="middle">${t}</text></g>`).join('') +
+        `<text class="legend" x="-4" y="141">shaded = out · every side must pass, set, attack (controlled)</text>`,
+      reveals: [[2.0, 4.0], [4.0, 6.0], [6.0, 7]],
+      actors: {
+        a1: [[0, 92, 36, 'A'], [6.2, 92, 36]], a2: [[0, 104, 70, 'A'], [6.2, 104, 70]], a3: [[0, 92, 104, 'A'], [6.2, 92, 104]],
+        b1: [[0, 148, 36, 'B'], [6.2, 148, 36]], b2: [[0, 136, 70, 'B'], [6.2, 136, 70]], b3: [[0, 148, 104, 'B'], [6.2, 148, 104]],
+      },
+      colors: { A: 'var(--sky)', B: 'var(--orange)' },
+      ball: [[0, 120, 136, 0.3], [0.6, 92, 104, 0.2, 0.8], [1.2, 104, 70, 0.5, 0.8], [1.6, 92, 36, 0.8, 0.6], [2.0, 148, 104, 0.2, 0.8],
+             [2.6, 136, 70, 0.5, 0.8], [3.0, 148, 36, 0.8, 0.6], [3.4, 92, 104, 0.2, 0.8], [4.0, 104, 70, 0.5, 0.8], [4.4, 92, 36, 0.8, 0.6],
+             [4.8, 148, 104, 0.2, 0.8], [5.4, 136, 70, 0.5, 0.8], [5.8, 148, 36, 0.8, 0.6], [6.2, 120, 136, 0.3, 0.6]],
+      phases: [[0, 2.0, 'Free ball: pass, set, roll it over'], [2.0, 3.4, 'Their three contacts'], [3.4, 4.8, 'Ours again'], [4.8, 6.2, 'Count consecutive three-contact sides']],
+      still: 1.4,
+    },
+    'conditioning': {
+      type: 'court', cuts: [],
+      alt: 'Top-down court: a player shuffles in a low stance from sideline to sideline, then sprints from defensive base to the 3 metre line and back, then rests before the next round.',
+      dur: 6.4,
+      props: [[60, 18], [60, 122], [84, 70], [36, 70]].map(([x, y]) => `<path class="prop" d="M${x - 3} ${y + 3}L${x} ${y - 4}L${x + 3} ${y + 3}Z"/>`).join('') +
+        `<path class="path" d="M60 22V118"/><path class="path" d="M38 70H82"/><text class="legend" x="-4" y="141">cones: sidelines, base, 3 m line · 20 s shuffle · 10 s sprint · 20 s rest</text>`,
+      actors: { P: [[0, 60, 22, 'P'], [0.9, 60, 118], [1.8, 60, 22], [2.7, 60, 118], [3.1, 36, 70], [3.5, 82, 70], [3.9, 36, 70], [4.3, 82, 70], [4.7, 36, 70], [6.0, 36, 70], [6.4, 60, 22]] },
+      actorColors: { P: 'var(--sky)' },
+      phases: [[0, 2.7, 'Shuffle sideline to sideline — stay low'], [2.7, 4.7, 'Sprint: base → 3 m line → base'], [4.7, 6.4, 'Rest 20 s, then repeat (6–8 rounds)']],
+      still: 0.9,
+    },
+
+    // ── Drills: game pressure (scrimmage with a live score) ──
+    'start-22': scrimViz({
+      alt: 'Top-down court with two full teams and a score of 22–22. Team A sides out, then wins a serving rally with a dig and transition kill to go up 24–22, then Team B sides out to make it 24–23.',
+      start: 'A 22 – 22 B',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'A 23 – 22 B', label: 'B serves — A sides out' },
+                { serve: 'A', how: 'dig', score: 'A 24 – 22 B', label: 'A serves — dig and transition' },
+                { serve: 'A', how: 'sideout', score: 'A 24 – 23 B', label: 'A serves — B sides out' }],
+      note: 'Play to 25, win by 2 — then rotate; loser serves first',
+    }),
+    'comeback': scrimViz({
+      alt: 'Top-down court: Team A trails 21–24 with Team B serving. A sides out, then wins a serving rally and serves an ace to tie at 24.',
+      start: 'A 21 – 24 B',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'A 22 – 24 B', label: 'Side out first' },
+                { serve: 'A', how: 'dig', score: 'A 23 – 24 B', label: 'Now a serving run' },
+                { serve: 'A', how: 'ace', score: 'A 24 – 24 B', label: 'Keep the run going' }],
+      note: 'Complete the comeback = big point',
+    }),
+    'close-out': scrimViz({
+      alt: 'Top-down court: Team A leads 24–22 and serves. Team B sides out to make it 24–23, then Team A sides out to win the game 25–23.',
+      start: 'A 24 – 22 B',
+      rallies: [{ serve: 'A', how: 'sideout', score: 'A 24 – 23 B', label: 'A serves for the game — B sides out' },
+                { serve: 'B', how: 'sideout', score: 'A 25 – 23 B', label: 'Side out to close it' }],
+      note: 'Track how many games each team closes out',
+    }),
+    'sideout-or-sit': scrimViz({
+      alt: 'Top-down court: one group receives every serve. They side out once and stay on; on the next serve the serving team wins the rally, so the receiving group sits and the waiting group runs on.',
+      start: 'Group 1 · 0 sideouts',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'Group 1 · 1 sideout — stay on', label: 'Side out → score and stay' },
+                { serve: 'B', how: 'dig', score: 'Lost it — Group 2 runs on', label: 'Serving team wins the rally' }],
+      note: 'First group to 7 sideouts wins',
+    }),
+    'break-run': scrimViz({
+      alt: 'Top-down court: Team A serves and wins two straight rallies, building a run; then Team B wins a rally, which resets the count and swaps roles.',
+      start: 'A run: 0 of 3',
+      rallies: [{ serve: 'A', how: 'dig', score: 'A run: 1 of 3', label: 'Win on serve' },
+                { serve: 'A', how: 'ace', score: 'A run: 2 of 3', label: 'Again' },
+                { serve: 'A', how: 'sideout', score: 'Reset — swap roles', label: 'B wins one: count resets' }],
+      note: '3 straight on serve = a run · first to 3 runs',
+    }),
+    'set-point-serve': scrimViz({
+      alt: 'Top-down court: after a silent wait, one server gets one serve at set point. The first serve lands in, so the team scores; the next one goes into the net and the opponent scores.',
+      start: '24 – 23 · set point',
+      rallies: [{ serve: 'A', how: 'ace', score: 'Make → team 1 – 0', label: 'Silence… one serve to the called zone' },
+                { serve: 'A', how: 'serr', score: 'Miss → 1 – 1', label: 'Next server — same pressure' }],
+      note: 'Make = team scores · miss = opponent scores · to 5',
+    }),
+    'fifth-set': scrimViz({
+      alt: 'Top-down court: a deciding set to 15 at 7–7. Team A sides out to reach 8 and the teams switch sides, then Team A wins a serving rally to lead 9–7.',
+      start: 'A 7 – 7 B',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'A 8 – 7 B · switch sides', label: 'Side out to 8' },
+                { serve: 'A', how: 'dig', score: 'A 9 – 7 B', label: 'Win on serve' }],
+      note: 'To 15, win by 2 · bench calls rotation and serve errors',
+    }),
+    'error-double': scrimViz({
+      alt: 'Top-down court starting at 15–15. Team B sides out with a kill for one point; then Team A hits the ball out on an easy swing, an unforced error, and Team B gets two points.',
+      start: 'A 15 – 15 B',
+      rallies: [{ serve: 'A', how: 'sideout', score: 'A 15 – 16 B', label: 'Kill = 1 point' },
+                { serve: 'B', how: 'out', score: 'A 15 – 18 B', label: 'Unforced error → 2 points to the other side' }],
+      note: 'Coach alone judges "unforced"',
+    }),
+    'momentum-ball': scrimViz({
+      alt: 'Top-down court at 18–18. Team B sides out to lead 19–18; the coach immediately sends a free ball to Team A, who lost the rally, and they win it to tie 19–19.',
+      start: 'A 18 – 18 B',
+      rallies: [{ serve: 'A', how: 'sideout', score: 'A 18 – 19 B', label: 'Served rally' },
+                { free: 'A', how: 'sideout', score: 'A 19 – 19 B', label: 'Coach: free ball to the team that lost it' }],
+      note: 'Win the bonus ball to stop the swing',
+    }),
+    'adversity': scrimViz({
+      alt: 'Top-down court at 16–16. Team B sides out; then the coach calls a curveball — setter out — and Team A adjusts with a 20-second huddle and wins the next rally.',
+      start: 'A 16 – 16 B',
+      rallies: [{ serve: 'A', how: 'sideout', score: 'Curveball: "setter out!"', label: 'Play — then the coach calls a curveball' },
+                { serve: 'B', how: 'sideout', score: 'A 17 – 17 B', label: '20 s huddle, adjust, side out' }],
+      note: 'Play to 25 with the curveball in place',
+    }),
+    'crowd-noise': scrimViz({
+      alt: 'Top-down court at 18–18 with crowd noise for Team B. Team A has to communicate with eye contact, hand signals, and early loud calls, and sides out twice.',
+      start: 'A 18 – 18 B · noise for B',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'A 19 – 18 B', label: 'Loud, early calls — eye contact' },
+                { serve: 'A', how: 'sideout', score: 'A 19 – 19 B', label: 'Hand signals between rallies' }],
+      note: 'Switch which team the noise supports each game',
+    }),
+    'rotation-escape': scrimViz({
+      alt: 'Top-down court: Team A is in its weakest rotation and receives a tough server. A sides out, then wins the next rally on serve, escaping the rotation.',
+      start: 'Rotation 4 · escape 0 of 2',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'Escape 1 of 2', label: 'Weakest rotation — side out' },
+                { serve: 'A', how: 'dig', score: 'Escaped → rotate', label: 'Win the next rally' }],
+      note: 'Track rallies needed to escape each rotation',
+    }),
+    'wash': scrimViz({
+      alt: 'Top-down court: Team A serves and wins the rally for a little point; the coach immediately sends a free ball to Team B, who win that rally. The little points are split, so it is a wash and no big point is scored.',
+      start: 'Little points A 0 – 0 B',
+      rallies: [{ serve: 'A', how: 'dig', score: 'Little points A 1 – 0 B', label: 'Serve → rally' },
+                { free: 'B', how: 'sideout', score: 'Split 1 – 1 → wash, no score', label: 'Free ball to the other team → rally' }],
+      note: 'Win both little points = 1 big point · to 5 per rotation',
+    }),
+
+    // ── Strategies: serve receive (stacking), blocking, serving, attack ──
+    'st-stack': receiveViz({
+      alt: 'Top-down court: the weak passer stands at the net out of the serving lanes, hidden in an overlap-legal stack, while the libero and two outside hitters take every serve.',
+      r: 20,
+      passers: [['O', 44, 34], ['L', 30, 70], ['O', 44, 106]],
+      others: [['W', 102, 24], ['M', 110, 70]],
+      setterFrom: [112, 104],
+      serves: [{ to: [36, 64], by: 1, label: 'Serve to the middle — the libero takes it' }, { to: [48, 30], by: 0, label: 'Serve to zone 5 — outside hitter' }],
+      note: 'W (weak passer) hides at the net, out of every serving lane',
+    }),
+    'st-read-block': blockScheme({
+      alt: 'Top-down court: our three blockers wait at base and watch the setter. Their middle fakes a quick, but our middle does not jump; only when the setter releases the ball to the outside do the blockers move, and the middle closes next to the right-side blocker for a double block.',
+      start: [30, 70, 110],
+      reps: [{ set: 'oh', moves: { 3: [[0.95, 70], [1.6, 98]] }, result: 'stuff',
+               phases: [[0, 0.8, 'Their pass — eyes on the setter, don\'t guess'], [0.8, 0.95, 'Setter releases'], [0.95, 1.7, 'Read the set, then move — middle closes'], [1.7, 3.2, 'Double block on the outside']] }],
+    }),
+    'st-commit-block': blockScheme({
+      alt: 'Top-down court: rep one, our middle commits and jumps with their quick hitter, and the quick set is stuffed. Rep two, the setter sets the outside instead; our middle already jumped and arrives late, so the outside hits against a single block.',
+      start: [30, 70, 110],
+      reps: [{ set: 'quick', moves: {}, result: 'stuff',
+               phases: [[0, 0.8, 'Commit: our middle jumps with their quick hitter'], [0.8, 1.6, 'Quick set — stuffed'], [1.6, 3.2, 'Takes the quick away']] },
+             { set: 'oh', moves: { 3: [[1.3, 70], [2.0, 92]] }, result: 'kill',
+               phases: [[3.2, 4.0, 'Commit again — but the set goes outside'], [4.0, 4.9, 'Middle is late: single block'], [4.9, 6.4, 'The risk: outside vs one blocker']] }],
+    }),
+    'st-bunch-spread': blockScheme({
+      alt: 'Top-down court: rep one, the blockers start bunched in the middle; on a set to the outside, the pin blocker has a long move. Rep two, the blockers start spread at the pins; the outside blocker is already there and the middle closes.',
+      start: [56, 70, 84],
+      reps: [{ set: 'oh', moves: { 2: [[0.95, 84], [1.6, 110]], 3: [[0.95, 70], [1.6, 98]] }, result: 'stuff',
+               phases: [[0, 0.95, 'Bunch: start close together in the middle'], [0.95, 1.7, 'Long move out to the pin'], [1.7, 3.2, 'Strong vs middle attacks; pins are a long move']] },
+             { set: 'oh', start: [26, 70, 114], moves: { 3: [[0.95, 70], [1.7, 100]] }, result: 'stuff',
+               phases: [[3.2, 4.15, 'Spread: start at the pins'], [4.15, 4.9, 'Pin is already there; middle closes'], [4.9, 6.4, 'Strong vs pin attacks; the middle has the long move']] }],
+    }),
+    'st-swing-block': blockScheme({
+      alt: 'Top-down court: our middle blocker uses a swing-block approach — a curved arm-swing approach along the net, stepping off and back in — to cover the long distance to the pin and jump higher next to the outside blocker.',
+      start: [30, 70, 110],
+      props: `<path class="approach" d="M113 70 Q100 82 106 96 L113 100"/>`,
+      reps: [{ set: 'oh', moves: { 3: [[0.95, 70, 113], [1.25, 82, 102], [1.5, 94, 106], [1.75, 100, 113]] }, result: 'stuff',
+               phases: [[0, 0.95, 'Read the set'], [0.95, 1.75, 'Swing approach: open, run along the net, plant'], [1.75, 3.2, 'Arm swing up — more height and reach at the pin']] }],
+    }),
+    'st-serve-weak': serveStratViz({
+      alt: 'Top-down court: we serve from our end line at the opponent\'s weakest passer, W, twice in a row; the first pass goes off the net and the second forces a high ball.',
+      passers: [['O', 196, 36], ['W', 212, 70], ['L', 196, 104]], weak: 1,
+      serves: [{ sy: 30, to: [208, 72], by: 1, pass: [172, 16], label: 'Serve W — pass off target' }, { sy: 110, to: [206, 64], by: 1, pass: [160, 96], label: 'Again — high ball only' }],
+      note: 'Keep serving the lowest-rated passer, especially early',
+    }),
+    'st-serve-seam': serveStratViz({
+      alt: 'Top-down court: we serve into the seam between two passers. Both move toward the ball and hesitate; the pass comes off late and off target.',
+      passers: [['O', 196, 36], ['L', 212, 70], ['O', 196, 104]],
+      serves: [{ sy: 70, to: [206, 52], by: 1, also: 0, pass: [168, 22], label: 'Between the passers — "yours!"' }, { sy: 110, to: [206, 88], by: 2, also: 1, pass: [170, 116], label: 'The other seam' }],
+      note: 'Seams create hesitation — even good passers shank them',
+    }),
+    'st-serve-z1': serveStratViz({
+      alt: 'Top-down court: their setter is in right back and starts releasing toward the net. We serve deep to that corner, so the setter must stop and the passer has to cover, and the set comes late.',
+      passers: [['O', 196, 104], ['L', 212, 70], ['S', 214, 30]], setter: 2,
+      serves: [{ sy: 110, to: [222, 26], by: 1, pass: [150, 60], label: 'Deep zone 1 — right where the setter releases from' }],
+      note: 'Setter is late or has to pass — no first-tempo set',
+    }),
+    'st-serve-short': serveStratViz({
+      alt: 'Top-down court: we serve short in front of their outside hitter, who is also passing. The hitter runs forward to pass and is then late getting back out to approach.',
+      passers: [['O', 196, 36], ['L', 212, 70], ['H', 196, 104]], hitter: 2,
+      serves: [{ sy: 30, to: [146, 106], by: 2, pass: [136, 64], label: 'Short, in front of the hitter' }],
+      note: 'The hitter passes, then has no time to open for a full approach',
+    }),
+    'st-attack-setter': {
+      type: 'court', cuts: [],
+      alt: 'Top-down court: their setter is front row, blocking on their right side across from our left pin. We set our outside high and hit over and around the smaller blocker; the setter then has to land and transition.',
+      dur: 4.8,
+      props: `<text class="legend" x="-4" y="141">O our outside · S our setter · their S (red) blocks on the right side</text>`,
+      actors: {
+        O: [[0, 66, 8, 'O'], [0.9, 66, 8], [1.5, 112, 28], [3.2, 112, 28], [4.0, 66, 8], [4.8, 66, 8]],
+        S: [[0, 108, 84, 'S'], [4.8, 108, 84]],
+        L: [[0, 30, 70, 'L'], [4.8, 30, 70]],
+        X: [[0, 128, 40, 'S'], [1.0, 128, 40], [1.4, 128, 30], [2.2, 128, 30], [3.0, 144, 56], [4.4, 144, 56], [4.8, 128, 40]],
+        M: [[0, 128, 70, 'M'], [1.0, 128, 70], [1.7, 128, 46], [4.4, 128, 46], [4.8, 128, 70]],
+      },
+      actorColors: { O: 'var(--amber)', S: 'var(--good)', L: 'var(--sky)', X: 'var(--bad)', M: 'var(--bad)' },
+      ball: [[0, 30, 70, 0.2], [0.7, 104, 80, 0.5, 0.9], [0.9, 104, 80, 0.5], [1.5, 114, 26, 1.0, 1.4], [1.85, 206, 30, 0.05], [4.8, 206, 30, 0.05]],
+      phases: [[0, 0.9, 'Their setter is front row — on our outside'], [0.9, 1.5, 'Set the outside high'], [1.5, 1.9, 'Hit over the smaller blocker'], [1.9, 4.8, 'Their setter must also land and get to the ball']],
+      still: 1.5,
+    },
+    'st-tool': blockViz({
+      alt: 'Top-down court: the outside hitter faces a two-person block and aims at the top and outside of the outside blocker\'s hands so the ball deflects out of bounds toward the antenna.',
+      id: 'sttool', blockers: [22, 34],
+      shots: [{ to: [176, 4], name: 'off the outside hand, toward the antenna', lab: 'tool', kind: 'tool' }, { to: [214, 6], name: 'high off the top of the hands', lab: 'high hands', kind: 'tool' }],
+      note: 'Aim high and wide: the ball ends up out off their hands',
+    }),
+
     // ── Attacking: technique (top-down torso) ──
     'tech-twist-before': twistViz({
       alt: 'View from above: a right-handed hitter approaches the net. On the last two steps the hips and shoulders turn toward the cross-court shot, the hitter takes off already aimed, and the ball goes cross where the shoulders face. A blocker on the other side covers the line.',
@@ -2238,6 +2998,139 @@
     },
   };
 
+  // Scrimmage with a live score, for game-pressure drills. Team A on the left, B on the right.
+  // rally: { serve: 'A' | 'B' } or { free: team receiving the coach's free ball }, how:
+  //   'sideout' (receiving team kills), 'dig' (serving team digs and kills), 'ace', 'serr' (serve into the net),
+  //   'out' (receiving team hits out), score: text shown once the point is over, label: phase caption.
+  function scrimViz({ alt, start, rallies, note }) {
+    const REP = 4.4, A0 = { 4: [110, 34], 3: [110, 70], 2: [110, 106], 5: [44, 34], 6: [30, 70], 1: [44, 106] };
+    const R = ([x, y]) => [240 - x, 140 - y], SERVE = [4, 106], COACH = [120, 136];
+    const dur = rallies.length * REP + 1.4, actors = {}, actorColors = {}, ball = [], phases = [], ballCuts = [];
+    const lands = [];
+    rallies.forEach((r, k) => {
+      const T = k * REP, sender = r.free ? (r.free === 'A' ? 'B' : 'A') : r.serve;
+      // Ball path written as if A is sending; reflected when B sends.
+      const f = sender === 'A' ? (q => q) : R, pt = (t, q, h, arc) => ball.push(arc ? [T + t, ...f(q), h, arc] : [T + t, ...f(q), h]);
+      if (k) { ballCuts.push(T); }
+      if (r.free) { ball.push([T, ...COACH, 0.3]); pt(1.1, [196, 70], 0.2, 0.9); }
+      else { pt(0, [8, 104], 0.2); pt(0.25, [8, 104], 0.7); }
+      let land;
+      if (r.how === 'ace') { pt(1.1, [206, 40], 0.05, 1.0); land = 1.1; }
+      else if (r.how === 'serr') { pt(0.8, [118, 74], 0.6, 0.5); pt(1.1, [114, 74], 0); land = 1.1; }
+      else {
+        if (!r.free) pt(1.1, [200, 74], 0.15, 1.0);
+        pt(1.7, [132, 56], 0.5, 1.0); pt(2.3, [127, 112], 1.0, 0.7);
+        if (r.how === 'sideout') { pt(2.6, [44, 40], 0.05); land = 2.6; }
+        else if (r.how === 'out') { pt(2.7, [2, 30], 0.05); land = 2.7; }
+        else { pt(2.6, [44, 40], 0.4); pt(3.2, [104, 80], 0.5, 1.0); pt(3.7, [113, 28], 1.0, 0.7); pt(4.0, [196, 100], 0.05); land = 4.0; }
+      }
+      const last = ball[ball.length - 1];
+      ball.push([T + REP - 0.001, last[1], last[2], last[3]]);
+      lands.push(T + land);
+      phases.push([T, T + land, r.label], [T + land, T + REP, r.score]);
+    });
+    phases.push([rallies.length * REP, dur, note]);
+    // Players: zone 1 of the serving team walks back to serve before its rallies.
+    for (const team of ['A', 'B']) for (const z of ['4', '3', '2', '5', '6', '1']) {
+      const home = team === 'A' ? A0[z] : R(A0[z]), spot = team === 'A' ? SERVE : R(SERVE), ev = [];
+      if (z === '1') rallies.forEach((r, k) => {
+        if (r.free || r.serve !== team) return;
+        const T = k * REP;
+        if (T > 0) ev.push([T - 0.7, ...home]);
+        ev.push([T, ...spot], [T + 0.5, ...spot], [T + 1.3, ...home]);
+      });
+      const keys = ev.length && ev[0][0] === 0 ? [[0, ...spot, z], ...ev.slice(1)] : [[0, ...home, z], ...ev];
+      keys.push([dur, ...home]);
+      actors[team + z] = keys;
+      actorColors[team + z] = team === 'A' ? 'var(--sky)' : 'var(--orange)';
+    }
+    if (rallies.some(r => r.free)) { actors.C = [[0, ...COACH, 'C'], [dur, ...COACH]]; actorColors.C = 'var(--muted)'; }
+    const boards = [start, ...rallies.map(r => r.score)];
+    // Cross-fade at each point: the old score stays up until the ball lands.
+    const reveals = boards.map((_, i) => [i ? lands[i - 1] : -1, i < lands.length ? lands[i] + 0.25 : dur + 1]);
+    return {
+      type: 'court', alt, dur, cuts: [], ballCuts, actors, actorColors, ball, phases, reveals,
+      props: boards.map(b => `<g class="reveal" opacity="0"><text class="count-label" x="120" y="5" text-anchor="middle">${b}</text></g>`).join('') +
+        `<text class="legend" x="-4" y="141">blue = team A · orange = team B · score at the top</text>`,
+      still: lands[0] - 0.05,
+    };
+  }
+
+  // We serve from our end line into the opponent's receive (right side). passers: [label, x, y];
+  // serve: { sy, to, by (passer index), also (a second passer who hesitates), pass (where the pass goes), label }.
+  function serveStratViz({ alt, passers, serves, note, weak = -1, setter = -1, hitter = -1 }) {
+    const REP = 2.8, dur = serves.length * REP + 1.2, TARGET = [132, 56];
+    const actors = {}, actorColors = {}, ball = [], phases = [], ballCuts = [];
+    passers.forEach(([label, x, y], i) => {
+      const keys = [[0, x, y, label]];
+      serves.forEach((sv, k) => {
+        const T = k * REP, [bx, by] = sv.to;
+        if (i === setter) keys.push([T + 0.2, x, y], [T + 0.6, x - 16, y + 10], [T + 1.0, x - 16, y + 10], [T + 1.9, TARGET[0] + 6, TARGET[1]], [T + REP - 0.2, x, y]);
+        else if (sv.by === i) {
+          keys.push([T + 0.15, x, y], [T + 0.95, bx + 3, by], [T + 1.6, bx + 3, by]);
+          if (i === hitter) keys.push([T + 2.1, 168, 126], [T + 2.6, 130, 110]);
+          keys.push([T + REP - 0.05, x, y]);
+        } else if (sv.also === i) keys.push([T + 0.15, x, y], [T + 0.8, (x + bx) / 2 + 2, (y + by) / 2], [T + 1.4, (x + bx) / 2 + 2, (y + by) / 2], [T + REP - 0.1, x, y]);
+      });
+      keys.push([dur, x, y]);
+      actors['p' + i] = keys;
+      actorColors['p' + i] = i === weak ? 'var(--bad)' : i === setter ? 'var(--good)' : 'var(--orange)';
+    });
+    actors.V = [[0, 4, serves[0].sy || 70, 'V'], ...serves.flatMap((sv, k) => [[k * REP + 0.001, 4, sv.sy || 70], [k * REP + 0.4, 4, sv.sy || 70]]), [dur, 4, serves[0].sy || 70]];
+    actorColors.V = 'var(--sky)';
+    serves.forEach((sv, k) => {
+      const T = k * REP, sy = sv.sy || 70;
+      if (k) ballCuts.push(T);
+      ball.push([T, 8, sy, 0.2], [T + 0.25, 8, sy, 0.7], [T + 1.0, ...sv.to, 0.15, 1.0], [T + 1.6, ...sv.pass, 0.5, 1.0], [T + REP - 0.001, ...sv.pass, 0.5]);
+      phases.push([T, T + 1.0, sv.label], [T + 1.0, T + REP, sv.pass[0] === TARGET[0] && sv.pass[1] === TARGET[1] ? 'Pass on target' : 'Pass off target']);
+    });
+    phases.push([serves.length * REP, dur, note]);
+    return {
+      type: 'court', alt, dur, cuts: [], ballCuts, actors, actorColors, ball, phases,
+      props: `<circle class="spot" cx="${TARGET[0]}" cy="${TARGET[1]}" r="9"/><text class="legend" x="-4" y="141">V our server · orange = their passers${weak >= 0 ? ' · red = weak passer' : ''}${setter >= 0 ? ' · green = their setter' : ''} · circle = their target</text>`,
+      still: 1.0,
+    };
+  }
+
+  // Our three blockers (zones 4 / 3 / 2, top to bottom at x = 113) against their attack.
+  // rep: { set: 'oh' | 'quick', start?: [y4, y3, y2], moves: { zone: [[t, y, x?]...] }, result: 'stuff' | 'kill', phases }.
+  function blockScheme({ alt, start, reps, props = '' }) {
+    const REP = 3.2, dur = reps.length * REP, Z = ['4', '3', '2'], actors = {}, ball = [], phases = [], cuts = [];
+    const their = { S: [], M: [], O: [], P: [] };
+    Z.forEach(z => { actors['b' + z] = []; });
+    reps.forEach((r, k) => {
+      const T = k * REP, st = r.start || start;
+      if (k) cuts.push(T);
+      Z.forEach((z, i) => {
+        const keys = actors['b' + z];
+        keys.push(k ? [T, 113, st[i]] : [T, 113, st[i], z]);
+        for (const [t, y, x = 113] of (r.moves[z] || [])) keys.push([T + t, x, y]);
+        keys.push([T + REP - 0.001, ...keys[keys.length - 1].slice(1, 3)]);
+      });
+      their.S.push(k ? [T, 132, 56] : [T, 132, 56, 'S'], [T + REP - 0.001, 132, 56]);
+      their.M.push(k ? [T, 150, 72] : [T, 150, 72, 'M'], [T + 0.4, 150, 72], [T + 0.85, 128, 66], [T + REP - 0.001, 128, 66]);
+      their.O.push(k ? [T, 176, 124] : [T, 176, 124, 'O'], [T + 0.7, 176, 124], [T + 1.2, 156, 118], [T + 1.65, 128, 112], [T + REP - 0.001, 128, 112]);
+      their.P.push(k ? [T, 210, 70] : [T, 210, 70, 'P'], [T + REP - 0.001, 210, 70]);
+      const quick = r.set === 'quick', C = quick ? [127, 66] : [127, 112], tc = quick ? 1.0 : 1.65;
+      ball.push([T, 206, 70, 0.3], [T + 0.8, 134, 58, 0.5, 1.0], [T + tc, ...C, 1.0, quick ? 0.15 : 0.8]);
+      if (r.result === 'stuff') ball.push([T + tc + 0.25, C[0] + 14, C[1] - 6, 0.05]);
+      else ball.push([T + tc + 0.3, 40, 96, 0.05]);
+      ball.push([T + REP - 0.001, ...ball[ball.length - 1].slice(1)]);
+      phases.push(...r.phases);
+    });
+    Object.entries(their).forEach(([k, keys]) => { keys.push([dur, ...keys[keys.length - 1].slice(1, 3)]); actors['t' + k] = keys; });
+    Z.forEach(z => { const keys = actors['b' + z]; keys.push([dur, ...keys[keys.length - 1].slice(1, 3)]); });
+    return {
+      type: 'court', alt, dur, cuts, actors, ball, phases,
+      actorColors: { b4: 'var(--amber)', b3: 'var(--amber)', b2: 'var(--amber)', tS: 'var(--muted)', tM: 'var(--bad)', tO: 'var(--bad)', tP: 'var(--muted)' },
+      props: props + `<text class="legend" x="-4" y="141">amber = our blockers 4 / 3 / 2 · red = their hitters (M quick, O outside)</text>`,
+      still: 1.75,
+    };
+  }
+
+  // The same diagram serves a drill card and a strategy card.
+  VISUALS['read-block'] = VISUALS['st-read-block'];
+
   // Top-down torso figure for rotation technique. Each key is [t, x, y, hipDeg, shoulderDeg, arm];
   // 0° faces the net (+x), positive turns toward cross-court (+y) for a left-side hitter.
   // Hips are drawn amber on top (far path), shoulders + hitting arm white underneath. The set arrives at the hand at
@@ -2285,6 +3178,94 @@
         : `<text class="legend" x="34" y="108">from above · amber = hips</text><text class="legend" x="34" y="116">white = shoulders + hitting arm</text>`),
       still: contactT,
     };
+  }
+
+  // Shared side-view body positions for plyometric figures (feet on the floor at y = 130,
+  // facing right). plyoPose(name, dx, dy) returns a copy shifted into place.
+  function plyoPose(name, dx = 0, dy = 0) {
+    const B = {
+      stand: { head: [60, 34], sh: [60, 47], el: [61, 65], ha: [62, 82], el2: [59, 65], ha2: [60, 82], hip: [60, 80], kn: [61, 104], an: [60, 126], toe: [69, 130], kn2: [59, 104], an2: [58, 126], toe2: [67, 130] },
+      dip:   { head: [68.5, 50], sh: [63, 62], el: [52, 70], ha: [42, 80], el2: [53, 72], ha2: [44, 83], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+      half:  { head: [67, 55], sh: [62, 67], el: [52, 76], ha: [42, 86], el2: [53, 78], ha2: [44, 89], hip: [47, 98], kn: [70, 110], an: [59, 126], toe: [69, 130], kn2: [68, 110], an2: [57, 126], toe2: [67, 130] },
+      reach: { head: [60, 30], sh: [60, 43], el: [63, 26], ha: [65, 9], el2: [61, 26], ha2: [62, 9], hip: [60, 76], kn: [61, 100], an: [61, 121], toe: [67, 128], kn2: [59, 100], an2: [59, 121], toe2: [65, 128] },
+      tuck:  { head: [60, 30], sh: [60, 43], el: [70, 52], ha: [80, 58], el2: [68, 52], ha2: [78, 58], hip: [60, 76], kn: [77, 60], an: [70, 82], toe: [77, 86], kn2: [75, 60], an2: [68, 82], toe2: [75, 86] },
+      land:  { head: [68.5, 50], sh: [63, 62], el: [70, 78], ha: [76, 92], el2: [68, 79], ha2: [73, 93], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+      // Broad jump: 45° take-off lean, then flight with the feet swinging forward.
+      btake: { head: [119, 53], sh: [110, 62], el: [122, 50], ha: [132, 38], el2: [120, 52], ha2: [130, 40], hip: [88, 84], kn: [76, 104], an: [64, 124], toe: [70, 130], kn2: [74, 105], an2: [62, 125], toe2: [68, 130] },
+      bair:  { head: [112, 28], sh: [108, 40], el: [120, 48], ha: [128, 58], el2: [118, 50], ha2: [126, 60], hip: [100, 70], kn: [116, 68], an: [122, 88], toe: [129, 90], kn2: [114, 70], an2: [120, 90], toe2: [127, 92] },
+      // Approach strides (near leg forward / far leg forward).
+      run1:  { head: [66, 34], sh: [64, 47], el: [55, 62], ha: [48, 74], el2: [71, 62], ha2: [77, 73], hip: [60, 80], kn: [72, 100], an: [74, 122], toe: [82, 126], kn2: [54, 103], an2: [44, 118], toe2: [40, 125] },
+      run2:  { head: [66, 34], sh: [64, 47], el: [71, 62], ha: [77, 73], el2: [55, 62], ha2: [48, 74], hip: [60, 80], kn: [54, 103], an: [44, 118], toe: [40, 125], kn2: [72, 100], an2: [74, 122], toe2: [82, 126] },
+      // Single leg (far leg held up behind).
+      slstand: { head: [60, 34], sh: [60, 47], el: [61, 65], ha: [62, 82], el2: [59, 65], ha2: [60, 82], hip: [60, 80], kn: [61, 104], an: [60, 126], toe: [69, 130], kn2: [62, 100], an2: [52, 112], toe2: [57, 116] },
+      sldip: { head: [68.5, 50], sh: [63, 62], el: [52, 70], ha: [42, 80], el2: [53, 72], ha2: [44, 83], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [58, 104], an2: [46, 114], toe2: [50, 118] },
+      slair: { head: [64, 26], sh: [63, 39], el: [72, 30], ha: [80, 22], el2: [56, 48], ha2: [50, 56], hip: [58, 72], kn: [72, 88], an: [72, 108], toe: [80, 110], kn2: [52, 94], an2: [40, 104], toe2: [42, 110] },
+      slland: { head: [68.5, 50], sh: [63, 62], el: [70, 78], ha: [76, 92], el2: [68, 79], ha2: [73, 93], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [58, 104], an2: [46, 114], toe2: [50, 118] },
+      slpogo: { head: [60, 32], sh: [60, 45], el: [56, 62], ha: [60, 78], el2: [64, 62], ha2: [68, 76], hip: [60, 78], kn: [61, 102], an: [61, 123], toe: [68, 130], kn2: [62, 98], an2: [52, 110], toe2: [57, 114] },
+      // Split squat (near leg forward / far leg forward).
+      splitL: { head: [60, 44], sh: [60, 57], el: [66, 72], ha: [70, 86], el2: [54, 72], ha2: [50, 86], hip: [60, 90], kn: [80, 108], an: [78, 126], toe: [87, 130], kn2: [50, 120], an2: [32, 124], toe2: [28, 130] },
+      splitR: { head: [60, 44], sh: [60, 57], el: [54, 72], ha: [50, 86], el2: [66, 72], ha2: [70, 86], hip: [60, 90], kn: [50, 120], an: [32, 124], toe: [28, 130], kn2: [80, 108], an2: [78, 126], toe2: [87, 130] },
+      // Bounding strides in the air.
+      bound:  { head: [72, 24], sh: [70, 37], el: [80, 30], ha: [88, 20], el2: [60, 46], ha2: [52, 54], hip: [64, 70], kn: [82, 66], an: [80, 88], toe: [88, 90], kn2: [52, 90], an2: [36, 100], toe2: [32, 106] },
+      bound2: { head: [72, 24], sh: [70, 37], el: [60, 46], ha: [52, 54], el2: [80, 30], ha2: [88, 20], hip: [64, 70], kn: [52, 90], an: [36, 100], toe: [32, 106], kn2: [82, 66], an2: [80, 88], toe2: [88, 90] },
+      // Block press over the net (side view, net to the right).
+      sblock: { head: [62, 30], sh: [60, 43], el: [70, 26], ha: [82, 14], el2: [68, 27], ha2: [80, 15], hip: [58, 76], kn: [61, 100], an: [61, 121], toe: [67, 128], kn2: [59, 100], an2: [59, 121], toe2: [65, 128] },
+      // Depth jump off a box (box top at y = 98).
+      onbox: { head: [43, 2], sh: [43, 15], el: [44, 33], ha: [45, 50], el2: [42, 33], ha2: [43, 50], hip: [43, 48], kn: [44, 72], an: [43, 94], toe: [52, 98], kn2: [44, 72], an2: [43, 94], toe2: [52, 98] },
+      offbox: { head: [47.5, 4], sh: [47, 17], el: [50, 34], ha: [55, 49], el2: [45, 34], ha2: [48, 49], hip: [46, 50], kn: [58, 68], an: [62, 90], toe: [70, 92], kn2: [45, 74], an2: [43, 94], toe2: [52, 98] },
+      drop: { head: [61.5, 26], sh: [61, 39], el: [72, 52], ha: [86, 48], el2: [70, 53], ha2: [84, 49], hip: [60, 72], kn: [64, 95], an: [64, 117], toe: [72, 119], kn2: [61, 96], an2: [60, 117], toe2: [68, 120] },
+      // Medicine ball (side view, facing right).
+      chest: { head: [60, 36], sh: [60, 49], el: [50, 60], ha: [66, 56], el2: [52, 62], ha2: [68, 58], hip: [57, 82], kn: [65, 104], an: [60, 126], toe: [69, 130], kn2: [63, 104], an2: [58, 126], toe2: [67, 130] },
+      push:  { head: [65, 36], sh: [63, 49], el: [78, 49], ha: [94, 49], el2: [77, 51], ha2: [93, 51], hip: [57, 82], kn: [65, 104], an: [60, 126], toe: [69, 130], kn2: [63, 104], an2: [58, 126], toe2: [67, 130] },
+      slam:  { head: [82, 58], sh: [75, 67], el: [84, 84], ha: [90, 100], el2: [82, 85], ha2: [88, 101], hip: [49, 92], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+      oload: { head: [58, 34], sh: [58, 47], el: [62, 26], ha: [50, 22], el2: [60, 27], ha2: [48, 23], hip: [60, 80], kn: [66, 104], an: [70, 126], toe: [79, 130], kn2: [54, 104], an2: [48, 126], toe2: [56, 130] },
+      orel:  { head: [64, 34], sh: [63, 47], el: [72, 30], ha: [84, 22], el2: [71, 31], ha2: [83, 23], hip: [60, 80], kn: [66, 104], an: [70, 126], toe: [79, 130], kn2: [54, 104], an2: [48, 126], toe2: [56, 130] },
+      sload: { head: [60, 34], sh: [60, 47], el: [46, 38], ha: [54, 24], el2: [70, 34], ha2: [78, 20], hip: [60, 80], kn: [64, 104], an: [66, 126], toe: [75, 130], kn2: [56, 104], an2: [52, 126], toe2: [58, 130] },
+      sswing: { head: [64, 34], sh: [63, 47], el: [76, 34], ha: [90, 40], el2: [66, 60], ha2: [62, 72], hip: [60, 80], kn: [64, 104], an: [66, 126], toe: [75, 130], kn2: [56, 104], an2: [52, 126], toe2: [58, 130] },
+      sfollow: { head: [68, 38], sh: [66, 51], el: [72, 68], ha: [66, 84], el2: [62, 64], ha2: [58, 76], hip: [60, 82], kn: [64, 104], an: [66, 126], toe: [75, 130], kn2: [56, 104], an2: [52, 126], toe2: [58, 130] },
+      bload: { head: [72, 56], sh: [66, 66], el: [66, 84], ha: [64, 102], el2: [64, 85], ha2: [62, 103], hip: [48, 94], kn: [70, 108], an: [59, 126], toe: [69, 130], kn2: [68, 108], an2: [57, 126], toe2: [67, 130] },
+      bthrow: { head: [58, 28], sh: [58, 41], el: [52, 22], ha: [44, 8], el2: [50, 23], ha2: [42, 9], hip: [60, 74], kn: [61, 98], an: [61, 119], toe: [67, 126], kn2: [59, 98], an2: [59, 119], toe2: [65, 126] },
+      // Plyometric push-up (head to the right).
+      plank: { head: [100, 90], sh: [92, 98], el: [93, 113], ha: [94, 128], el2: [91, 113], ha2: [92, 128], hip: [52, 106], kn: [32, 113], an: [10, 121], toe: [6, 128], kn2: [32, 114], an2: [10, 122], toe2: [6, 128] },
+      pdown: { head: [100, 112], sh: [92, 119], el: [78, 113], ha: [94, 128], el2: [77, 114], ha2: [92, 128], hip: [52, 119], kn: [32, 123], an: [10, 125], toe: [6, 128], kn2: [32, 124], an2: [10, 126], toe2: [6, 128] },
+      pair:  { head: [100, 72], sh: [92, 80], el: [94, 96], ha: [96, 112], el2: [93, 96], ha2: [95, 112], hip: [52, 96], kn: [32, 108], an: [10, 120], toe: [6, 128], kn2: [32, 109], an2: [10, 121], toe2: [6, 128] },
+      // Front view (facing the viewer; "near" limbs are the athlete's left, on the right of the picture).
+      fstand: { head: [60, 34], sh: [60, 47], el: [68, 63], ha: [70, 80], el2: [52, 63], ha2: [50, 80], hip: [60, 80], kn: [66, 104], an: [66, 126], toe: [71, 130], kn2: [54, 104], an2: [54, 126], toe2: [49, 130] },
+      fdip:  { head: [60, 50], sh: [60, 62], el: [70, 74], ha: [74, 86], el2: [50, 74], ha2: [46, 86], hip: [60, 94], kn: [72, 108], an: [67, 126], toe: [72, 130], kn2: [48, 108], an2: [53, 126], toe2: [48, 130] },
+      ftuck: { head: [60, 34], sh: [60, 47], el: [72, 56], ha: [78, 66], el2: [48, 56], ha2: [42, 66], hip: [60, 80], kn: [70, 94], an: [67, 112], toe: [72, 115], kn2: [50, 94], an2: [53, 112], toe2: [48, 115] },
+      fup:   { head: [60, 30], sh: [60, 43], el: [66, 24], ha: [68, 8], el2: [54, 24], ha2: [52, 8], hip: [60, 76], kn: [64, 100], an: [64, 121], toe: [66, 128], kn2: [56, 100], an2: [56, 121], toe2: [54, 128] },
+      fready: { head: [60, 34], sh: [60, 47], el: [70, 46], ha: [70, 32], el2: [50, 46], ha2: [50, 32], hip: [60, 82], kn: [67, 105], an: [67, 126], toe: [71, 130], kn2: [53, 105], an2: [53, 126], toe2: [49, 130] },
+      fsl:   { head: [64, 50], sh: [62, 62], el: [72, 72], ha: [76, 84], el2: [50, 70], ha2: [44, 78], hip: [60, 92], kn: [66, 108], an: [65, 126], toe: [70, 130], kn2: [56, 106], an2: [66, 118], toe2: [70, 120] },
+      fslair: { head: [60, 32], sh: [60, 45], el: [70, 56], ha: [76, 66], el2: [50, 56], ha2: [44, 66], hip: [60, 78], kn: [65, 100], an: [65, 120], toe: [70, 124], kn2: [56, 96], an2: [62, 110], toe2: [66, 112] },
+      fhold: { head: [58, 46], sh: [58, 59], el: [46, 72], ha: [40, 86], el2: [50, 74], ha2: [42, 88], hip: [58, 90], kn: [68, 107], an: [68, 126], toe: [73, 130], kn2: [50, 107], an2: [52, 126], toe2: [47, 130] },
+      fthrow: { head: [64, 36], sh: [62, 49], el: [78, 56], ha: [92, 56], el2: [76, 58], ha2: [90, 58], hip: [60, 82], kn: [66, 105], an: [66, 126], toe: [71, 130], kn2: [54, 105], an2: [54, 126], toe2: [49, 130] },
+    };
+    // A trailing "~" mirrors the pose left-right (front view: the other leg).
+    const flip = name.endsWith('~'), base = B[flip ? name.slice(0, -1) : name];
+    const out = {};
+    for (const [j, [x, y]] of Object.entries(base)) out[j] = [(flip ? 120 - x : x) + dx, y + dy];
+    return out;
+  }
+  // Poses from a list of [key, name, dx, dy]; keys from a list of [t, key, ease].
+  function plyoPoses(list) {
+    return Object.fromEntries(list.map(([k, n, dx = 0, dy = 0]) => [k, plyoPose(n, dx, dy)]));
+  }
+  // Repeating cycle helper: `cycle` is a list of [dt, poseKey, ease] played `n` times every `rep` seconds.
+  function cycleKeys(n, rep, cycle, endPose) {
+    const keys = [];
+    for (let i = 0; i < n; i++) for (const [dt, k, e] of cycle) keys.push(e ? [i * rep + dt, k, e] : [i * rep + dt, k]);
+    keys.push([n * rep, endPose]);
+    return keys;
+  }
+  // Repeated tuck jumps: land → take off → tuck at the top → extend → land, `n` times.
+  function tuckKeys(n, rep) {
+    const keys = [];
+    for (let i = 0; i < n; i++) {
+      const T = i * rep;
+      keys.push([T, 'land'], [T + 0.12, 'ext', 'out'], [T + 0.36, 'tuck', 'out'], [T + 0.52, 'ext2', 'in'], [T + rep - 0.001, 'land', 'in']);
+    }
+    keys.push([n * rep, 'land']);
+    return keys;
   }
 
   // Shared play for attack diagrams by position. After the pass, the setter sets `setDur`
@@ -2595,8 +3576,7 @@
         ${v.props || ''}
         <g class="layer">
           ${Object.keys(v.actors).map(a => `<g class="actor" data-actor="${a}"><circle r="6.5"/><text text-anchor="middle" dy="2.6"></text></g>`).join('')}
-          <ellipse class="ball-shadow" rx="3" ry="1.5"/>
-          <circle class="ball" r="3"/>
+          ${v.ball ? '<ellipse class="ball-shadow" rx="3" ry="1.5"/><circle class="ball" r="3"/>' : ''}
         </g>
       </svg>
       ${captionHtml(v)}
@@ -2642,6 +3622,7 @@
       const fade = 0.25, d = Math.min(...[0, ...v.cuts, v.dur].map(c => Math.abs(t - c)));
       el.layer.setAttribute('opacity', Math.min(1, d / fade).toFixed(2));
     }
+    if (!v.ball) return setPhase(inst, t);
     let bx, by, bh;
     const carry = (v.carry || []).find(([s, e]) => t >= s && t <= e);
     if (carry) { const p = pos[carry[2]]; bx = p.x - 4; by = p.y - 4; bh = 0.3; }
