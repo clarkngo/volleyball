@@ -281,9 +281,19 @@
     .viz .floor { stroke: rgba(255,255,255,0.18); stroke-width: 1.5; }
     .viz .guide { stroke: var(--sky); stroke-width: 1.2; stroke-dasharray: 3 3; }
     .viz .guide-label { fill: var(--sky); font-size: 7px; font-weight: 600; }
-    .viz figcaption { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
-      padding: 0.35rem 0.6rem; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border); }
-    .viz-phase { color: var(--amber); font-weight: 700; }
+    .viz:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+    .viz figcaption { padding: 0.35rem 0.6rem 0.4rem; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .viz-row { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+    .viz-phase { color: var(--amber); font-weight: 700; min-width: 0; }
+    .viz-ctrls { display: flex; gap: 0.25rem; flex-shrink: 0; }
+    .viz-step { padding: 0.1rem 0.45rem; }
+    .viz-track { display: flex; gap: 3px; margin-bottom: 0.35rem; }
+    .viz-seg { flex-basis: 0; min-width: 6px; height: 14px; padding: 5px 0; border: 0; background: none; cursor: pointer; position: relative; }
+    .viz-seg::before { content: ''; position: absolute; inset: 5px 0; border-radius: 100px; background: rgba(255,255,255,0.12); transition: background 0.15s; }
+    .viz-seg.done::before { background: rgba(255,183,48,0.4); }
+    .viz-seg.cur::before { background: var(--amber); }
+    .viz-seg:hover::before { background: var(--text); }
+    .viz-seg:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; border-radius: 4px; }
     .viz-btn { font: inherit; font-size: 0.72rem; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 100px; padding: 0.1rem 0.55rem; cursor: pointer; }
     .viz-btn:hover { color: var(--text); border-color: var(--border-hover); }
 
@@ -1180,7 +1190,7 @@
       { name: 'Rotational', viz: 'def-rotational', desc: 'Defense rotates toward the attack: the line digger pulls up to cover tips, zone 6 rotates to the line.',
         use: 'Opponent tips and rolls a lot, or their outside hits mostly cross.',
         pros: ['Takes away tips behind the block', 'Strong vs cross-court hitters'],
-        cons: ['Deep line corner open', 'More movement, harder timing'] },
+        cons: ['Deep cross-court corner open (zone 5 deep)', 'More movement, harder timing'] },
       { name: 'Middle-up (6-up)', viz: 'def-middle-up', desc: 'Zone 6 player moves up behind the block to take tips and short shots.',
         use: 'Younger or smaller opponents who rarely hit deep with power.',
         pros: ['Nothing short falls', 'Simple for beginners'],
@@ -1864,7 +1874,7 @@
           </g>
         </g>
       </svg>
-      <figcaption><span class="viz-phase"></span><button class="viz-btn" type="button">${reduceMotion ? '▶ Play' : '❚❚ Pause'}</button></figcaption>
+      ${captionHtml(v)}
     </figure>`;
   }
 
@@ -1884,10 +1894,35 @@
     return out;
   }
 
+  // Caption: phase label, step/play controls, and a phase track (one segment per phase,
+  // sized by its duration) that shows progress and jumps to a phase when clicked.
+  function captionHtml(v) {
+    const track = v.phases.map(([s, e, label], i) =>
+      `<button class="viz-seg" type="button" data-i="${i}" style="flex-grow:${(e - s).toFixed(2)}" aria-label="Go to: ${esc(label)}" title="${esc(label)}"></button>`).join('');
+    return `<figcaption>
+        <div class="viz-track">${track}</div>
+        <div class="viz-row">
+          <span class="viz-phase" aria-live="polite"></span>
+          <span class="viz-ctrls">
+            <button class="viz-btn viz-step" type="button" data-dir="-1" aria-label="Previous step">◀</button>
+            <button class="viz-btn viz-play" type="button">${reduceMotion ? '▶ Play' : '❚❚ Pause'}</button>
+            <button class="viz-btn viz-step" type="button" data-dir="1" aria-label="Next step">▶</button>
+          </span>
+        </div>
+      </figcaption>`;
+  }
+
+  function phaseIndex(v, t) {
+    const i = v.phases.findIndex(([s, e]) => t >= s && t < e);
+    return i < 0 ? v.phases.length - 1 : i;
+  }
   function setPhase(inst, t) {
-    const ph = inst.v.phases.find(([s, e]) => t >= s && t < e);
-    const label = ph ? ph[2] : '';
+    const i = phaseIndex(inst.v, t), label = inst.v.phases[i][2];
     if (inst.el.phase.textContent !== label) inst.el.phase.textContent = label;
+    if (inst.phaseI !== i) {
+      inst.phaseI = i;
+      inst.el.segs.forEach((s, j) => { s.classList.toggle('done', j < i); s.classList.toggle('cur', j === i); });
+    }
   }
 
   // ── Court mode: top-down drill diagrams ──
@@ -1912,7 +1947,7 @@
         <ellipse class="ball-shadow" rx="3" ry="1.5"/>
         <circle class="ball" r="3"/>
       </svg>
-      <figcaption><span class="viz-phase"></span><button class="viz-btn" type="button">${reduceMotion ? '▶ Play' : '❚❚ Pause'}</button></figcaption>
+      ${captionHtml(v)}
     </figure>`;
   }
 
@@ -2012,11 +2047,29 @@
             ball: q('.ball'), shadow: q('.ball-shadow'), reveal: q('.reveal'), phase: q('.viz-phase') }
         : { path: q('.limb.near'), far: q('.limb.far'), fig: q('.fig'), head: q('.head'), kn: q('.kn-dot'),
             hip: q('.hip-dot'), guide: q('.guide-g'), phase: q('.viz-phase') };
+      el.segs = [...fig.querySelectorAll('.viz-seg')];
       const inst = { root: fig, v, t: reduceMotion ? v.still : 0, playing: !reduceMotion, visible: !vizObserver, el };
-      const btn = fig.querySelector('.viz-btn');
-      const toggle = () => { inst.playing = !inst.playing; btn.textContent = inst.playing ? '❚❚ Pause' : '▶ Play'; kickViz(); };
-      btn.addEventListener('click', toggle);
-      fig.querySelector('svg').addEventListener('click', toggle);
+      const btn = q('.viz-play');
+      const setPlaying = on => { inst.playing = on; btn.textContent = on ? '❚❚ Pause' : '▶ Play'; kickViz(); };
+      // Stepping pauses and shows the END of a phase — the position the movement arrives at
+      // (landing stuck, defense set, ball dug), which is the frame a coach wants to talk over.
+      const goPhase = i => {
+        const n = v.phases.length;
+        i = ((i % n) + n) % n;
+        setPlaying(false);
+        inst.t = v.phases[i][1] - 0.001;
+        drawViz(inst);
+      };
+      const step = dir => goPhase(phaseIndex(v, inst.t % v.dur) + dir);
+      btn.addEventListener('click', () => setPlaying(!inst.playing));
+      q('svg').addEventListener('click', () => setPlaying(!inst.playing));
+      fig.querySelectorAll('.viz-step').forEach(b => b.addEventListener('click', () => step(+b.dataset.dir)));
+      el.segs.forEach(s => s.addEventListener('click', () => goPhase(+s.dataset.i)));
+      fig.tabIndex = 0;
+      fig.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); step(e.key === 'ArrowRight' ? 1 : -1); }
+        else if ((e.key === ' ' || e.key === 'k') && !e.target.closest('button')) { e.preventDefault(); setPlaying(!inst.playing); }
+      });
       drawViz(inst);
       if (vizObserver) vizObserver.observe(fig);
       return inst;
