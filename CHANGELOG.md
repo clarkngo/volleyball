@@ -41,6 +41,7 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 ### Changed
 
+- **`coaches-corner.html` · Print & keyboard polish** — **Print** now uses a light print palette (the dark-theme colors printed light-on-white) and the game plan's Print button prints only the matchup planner; visual controls, timers, and the tab bar are hidden on paper and cards don't split across pages. **Keyboard / screen readers:** visuals announce their step text only while paused (no stream of announcements from playing visuals), phase-track segments leave the tab order (use ← / → on the visual), and every button, summary, and link gets the amber focus ring.
 - **`coaches-corner.html` · Visual labels fit on every screen** — checked all 121 visuals at phone width (375 px) and with reduced motion. Shot labels on the twist technique diagrams and the "high hands" tool label now sit inside the frame, the floor-line label on Line Hops and Zig-Zag Hops no longer touches the bottom edge, and the Lost-the-first-set legend is shorter.
 - `prototypes/09-setter-footwork.html` — Timeline opens on **set base** (hold + reset to release); **CSS2D** **L** / **R** foot chips; ball parked on target until approach segment; dual renderer resize.
 - **`docs/IDEAS.md`** — Item **5 (setter footwork)** marked shipped (**09**). (Item **4** / **08** from earlier commit.)
