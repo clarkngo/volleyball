@@ -38,6 +38,7 @@ How to add entries after a change: see **[docs/CHANGELOG_GUIDE.md](docs/CHANGELO
 
 ### Changed
 
+- **`coaches-corner.html` · Visual labels fit on every screen** — checked all 121 visuals at phone width (375 px) and with reduced motion. Shot labels on the twist technique diagrams and the "high hands" tool label now sit inside the frame, the floor-line label on Line Hops and Zig-Zag Hops no longer touches the bottom edge, and the Lost-the-first-set legend is shorter.
 - `prototypes/09-setter-footwork.html` — Timeline opens on **set base** (hold + reset to release); **CSS2D** **L** / **R** foot chips; ball parked on target until approach segment; dual renderer resize.
 - **`docs/IDEAS.md`** — Item **5 (setter footwork)** marked shipped (**09**). (Item **4** / **08** from earlier commit.)
 - **`index.html`** — Nav link + featured card for **`coaches-corner.html`**.
