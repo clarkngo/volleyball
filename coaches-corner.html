@@ -2267,7 +2267,7 @@
     'line-hops': {
       alt: 'Front view: the athlete hops side to side over a line on the floor with both feet together, as quickly as possible, staying low and light.',
       dur: 2.0,
-      props: `<line class="guide" x1="60" y1="124" x2="60" y2="132"/><text class="guide-label" x="60" y="140" text-anchor="middle">line</text>`,
+      props: `<line class="guide" x1="60" y1="124" x2="60" y2="132"/><text class="guide-label" x="60" y="138.5" text-anchor="middle">line</text>`,
       poses: plyoPoses([['L', 'fdip', -16], ['aR', 'ftuck', 0, -12], ['R', 'fdip', 16], ['aL', 'ftuck', 0, -12]]),
       keys: cycleKeys(4, 0.5, [[0, 'L'], [0.12, 'aR', 'out'], [0.25, 'R', 'in'], [0.37, 'aL', 'out'], [0.5 - 0.001, 'L', 'in']], 'L'),
       phases: [[0, 0.5, 'Two feet together over the line'], [0.5, 1.0, 'Quick, light contacts'], [1.0, 2.0, 'Stay low — speed over height']],
@@ -2328,7 +2328,7 @@
     'zigzag': {
       alt: 'Front view: the athlete hops on one leg diagonally left and right along a line, moving forward toward the viewer, sticking each landing briefly.',
       dur: 3.2,
-      props: `<line class="guide" x1="60" y1="124" x2="60" y2="132"/><text class="guide-label" x="60" y="140" text-anchor="middle">line</text>`,
+      props: `<line class="guide" x1="60" y1="124" x2="60" y2="132"/><text class="guide-label" x="60" y="138.5" text-anchor="middle">line</text>`,
       poses: plyoPoses([['R', 'fsl', 28], ['a', 'fslair', 0, -14], ['L', 'fsl', -28]]),
       keys: [[0, 'R'], [0.2, 'R'], [0.4, 'a', 'out'], [0.6, 'L', 'in'], [1.0, 'L'], [1.2, 'a', 'out'], [1.4, 'R', 'in'], [1.8, 'R'],
              [2.0, 'a', 'out'], [2.2, 'L', 'in'], [2.6, 'L'], [2.8, 'a', 'out'], [3.0, 'R', 'in'], [3.2, 'R']],
@@ -3007,7 +3007,7 @@
       type: 'court', cuts: [],
       alt: 'Top-down court: in set one our best blocker (amber) starts in the middle front, not across from their best hitter (red) on their left side. For set two the whole lineup starts one rotation later, so our best blocker is in right front, directly across from their best hitter, and blocks the attack.',
       dur: 7.0,
-      props: `<text class="legend" x="-4" y="141">amber = our best blocker · red H = their best hitter · same system, new starting spot</text>`,
+      props: `<text class="legend" x="-4" y="141">amber = our best blocker · red H = their best hitter</text>`,
       actors: {
         O1: [[0, 110, 34, 'O'], [1.6, 110, 34], [3.0, 110, 70], [7.0, 110, 70]],
         M: [[0, 110, 70, 'M'], [1.6, 110, 70], [3.0, 110, 106], [4.3, 110, 106], [4.6, 114, 106], [7.0, 114, 106]],
@@ -3281,7 +3281,7 @@
     const lanes = net ? [[0, 'line'], [shotDeg, 'cross']].map(([d, l]) => {
       const rr = d * Math.PI / 180, e = [hand[0] + Math.cos(rr) * 60, hand[1] + Math.sin(rr) * 60];
       return `<line class="shot" x1="${hand[0].toFixed(1)}" y1="${hand[1].toFixed(1)}" x2="${e[0].toFixed(1)}" y2="${e[1].toFixed(1)}"/>` +
-        `<text class="shot-label" x="${(e[0] + 2).toFixed(1)}" y="${(e[1] + 2.5).toFixed(1)}">${l}</text>`;
+        `<text class="shot-label" x="${(e[0] - 2).toFixed(1)}" y="${(e[1] + (d ? 7 : -3)).toFixed(1)}" text-anchor="end">${l}</text>`;
     }).join('') : '';
     return {
       alt, view: net ? '60 -6 214 146' : '90 0 140 120', height: net ? 230 : 210, dur, floor: false, dots: [], headR: 5.5, balls: { ball: 4 }, farOnTop: true, cls: 'top',
@@ -3457,7 +3457,9 @@
     }).join('');
     const lanes = shots.map(sh => {
       const from = sh.kind === 'tool' ? `M${C[0]} ${C[1]}L129 ${(blockers[0] || 22) - 5}L${sh.to[0]} ${sh.to[1]}` : `M${C[0]} ${C[1]}L${sh.to[0]} ${sh.to[1]}`;
-      const lx = sh.to[0] + (sh.to[0] > 215 ? -4 : 5), anchor = sh.to[0] > 215 ? 'end' : 'start';
+      // Labels sit right of the shot's end unless they would run past the edge of the diagram.
+      const right = sh.to[0] + 5 + sh.lab.length * 4.2 < 246;
+      const lx = sh.to[0] + (right ? 5 : -4), anchor = right ? 'start' : 'end';
       return `<path class="shot" d="${from}"/><circle class="shot-end" cx="${sh.to[0]}" cy="${sh.to[1]}" r="1.8"/>` +
         `<text class="shot-label" x="${lx}" y="${sh.to[1] + (sh.to[1] < 10 ? 7 : 2.5)}" text-anchor="${anchor}">${sh.lab}</text>`;
     }).join('');
