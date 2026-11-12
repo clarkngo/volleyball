@@ -239,6 +239,22 @@
     .steps { padding-left: 1.2rem; display: grid; gap: 0.4rem; }
     .steps li { font-size: 0.84rem; color: var(--muted); }
     .steps b { color: var(--text); }
+    .steps li.cur { color: var(--text); }
+    .steps li.cur b { color: var(--amber); }
+    .steps .tl-t { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    /* Talk timeline: one segment per step, sized by its suggested length, with a real-time timer. */
+    .tl { margin: 0.6rem 0 0.8rem; }
+    .tl-bar { position: relative; display: flex; gap: 2px; height: 30px; }
+    .tl-seg { min-width: 0; display: flex; align-items: center; justify-content: center; padding: 0 4px; border-radius: 5px;
+      background: rgba(148,163,184,0.12); border: 1px solid rgba(148,163,184,0.2); font-size: 0.7rem; color: var(--muted);
+      overflow: hidden; white-space: nowrap; text-overflow: ellipsis; transition: background 0.2s, color 0.2s; }
+    .tl-seg span { overflow: hidden; text-overflow: ellipsis; }
+    .tl-seg.done { background: rgba(251,191,36,0.16); color: var(--text); }
+    .tl-seg.cur { background: rgba(251,191,36,0.28); border-color: var(--amber); color: var(--text); font-weight: 700; }
+    .tl-head { position: absolute; top: -3px; bottom: -3px; left: 0; width: 2px; background: var(--amber); border-radius: 1px; pointer-events: none; }
+    .tl-ticks { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+    .tl-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.35rem; }
+    .tl-clock { font-size: 0.85rem; font-weight: 700; font-variant-numeric: tabular-nums; }
     .say { display: grid; gap: 0.4rem; }
     .say blockquote { font-size: 0.86rem; color: var(--text); border-left: 3px solid var(--orange); background: rgba(255,140,0,0.06); padding: 0.45rem 0.7rem; border-radius: 0 8px 8px 0; }
     .talk-card .avoid h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--bad); margin-bottom: 0.15rem; }
@@ -1005,25 +1021,25 @@
   const TALK_MOMENT_LABEL = Object.fromEntries(TALK_MOMENTS);
 
   const TALK_FRAMEWORKS = [
-    { moment: 'Pre-game', time: '2–3 min', steps: [
+    { moment: 'Pre-game', plan: [30, 60, 60, 30], time: '2–3 min', steps: [
       ['Connect', 'Eye contact, calm voice. Name what today means without making it bigger.'],
       ['Two keys', 'Two controllable focuses for the match (e.g. "serve to zone 1," "talk on every ball").'],
       ['Belief', 'Remind them why they\'re ready: the work they\'ve done.'],
       ['Break', 'Team chant or hands in — end on energy.'],
     ]},
-    { moment: 'Timeout', time: '30–60 s', steps: [
+    { moment: 'Timeout', plan: [10, 25, 15, 10], time: '30–60 s', steps: [
       ['Breathe', 'First 10 seconds: let them drink and breathe. Say nothing yet.'],
       ['One fix', 'One specific, tactical instruction. Not three.'],
       ['One cue', 'A short phrase they can carry back: "high to middle," "next ball."'],
       ['Send', 'Calm, confident close: "We\'re fine. Go get this one."'],
     ]},
-    { moment: 'Between sets', time: '~2–3 min', steps: [
+    { moment: 'Between sets', plan: [30, 45, 75, 30], time: '~2–3 min', steps: [
       ['Reset', 'Win or lose, the last set is over. Start from 0–0.'],
       ['What worked', 'Name one thing to keep doing — with evidence.'],
       ['One adjustment', 'One change for this set: serving target, block, rotation.'],
       ['Start fast', 'A goal for the first five points.'],
     ]},
-    { moment: 'Post-game', time: '2–5 min', steps: [
+    { moment: 'Post-game', plan: [45, 105, 90, 60], time: '2–5 min', steps: [
       ['Acknowledge', 'Name the result and the feeling honestly.'],
       ['Effort & growth', 'Praise specific effort or improvement — not just the score.'],
       ['One takeaway', 'One lesson to carry forward. Save the film-room detail for practice.'],
@@ -4265,11 +4281,65 @@
   const TALK_TOPICS = ['all', 'win', 'loss', 'losing composure', 'keeping the lead', 'tough opponent', 'confidence', 'nerves', 'mistakes', 'momentum'];
   let talkMoment = 'all', talkTopic = 'all';
 
-  $('#talk-frameworks').innerHTML = TALK_FRAMEWORKS.map(f => `
-    <div class="card">
+  const clock = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+  $('#talk-frameworks').innerHTML = TALK_FRAMEWORKS.map((f, fi) => {
+    const total = f.plan.reduce((a, b) => a + b, 0);
+    const starts = f.plan.map((_, i) => f.plan.slice(0, i).reduce((a, b) => a + b, 0));
+    return `
+    <div class="card" data-fw="${fi}">
       <div class="meta"><span class="tag lvl">${f.moment}</span><span class="tag plain">⏱ ${f.time}</span></div>
-      <ol class="steps">${f.steps.map(([h, d]) => `<li><b>${h}</b> — ${esc(d)}</li>`).join('')}</ol>
-    </div>`).join('');
+      <div class="tl" role="group" aria-label="${f.moment} talk timer, ${clock(total)} total">
+        <div class="tl-bar">${f.steps.map(([h], i) =>
+          `<div class="tl-seg" style="flex-grow:${f.plan[i]}" title="${esc(h)} · ${clock(starts[i])}–${clock(starts[i] + f.plan[i])}"><span>${i + 1}</span></div>`).join('')}
+          <div class="tl-head"></div></div>
+        <div class="tl-ticks"><span>0:00</span><span>${clock(total)}</span></div>
+        <div class="tl-row">
+          <span class="tl-clock" aria-live="off">0:00 / ${clock(total)}</span>
+          <span class="viz-ctrls"><button class="viz-btn tl-go" type="button">▶ Start</button><button class="viz-btn tl-reset" type="button">Reset</button></span>
+        </div>
+      </div>
+      <ol class="steps">${f.steps.map(([h, d], i) =>
+        `<li><b>${h}</b> <span class="tl-t">${clock(starts[i])}–${clock(starts[i] + f.plan[i])}</span> — ${esc(d)}</li>`).join('')}</ol>
+    </div>`;
+  }).join('');
+
+  // Real-time talk timers: the playhead moves across the bar and the current step lights up.
+  const talkTimers = new Map();
+  function drawTimer(card, sec) {
+    const f = TALK_FRAMEWORKS[card.dataset.fw], total = f.plan.reduce((a, b) => a + b, 0), t = Math.min(sec, total);
+    let i = 0, acc = 0;
+    while (i < f.plan.length - 1 && t >= acc + f.plan[i]) acc += f.plan[i++];
+    const started = sec > 0, done = sec >= total;
+    card.querySelectorAll('.tl-seg').forEach((s, j) => {
+      s.classList.toggle('done', started && (done || j < i));
+      s.classList.toggle('cur', started && !done && j === i);
+    });
+    card.querySelectorAll('.steps li').forEach((li, j) => li.classList.toggle('cur', started && !done && j === i));
+    card.querySelector('.tl-head').style.left = `calc(${(t / total * 100).toFixed(2)}% - 1px)`;
+    card.querySelector('.tl-clock').textContent = done ? `Done · ${clock(total)}` : `${clock(t)} / ${clock(total)}${started ? ` · ${i + 1}. ${f.steps[i][0]}` : ''}`;
+  }
+  $('#talk-frameworks').addEventListener('click', e => {
+    const card = e.target.closest('.card[data-fw]'); if (!card) return;
+    const st = talkTimers.get(card) || { elapsed: 0, since: 0, id: 0 };
+    const total = TALK_FRAMEWORKS[card.dataset.fw].plan.reduce((a, b) => a + b, 0);
+    const go = card.querySelector('.tl-go');
+    const stop = () => { clearInterval(st.id); st.id = 0; };
+    if (e.target.closest('.tl-reset')) {
+      stop(); st.elapsed = 0; go.textContent = '▶ Start'; drawTimer(card, 0);
+    } else if (e.target.closest('.tl-go')) {
+      if (st.id) { stop(); st.elapsed += (performance.now() - st.since) / 1000; go.textContent = '▶ Resume'; }
+      else {
+        if (st.elapsed >= total) st.elapsed = 0;
+        st.since = performance.now(); go.textContent = '❚❚ Pause';
+        st.id = setInterval(() => {
+          const sec = st.elapsed + (performance.now() - st.since) / 1000;
+          drawTimer(card, sec);
+          if (sec >= total) { stop(); st.elapsed = total; go.textContent = '↻ Again'; }
+        }, 200);
+      }
+    } else return;
+    talkTimers.set(card, st);
+  });
 
   function renderTalkChips() {
     $('#talk-moments').innerHTML = TALK_MOMENTS.map(([k, l]) =>
