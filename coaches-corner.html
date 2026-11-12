@@ -1413,59 +1413,59 @@
   ];
 
   const SITUATIONS = [
-    { cat: 'Momentum', title: 'Opponent goes on a 3–4 point run',
+    { cat: 'Momentum', title: 'Opponent goes on a 3–4 point run', viz: 'sit-run',
       when: 'Two or three points in a row on the same server, frustration showing.',
       do: ['Call a timeout before it becomes 5.', 'Give one fix only — "pass high to middle," not a lecture.', 'Run your highest-percentage play out of the timeout.'],
       avoid: ['Missing the serve after the timeout.', 'Changing three things at once.'] },
-    { cat: 'Momentum', title: 'Team is flat or rattled',
+    { cat: 'Momentum', title: 'Team is flat or rattled', viz: 'sit-flat',
       when: 'Body language down, quiet court, slow transitions.',
       do: ['Sub in an energy player or a confident server.', 'Call a simple, safe play to get an easy point.', 'Ask the captain to reset the huddle between points.'],
       avoid: ['Yelling about effort — give a task instead.'] },
-    { cat: 'Serve receive', title: 'Our serve receive is breaking down',
+    { cat: 'Serve receive', title: 'Our serve receive is breaking down', viz: 'sit-sr-break',
       when: 'Two or more passes rated 0–1 in a rotation; one passer keeps getting served.',
       do: ['Shrink the targeted passer\'s area — libero and stronger outside cover more.', 'Switch formations (3-person → 2-person, or add a 4th passer).', 'Tell passers: high to the middle beats perfect.'],
       avoid: ['Leaving the same formation and hoping.', 'Running fast tempo off bad passes.'] },
-    { cat: 'Serve receive', title: 'Stuck in one rotation',
+    { cat: 'Serve receive', title: 'Stuck in one rotation', viz: 'st-stack',
       when: 'Three or more points lost in the same rotation.',
       do: ['Timeout and change the receive pattern for that rotation.', 'Set your best available hitter, even if predictable.', 'Consider a substitution for a better passer or blocker.'],
       avoid: ['Waiting for it to fix itself.'] },
-    { cat: 'Offense', title: 'Our hitter keeps getting blocked',
+    { cat: 'Offense', title: 'Our hitter keeps getting blocked', viz: 'atk-block-2',
       when: 'Same attacker blocked 2–3 times; their block is forming early.',
       do: ['Hitter uses shots: wipe off the hands, roll deep, tip behind the block.', 'Set slightly higher and wider to spread the block.', 'Run the middle or the opposite to pull the block away.'],
       avoid: ['Feeding the same set into a formed double block.'] },
-    { cat: 'Offense', title: 'Our setter is predictable',
+    { cat: 'Offense', title: 'Our setter is predictable', viz: 'atk-mb-1',
       when: 'The block is in place before the set; the opponent calls our plays.',
       do: ['Set the middle on the first good pass.', 'Use the back-row attack to add a fourth option.', 'Dump on two when the setter is front row.'],
       avoid: ['Only going to the outside on good passes.'] },
-    { cat: 'Offense', title: 'Lots of out-of-system balls',
+    { cat: 'Offense', title: 'Lots of out-of-system balls', viz: 'oos-set',
       when: 'Digs and passes away from the setter.',
       do: ['High, hittable sets to the left pin (or right for a lefty).', 'Hitters: hit to the deep corners — keep it in, no error.', 'Non-setters say "help" and square up.'],
       avoid: ['Trying fast sets from bad positions.'] },
-    { cat: 'Defense', title: 'Their big hitter is scoring at will',
+    { cat: 'Defense', title: 'Their big hitter is scoring at will', viz: 'sit-big-hitter',
       when: 'One attacker is responsible for most of their points.',
       do: ['Commit or bunch your block toward them.', 'Serve them — make them pass first.', 'Put your best digger in their favorite channel (cross is usually zone 5).'],
       avoid: ['Ignoring their other hitters completely — shift, don\'t abandon.'] },
-    { cat: 'Defense', title: 'Opponent is tipping and rolling',
+    { cat: 'Defense', title: 'Opponent is tipping and rolling', viz: 'def-rotational',
       when: 'Short balls landing behind the block or in the middle.',
       do: ['Switch to rotational or middle-up defense.', 'Blockers call "tip" while landing.', 'Line digger reads the hitter\'s arm speed.'],
       avoid: ['Diggers sitting on their heels deep.'] },
-    { cat: 'Defense', title: 'Their setter is front row',
+    { cat: 'Defense', title: 'Their setter is front row', viz: 'sit-setter-dump',
       when: 'The setter can dump on two and blocks their right side.',
       do: ['Assign a blocker (usually your left-side) to watch the dump.', 'Attack your outside at the setter\'s block.', 'Serve away from their best passer to force a jump-set.'],
       avoid: ['Letting the dump surprise you twice.'] },
-    { cat: 'Serving', title: 'Serving errors are piling up',
+    { cat: 'Serving', title: 'Serving errors are piling up', viz: 'sit-serve-errors',
       when: 'Three or more missed serves in a set, especially after timeouts.',
       do: ['Ask for "aggressive and in" — deeper targets, not more speed.', 'Remind servers of their routine.', 'Rest a struggling server if you can sub.'],
       avoid: ['Switching to soft "just get it in" serves that become free balls.'] },
-    { cat: 'End of set', title: 'Down 3+ points late (20+)',
+    { cat: 'End of set', title: 'Down 3+ points late (20+)', viz: 'sit-down-late',
       when: 'Opponent near 25 and pulling away.',
       do: ['Serve tough — you need runs, not safe points.', 'Use your remaining timeouts to break their server.', 'Sub in your best server or blocker for the critical rotations.'],
       avoid: ['Saving timeouts you will never use.'] },
-    { cat: 'End of set', title: 'Up late in a close set',
+    { cat: 'End of set', title: 'Up late in a close set', viz: 'sit-up-late',
       when: 'Leading 22–20 or similar; nerves showing.',
       do: ['Keep serving aggressive to a target.', 'Set your most reliable hitter.', 'Talk on every play to keep the team loose.'],
       avoid: ['Tipping or freeballing out of fear.', 'Unforced errors on serve.'] },
-    { cat: 'Between sets', title: 'Lost the first set',
+    { cat: 'Between sets', title: 'Lost the first set', viz: 'sit-lost-set1',
       when: 'You now know their lineup, their best hitter, and their weak passer.',
       do: ['Re-align your starting rotation so your best blocker faces their best hitter.', 'Pick a serving target based on set 1.', 'Give each position one clear job.'],
       avoid: ['Changing your whole system between sets.'] },
@@ -1891,12 +1891,14 @@
       <article class="card sit-card">
         <div class="meta"><span class="tag lvl">${s.cat}</span></div>
         <h3>${esc(s.title)}</h3>
+        ${s.viz && VISUALS[s.viz] ? vizHtml(s.viz) : ''}
         <p class="when">${esc(s.when)}</p>
         <div class="detail">
           <div class="do"><h4>Do this</h4><ul>${s.do.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
           <div class="avoid"><h4>Avoid</h4><ul>${s.avoid.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
         </div>
       </article>`).join('');
+    mountVisuals($('#sit-grid'));
   }
   $('#sit-chips').addEventListener('click', e => {
     const b = e.target.closest('.chip'); if (!b) return;
@@ -2908,6 +2910,121 @@
       note: 'Aim high and wide: the ball ends up out off their hands',
     }),
 
+    // ── Coach's Corner: situational playbook ──
+    'sit-run': scrimViz({
+      alt: 'Top-down court: Team A leads 14–12 and Team B goes on a three-point run on the same server (a dig and transition, an ace, and an A attack hit out) to lead 15–14. A takes a timeout with one fix and sides out to tie 15–15.',
+      start: 'A 14 – 12 B',
+      rallies: [{ serve: 'B', how: 'dig', score: 'A 14 – 13 B', label: 'B serving — they dig and score' },
+                { serve: 'B', how: 'ace', score: 'A 14 – 14 B', label: 'Same server — ace' },
+                { serve: 'B', how: 'out', score: 'A 14 – 15 B', label: 'Frustration — A hits out' },
+                { serve: 'B', how: 'sideout', score: 'A 15 – 15 B', label: 'Timeout · one fix · best play → side out' }],
+      note: 'Call it before 3 becomes 5',
+    }),
+    'sit-flat': scrimViz({
+      alt: 'Top-down court: Team A trails 10–13 and looks flat. A runs a simple, safe high ball to the pin to side out, then a confident server subbed in wins the next rally on a dig and transition, 12–13.',
+      start: 'A 10 – 13 B',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'A 11 – 13 B', label: 'Simple, safe play to get an easy point' },
+                { serve: 'A', how: 'dig', score: 'A 12 – 13 B', label: 'Sub in a confident server — energy back' }],
+      note: 'Give a task, not a speech',
+    }),
+    'sit-sr-break': receiveViz({
+      alt: 'Top-down court: the struggling passer (red) now covers a small area near the sideline, while the libero shifts over with a much larger area and the other outside covers the rest. A serve into the seam next to the struggling passer is taken by the libero, a serve right at the struggling passer is passed high to the middle, and a deep serve is the libero\'s.',
+      r: 24,
+      passers: [['O', 56, 38, 24], ['L', 46, 74, 30], ['O', 66, 110, 15]],
+      others: [['M', 112, 66], ['R', 112, 112]],
+      setterFrom: [98, 120], weak: 2,
+      serves: [
+        { to: [54, 94], by: 1, label: 'Serve at the seam — the libero takes it' },
+        { to: [66, 110], by: 2, label: 'Right at them — high to the middle beats perfect' },
+        { to: [22, 80], by: 1, label: 'Deep — the libero\'s big area' },
+      ],
+      note: 'Shrink the targeted passer\'s area',
+      legend: 'red = targeted passer (small area) · blue = libero + strong outside cover more',
+    }),
+    'sit-big-hitter': blockScheme({
+      alt: 'Top-down court: rep one, our blockers start evenly spread; their outside hitter gets a set and our middle arrives late, so the hitter scores against one blocker. Rep two, our block starts shifted toward their big hitter; the middle closes in time and the double block stuffs the attack.',
+      start: [30, 70, 110],
+      reps: [{ set: 'oh', moves: { 3: [[0.95, 70], [1.9, 98]] }, result: 'kill',
+               phases: [[0, 0.95, 'Even block — their big hitter (O) gets the set'], [0.95, 1.95, 'Middle is late'], [1.95, 3.2, 'One blocker — they score again']] },
+             { set: 'oh', start: [48, 88, 112], moves: { 3: [[0.95, 88], [1.45, 102]] }, result: 'stuff',
+               phases: [[3.2, 4.15, 'Bunch the block toward their big hitter'], [4.15, 4.9, 'Short move — the middle closes'], [4.9, 6.4, 'Double block — shift, don\'t abandon']] }],
+    }),
+    'sit-setter-dump': {
+      type: 'court', cuts: [3.2],
+      alt: 'Top-down court: their setter is front row. Rep one, our left-front blocker follows their outside and the setter dumps the second ball into the open spot behind our block; our libero is too late. Rep two, our left-front blocker stays in front of the setter, jumps with the dump, and blocks it back onto their side.',
+      dur: 6.4,
+      props: `<text class="legend" x="-4" y="141">amber = our blockers (4 = left front) · red = their setter S and outside O</text>`,
+      actors: {
+        b4: [[0, 113, 30, '4'], [3.199, 113, 30], [3.2, 113, 40], [3.8, 113, 54], [6.4, 113, 54]],
+        b3: [[0, 113, 70, 'M'], [0.9, 113, 70], [1.4, 113, 100], [3.199, 113, 100], [3.2, 113, 70], [4.1, 113, 70], [4.6, 113, 100], [6.4, 113, 100]],
+        L: [[0, 30, 70, 'L'], [1.0, 30, 70], [1.5, 64, 56], [3.199, 64, 56], [3.2, 30, 70], [6.4, 30, 70]],
+        tS: [[0, 132, 56, 'S'], [6.4, 132, 56]],
+        tO: [[0, 176, 124, 'O'], [0.4, 176, 124], [1.0, 130, 110], [3.199, 130, 110], [3.2, 176, 124], [3.6, 176, 124], [4.2, 130, 110], [6.4, 130, 110]],
+        tP: [[0, 196, 70, 'P'], [6.4, 196, 70]],
+      },
+      actorColors: { b4: 'var(--amber)', b3: 'var(--amber)', L: 'var(--sky)', tS: 'var(--bad)', tO: 'var(--bad)', tP: 'var(--muted)' },
+      ball: [[0, 196, 70, 0.3], [0.8, 133, 56, 0.9, 1.0], [1.2, 98, 54, 0.05, 0.3], [3.199, 98, 54, 0.05],
+             [3.2, 196, 70, 0.3], [4.0, 133, 56, 0.9, 1.0], [4.2, 122, 56, 1.0, 0.1], [4.55, 146, 64, 0.05], [6.4, 146, 64, 0.05]],
+      phases: [[0, 0.8, 'Pass to their front-row setter'], [0.8, 1.2, 'Dump on two — nobody home'], [1.2, 3.2, 'Don\'t let it surprise you twice'],
+               [3.2, 4.0, 'Our left-front blocker watches the setter'], [4.0, 4.55, 'Dump blocked'], [4.55, 6.4, 'Their outside still has our middle']],
+      still: 4.2,
+    },
+    'sit-serve-errors': {
+      type: 'court', cuts: [], ballCuts: [2.2, 4.4],
+      alt: 'Top-down court: our server tries a flat, harder serve that goes into the net, then aims at the lines and serves out. The third serve is aggressive but aimed at a deep zone a meter inside the lines; it lands in, the passer has to move back, and the pass goes off the net.',
+      dur: 7.6,
+      props: `<rect class="area" x="178" y="28" width="38" height="84" rx="4"/><text class="legend" x="197" y="24" text-anchor="middle">deep, with margin</text>` +
+        `<text class="legend" x="-4" y="141">V our server · orange = their passer · shaded = target: deep, ~1 m inside the lines</text>`,
+      actors: {
+        V: [[0, 4, 70, 'V'], [7.6, 4, 70]],
+        P: [[0, 196, 70, 'P'], [4.8, 196, 70], [5.4, 206, 54], [7.6, 206, 54]],
+      },
+      actorColors: { V: 'var(--sky)', P: 'var(--orange)' },
+      ball: [[0, 8, 70, 0.2], [0.25, 8, 70, 0.7], [0.8, 118, 72, 0.55, 0.3], [1.1, 114, 72, 0], [2.199, 114, 72, 0],
+             [2.2, 8, 70, 0.2], [2.45, 8, 70, 0.7], [3.3, 236, 22, 0.05, 1.0], [4.399, 236, 22, 0.05],
+             [4.4, 8, 70, 0.2], [4.65, 8, 70, 0.7], [5.5, 204, 52, 0.15, 1.0], [6.1, 150, 36, 0.5, 1.0], [7.6, 150, 36, 0.5]],
+      phases: [[0, 1.1, 'More speed — a flat serve'], [1.1, 2.2, 'Into the net: free point'], [2.2, 3.3, 'Aim at the lines'], [3.3, 4.4, 'Out: free point'],
+               [4.4, 5.5, 'Aggressive and in: deep, with margin'], [5.5, 7.6, 'Passer moves back — pass off the net']],
+      still: 5.4,
+    },
+    'sit-down-late': scrimViz({
+      alt: 'Top-down court: Team A trails 20–23 late in the set. A sides out to 21–23, then serves tough and gets an ace for 22–23, and wins a long rally on a dig and transition to tie 23–23.',
+      start: 'A 20 – 23 B',
+      rallies: [{ serve: 'B', how: 'sideout', score: 'A 21 – 23 B', label: 'Side out first' },
+                { serve: 'A', how: 'ace', score: 'A 22 – 23 B', label: 'Serve tough — you need a run' },
+                { serve: 'A', how: 'dig', score: 'A 23 – 23 B', label: 'Their timeout can\'t stop your server' }],
+      note: 'Use every timeout — you can\'t save them',
+    }),
+    'sit-up-late': scrimViz({
+      alt: 'Top-down court: Team A leads 22–20. A serves aggressively to a target and wins the rally on a dig and transition, 23–20. B sides out to 23–21, and A sides out by setting its most reliable hitter, 24–21.',
+      start: 'A 22 – 20 B',
+      rallies: [{ serve: 'A', how: 'dig', score: 'A 23 – 20 B', label: 'Keep serving aggressive to a target' },
+                { serve: 'A', how: 'sideout', score: 'A 23 – 21 B', label: 'They side out — stay loose' },
+                { serve: 'B', how: 'sideout', score: 'A 24 – 21 B', label: 'Set your most reliable hitter' }],
+      note: 'No fear tips, no free balls',
+    }),
+    'sit-lost-set1': {
+      type: 'court', cuts: [],
+      alt: 'Top-down court: in set one our best blocker (amber) starts in the middle front, not across from their best hitter (red) on their left side. For set two the whole lineup starts one rotation later, so our best blocker is in right front, directly across from their best hitter, and blocks the attack.',
+      dur: 7.0,
+      props: `<text class="legend" x="-4" y="141">amber = our best blocker · red H = their best hitter · same system, new starting spot</text>`,
+      actors: {
+        O1: [[0, 110, 34, 'O'], [1.6, 110, 34], [3.0, 110, 70], [7.0, 110, 70]],
+        M: [[0, 110, 70, 'M'], [1.6, 110, 70], [3.0, 110, 106], [4.3, 110, 106], [4.6, 114, 106], [7.0, 114, 106]],
+        R: [[0, 110, 106, 'R'], [1.6, 110, 106], [3.0, 44, 106], [7.0, 44, 106]],
+        S: [[0, 44, 106, 'S'], [1.6, 44, 106], [3.0, 30, 70], [7.0, 30, 70]],
+        L: [[0, 30, 70, 'L'], [1.6, 30, 70], [3.0, 44, 34], [7.0, 44, 34]],
+        O2: [[0, 44, 34, 'O'], [1.6, 44, 34], [3.0, 110, 34], [7.0, 110, 34]],
+        tS: [[0, 132, 56, 'S'], [7.0, 132, 56]],
+        H: [[0, 150, 118, 'H'], [3.9, 150, 118], [4.6, 128, 108], [7.0, 128, 108]],
+      },
+      actorColors: { O1: 'var(--sky)', M: 'var(--amber)', R: 'var(--sky)', S: 'var(--sky)', L: 'var(--sky)', O2: 'var(--sky)', tS: 'var(--muted)', H: 'var(--bad)' },
+      ball: [[0, 132, 56, 0.5], [4.0, 132, 56, 0.5], [4.65, 127, 108, 1.0, 0.8], [4.95, 142, 100, 0.05], [7.0, 142, 100, 0.05]],
+      phases: [[0, 1.6, 'Set 1: our best blocker starts away from their best hitter'], [1.6, 3.0, 'Set 2: start one rotation later'],
+               [3.0, 4.0, 'Now our best blocker faces their best hitter'], [4.0, 5.0, 'Their hitter attacks into our best block'], [5.0, 7.0, 'One change, not a new system']],
+      still: 4.7,
+    },
+
     // ── Attacking: technique (top-down torso) ──
     'tech-twist-before': twistViz({
       alt: 'View from above: a right-handed hitter approaches the net. On the last two steps the hips and shoulders turn toward the cross-court shot, the hitter takes off already aimed, and the ball goes cross where the shoulders face. A blocker on the other side covers the line.',
@@ -3357,7 +3474,7 @@
   // circle (fewer passers → bigger areas; seams are where circles meet). Three serves test the
   // formation: the responsible passer moves to the ball and passes to target; the setter
   // throws the ball back to the next server.
-  function receiveViz({ alt, r, passers, others, setterFrom, serves, note }) {
+  function receiveViz({ alt, r, passers, others, setterFrom, serves, note, weak = -1, legend }) {
     const REP = 2.6, TARGET = [108, 84], SERVERS = [[238, 40], [238, 100], [238, 70]];
     const dur = serves.length * REP + 1.4;
     const actors = {}, actorColors = {}, ball = [], phases = [];
@@ -3370,7 +3487,7 @@
       });
       keys.push([dur, x, y]);
       actors['p' + i] = keys;
-      actorColors['p' + i] = 'var(--sky)';
+      actorColors['p' + i] = i === weak ? 'var(--bad)' : 'var(--sky)';
     });
     others.forEach(([label, x, y], i) => {
       actors['o' + i] = [[0, x, y, label], [dur, x, y]];
@@ -3388,10 +3505,10 @@
       phases.push([T, T + REP, sv.label]);
     });
     phases.push([serves.length * REP, dur, note]);
-    const areas = passers.map(([, x, y]) => `<circle class="area" cx="${x}" cy="${y}" r="${r}"/>`).join('');
+    const areas = passers.map(([, x, y, pr]) => `<circle class="area" cx="${x}" cy="${y}" r="${pr || r}"/>`).join('');
     return {
       type: 'court', alt, dur, cuts: [], actors, actorColors, ball, phases,
-      props: areas + `<text class="legend" x="-4" y="141">blue = passers (shaded = their area) · amber = non-passers · S setter</text>`,
+      props: areas + `<text class="legend" x="-4" y="141">${legend || 'blue = passers (shaded = their area) · amber = non-passers · S setter'}</text>`,
       still: 0.9,
     };
   }
